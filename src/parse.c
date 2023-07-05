@@ -1,5 +1,6 @@
 #include "common.h"
 #include "parse.h"
+#include "tokenize.h"
 
 /* EBNF
  * expr    = mul ("+" mul | "-" mul)*

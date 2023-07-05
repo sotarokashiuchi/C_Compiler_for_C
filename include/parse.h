@@ -1,5 +1,5 @@
 #ifndef PARSE_H
-#define PAESE_H
+#define PARSE_H
 
 /// @brief 抽象構文木のノードの種類
 typedef enum{
