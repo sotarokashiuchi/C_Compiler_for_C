@@ -32,19 +32,6 @@ Node_t *new_node_num(int val){
 	return node;
 }
 
-Node_t *primary() {
-  // 次のトークンが"("なら、"(" expr ")"のはず
-  if (consume('(')) {
-    Node_t *node = expr();
-    expect(')');
-    return node;
-  }
-
-  // そうでなければ数値のはず
-  return new_node_num(expect_number());
-}
-
-
 Node_t *expr(void) {
 	Node_t *node = mul();
 
@@ -71,4 +58,16 @@ Node_t *mul(void){
 			return node;
 		}
 	}
+}
+
+Node_t *primary() {
+  // 次のトークンが"("なら、"(" expr ")"のはず
+  if (consume('(')) {
+    Node_t *node = expr();
+    expect(')');
+    return node;
+  }
+
+  // そうでなければ数値のはず
+  return new_node_num(expect_number());
 }

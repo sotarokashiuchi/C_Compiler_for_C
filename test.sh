@@ -17,7 +17,7 @@ assert() {
 }
 
 # assert 理想の実行結果 入力データ
-assert 9 "5+4"
+assert 12 "5+4+3"
 assert 6 "3*2"
 assert 14 "2*(3+4)"
 assert 0 "2+2*(3+4*(1-2))"
