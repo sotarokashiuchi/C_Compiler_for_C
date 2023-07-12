@@ -4,7 +4,8 @@
 
 /* EBNF
  * expr    = mul ("+" mul | "-" mul)*
- * mul     = primary ("*" primary | "/" primary)*
+ * mul     = unary ("*" unary | "/" unary)*
+ * unary 	 = ("+" | "-")? primary
  * primary = num | "(" expr ")"
  */
 
@@ -47,17 +48,27 @@ Node_t *expr(void) {
 }
 
 Node_t *mul(void){
-	Node_t *node = primary();
+	Node_t *node = unary();
 	
 	for(;;){
 		if(consume('*')){
-			node = new_node(ND_MUL, node, primary());
+			node = new_node(ND_MUL, node, unary());
 		} else if(consume('/')){
-			node = new_node(ND_DIV, node, primary());
+			node = new_node(ND_DIV, node, unary());
 		} else{
 			return node;
 		}
 	}
+}
+
+Node_t* unary(){
+	if(consume('+')){
+		return primary();
+	}
+	if(consume('-')){
+		return new_node(ND_SUB, new_node_num(0), primary());
+	}
+	return primary();
 }
 
 Node_t *primary() {

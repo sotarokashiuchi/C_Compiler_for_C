@@ -26,6 +26,8 @@ extern Node_t *expr(void);
 /// @return 生成したノード
 extern Node_t *mul(void);
 
+extern Node_t* unary();
+
 /// @brief primary = "(" expr ")" | num
 /// @return 生成したノード
 extern Node_t *primary();
