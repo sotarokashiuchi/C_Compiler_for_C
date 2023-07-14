@@ -1,6 +1,8 @@
 #ifndef TOKENIZE_H
 #define TOKENIZE_H
 
+#include <string.h>
+
 /// @brief トークンの種類
 typedef enum{
 	TK_RESERVED,		// 記号
@@ -14,6 +16,7 @@ typedef struct Token {
 	struct Token* next;	// 次の入力トークン
 	int val;				// kindがTK_NUMの場合、その数値
 	char *str;			// トークン文字列
+	int	len;				// トークンの長さ
 } Token_t;
 
 /* グローバル変数宣言 */
@@ -37,11 +40,11 @@ extern int expect_number();
 /// 			 トークンを1つ読み進めて真を返す。それ以外の場合には偽を返す。
 /// @param op 期待する記号
 /// @return true:次のトークンが期待通り. false:それ以外の場合
-extern bool consume(char op);
+extern bool consume(char *op);
 
 /// @brief 次のトークンが期待している記号の場合、トークンを1つ読み進める。
 ///				 それ以外の場合にはエラーを報告する。
 /// @param op 期待する記号
-extern void expect(char op);
+extern void expect(char *op);
 
 #endif

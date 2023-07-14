@@ -1,5 +1,7 @@
 *~
 *.o
+.*
+peda-session-9cc.txt
 tmp*
 a.out
 9cc
