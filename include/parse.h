@@ -7,6 +7,12 @@ typedef enum{
   ND_SUB, 				// -
   ND_MUL, 				// *
   ND_DIV, 				// /
+  ND_EQUALTO,     // ==
+  ND_NOT_EQUAL_TO,// !=
+  ND_GREATER_THAN,// >
+  ND_LESS_THAN,   // <
+  ND_GREATER_THAN_OR_EQUAL_TO,  // >=
+  ND_LESS_THAN_OR_EQUALT_TO,    // <=
   ND_NUM, 				// 整数
 } NodeKind;
 
@@ -21,15 +27,5 @@ typedef struct Node {
 /// @brief expr = mul ("+" mul | "-" mul)*
 /// @return 生成したノード
 extern Node_t *expr(void);
-
-/// @brief mul = primary ("*" primary | "/" primary)*
-/// @return 生成したノード
-extern Node_t *mul(void);
-
-extern Node_t* unary();
-
-/// @brief primary = "(" expr ")" | num
-/// @return 生成したノード
-extern Node_t *primary();
 
 #endif
