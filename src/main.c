@@ -16,7 +16,6 @@ int main(int argc, char **argv){
 	user_input = argv[1];
 	token = tokenize(argv[1]);
 	Node_t *node = expr();
-  exit(1);
 
 	// 前半部分のコード生成
   printf(".intel_syntax noprefix\n");

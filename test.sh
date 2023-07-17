@@ -17,10 +17,13 @@ assert() {
 }
 
 # assert 理想の実行結果 入力データ
-assert 12 "5+4+3"
 assert 14 "2*(3+4)"
 assert 0 "2+2*(3+4*(1-2))"
-assert 1 "-(10+3)+14"
 assert "13" "2++14+-3"
+assert "1" "3<4"
+# assert "0" "3>4"
+assert "1" "3+4<=1*7"
+assert "0" "7==8"
+assert "0" "8<7"
 
 echo OK

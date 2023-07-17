@@ -73,9 +73,9 @@ Node_t* relational(void){
 		} else if(consume("<=")){
 			node = new_node(ND_LESS_THAN_OR_EQUALT_TO, node, add());
 		} else if(consume(">")){
-			node = new_node(ND_GREATER_THAN, node, add());
+			node = new_node(ND_LESS_THAN, add(), node);
 		} else if(consume(">=")){
-			node = new_node(ND_GREATER_THAN_OR_EQUAL_TO, node, add());
+			node = new_node(ND_LESS_THAN_OR_EQUALT_TO, add(), node);
 		} else {
 			return node;
 		}
