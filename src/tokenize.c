@@ -44,6 +44,12 @@ Token_t* tokenize(char *p){
 			cur = new_token(TK_RESERVED, cur, &p, 1);
 			continue;
 		}
+		
+		// 変数
+		if('a' <= *p && *p <= 'z'){
+			cur = new_token(TK_IDENT, cur, &p, 1);
+			continue;
+		}
 
 		// 数値処理
 		if(isdigit(*p)){
