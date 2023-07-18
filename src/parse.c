@@ -12,6 +12,9 @@
  * primary    = num | "(" expr ")"
  */
 
+// 文ごとの先頭ノードを格納
+Node_t *code[100];
+
 Node_t* equality(void);
 Node_t* relational(void);
 Node_t* add(void);
@@ -43,9 +46,34 @@ Node_t *new_node_num(int val){
 	return node;
 }
 
-// expr       = equality
+// program    = stmt*
+void program(void){
+	int i = 0;
+	while(!at_eof()){
+		code[i++] = stmt();
+	}
+	code[i] = NULL;
+}
+
+// stmt       = expr ";"
+Node_t* stmt(void){
+	Node_t *node = expr();
+	expect(";");
+	return node;
+}
+
+// expr       = assign
 Node_t *expr(void) {
-	equality();
+	return assign();
+}
+
+// assign     = equality ("=" assign)?
+Node_t* assign(void){
+	Node_t *node = equality();
+	if(consume("=")){
+		node = new_node(ND_ASSIGN, node, assign());
+	}
+	return node;
 }
 
 // equality   = relational ("==" relational | "!=" relational)*
@@ -97,6 +125,7 @@ Node_t* add(void) {
 	}
 }
 
+// mul        = unary ("*" unary | "/" unary)*
 Node_t *mul(void){
 	Node_t *node = unary();
 	
@@ -111,6 +140,7 @@ Node_t *mul(void){
 	}
 }
 
+// unary      = ("+" | "-")? primary
 Node_t* unary(){
 	if(consume("+")){
 		return primary();
@@ -121,10 +151,18 @@ Node_t* unary(){
 	return primary();
 }
 
+// primary    = num | ident | "(" expr ")"
 Node_t *primary() {
+	Token_t *tok = consume_ident();
+	if(tok != NULL){
+		Node_t *node = new_node(ND_LVAR, NULL, NULL);
+		node->offset = (tok->str[0] - 'a' + 1) * 8;
+		return node;
+	}
+	
   // 次のトークンが"("なら、"(" expr ")"のはず
   if (consume("(")) {
-    Node_t *node = expr();
+   Node_t *node = expr();
     expect(")");
     return node;
   }

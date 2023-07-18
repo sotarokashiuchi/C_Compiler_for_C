@@ -48,4 +48,13 @@ extern bool consume(char *op);
 /// @param op 期待する記号
 extern void expect(char *op);
 
+/// @brief  次のトークンが識別子か調べ、識別子の場合には、
+///					トークンを1つ読み進めてトークン構造体を返す。それ以外の場合にはNULLを返す。
+/// @return Token_t:トークンが識別子. NULL:トークンが非識別子
+Token_t* consume_ident(void);
+
+/// @brief トークンが終端か確認する
+/// @return 終端だとtrue, 非終端だとfalseを返す
+bool at_eof();
+
 #endif

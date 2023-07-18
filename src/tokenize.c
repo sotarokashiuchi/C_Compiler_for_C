@@ -90,8 +90,6 @@ int expect_number() {
 	return val;
 }
 
-/// @brief 
-/// @return 
 bool at_eof(){
 	return token->kind == TK_EOF;
 }
@@ -110,6 +108,15 @@ void expect(char *op) {
 		error_at(token->str, "'%c'ではありません", op);
 	}
 	token = token->next;
+}
+
+Token_t* consume_ident(void){
+	if(token->kind != TK_IDENT){
+		return NULL;
+	}
+	Token_t *tok = token;
+	token = token->next;
+	return tok;
 }
 
 static void error_at(char *loc, char *fmt, ...){

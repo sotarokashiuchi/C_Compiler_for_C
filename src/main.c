@@ -15,7 +15,6 @@ int main(int argc, char **argv){
 	// 抽象構文木作成
 	user_input = argv[1];
 	token = tokenize(argv[1]);
-  exit(1);
 	Node_t *node = expr();
 
 	// 前半部分のコード生成

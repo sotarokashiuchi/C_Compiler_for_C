@@ -7,6 +7,8 @@ typedef enum{
   ND_SUB, 				// -
   ND_MUL, 				// *
   ND_DIV, 				// /
+  ND_ASSIGN,      // =
+  ND_LVAR,        // ローカル変数
   ND_EQUALTO,     // ==
   ND_NOT_EQUAL_TO,// !=
   ND_GREATER_THAN,// >
@@ -22,6 +24,7 @@ typedef struct Node {
 	struct Node *lhs;	// 左辺
 	struct Node *rhs; // 右辺
 	int val;					// kindがND_NUMの場合のみ使う
+	int offset;			  // kindがND_LVAEの場合のみ使う
 } Node_t;
 
 /// @brief expr = mul ("+" mul | "-" mul)*
