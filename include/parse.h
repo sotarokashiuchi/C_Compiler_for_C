@@ -27,8 +27,9 @@ typedef struct Node {
 	int offset;			  // kindがND_LVAEの場合のみ使う
 } Node_t;
 
-/// @brief expr = mul ("+" mul | "-" mul)*
-/// @return 生成したノード
-extern Node_t *expr(void);
+// グローバル変数
+extern Node_t *code[100];
+
+void program(void);
 
 #endif

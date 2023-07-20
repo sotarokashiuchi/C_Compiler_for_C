@@ -3,24 +3,31 @@
 #include "tokenize.h"
 
 /* EBNF
- * expr       = equality
+ * program    = stmt* 
+ * stmt       = expr ";"
+ * expr       = assign
+ * assign     = equality ("=" assign)?
  * equality   = relational ("==" relational | "!=" relational)*
  * relational = add ("<" add | "<=" add | ">" add | ">=" add)*
  * add        = mul ("+" mul | "-" mul)*
  * mul        = unary ("*" unary | "/" unary)*
  * unary      = ("+" | "-")? primary
- * primary    = num | "(" expr ")"
+ * primary    = num | ident | "(" expr ")"
  */
 
 // 文ごとの先頭ノードを格納
 Node_t *code[100];
 
+// void program(void);
+Node_t* stmt(void);
+Node_t* expr(void);
+Node_t* assign(void);
 Node_t* equality(void);
 Node_t* relational(void);
 Node_t* add(void);
-Node_t *mul(void);
+Node_t* mul(void);
 Node_t* unary();
-Node_t *primary();
+Node_t* primary();
 
 /// @brief ノードを生成する
 /// @param kind ノードの種類
