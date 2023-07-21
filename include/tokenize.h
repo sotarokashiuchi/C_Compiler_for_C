@@ -50,14 +50,16 @@ extern int expect_number();
 
 /// @brief 次のトークンが期待している記号の場合には、
 /// 			 トークンを1つ読み進めて真を返す。それ以外の場合には偽を返す。
+/// @param kind 期待する文字列のトークンの種類
 /// @param op 期待する記号
 /// @return true:次のトークンが期待通り. false:それ以外の場合
-extern bool consume(char *op);
+extern bool consume(TokenKind kind, char *op);
 
-/// @brief 次のトークンが期待している記号の場合、トークンを1つ読み進める。
+/// @brief 次のトークンが期待している文字列の場合、トークンを1つ読み進める。
 ///				 それ以外の場合にはエラーを報告する。
-/// @param op 期待する記号
-extern void expect(char *op);
+/// @param kind 期待する文字列のトークンの種類
+/// @param op 期待する文字列
+extern void expect(TokenKind kind, char *op);
 
 /// @brief  次のトークンが識別子か調べ、識別子の場合には、
 ///					トークンを1つ読み進めてトークン構造体を返す。それ以外の場合にはNULLを返す。

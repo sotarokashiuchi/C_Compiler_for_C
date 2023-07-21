@@ -63,11 +63,18 @@ void program(void){
 	code[i] = NULL;
 }
 
-// stmt       = expr ";"
+// stmt       = expr ";" | "return" expr ";"
 Node_t* stmt(void){
   DEBUG_WRITE("\n");
-	Node_t *node = expr();
-	expect(";");
+	Node_t *node;
+	
+  if (consume(TK_RETURN, "return")) {
+		node = new_node(ND_RETURN, expr(), NULL);
+  } else {
+    node = expr();
+  }
+
+	expect(TK_RESERVED, ";");
 	return node;
 }
 
@@ -81,8 +88,7 @@ Node_t *expr(void) {
 Node_t* assign(void){
   DEBUG_WRITE("\n");
 	Node_t *node = equality();
-	if(consume("=")){
-		DEBUG_WRITE("=の読み込み\n");
+	if(TK_RESERVED, consume(TK_RESERVED, "=")){
 		node = new_node(ND_ASSIGN, node, assign());
 	}
 	return node;
@@ -94,9 +100,9 @@ Node_t* equality(void){
 	Node_t *node = relational();
 
 	for(;;){
-		if(consume("==")){
+		if(consume(TK_RESERVED, "==")){
 			node = new_node(ND_EQUALTO, node, relational());
-		} else if(consume("!=")){
+		} else if(consume(TK_RESERVED, "!=")){
 			node = new_node(ND_NOT_EQUAL_TO, node, relational());
 		} else{
 			return node;
@@ -110,13 +116,13 @@ Node_t* relational(void){
 	Node_t *node = add();
 
 	for(;;){
-		if(consume("<")){
+		if(consume(TK_RESERVED, "<")){
 			node = new_node(ND_LESS_THAN, node, add());
-		} else if(consume("<=")){
+		} else if(consume(TK_RESERVED, "<=")){
 			node = new_node(ND_LESS_THAN_OR_EQUALT_TO, node, add());
-		} else if(consume(">")){
+		} else if(consume(TK_RESERVED, ">")){
 			node = new_node(ND_LESS_THAN, add(), node);
-		} else if(consume(">=")){
+		} else if(consume(TK_RESERVED, ">=")){
 			node = new_node(ND_LESS_THAN_OR_EQUALT_TO, add(), node);
 		} else {
 			return node;
@@ -130,9 +136,9 @@ Node_t* add(void) {
 	Node_t *node = mul();
 
 	for(;;){
-		if(consume("+")){
+		if(consume(TK_RESERVED, "+")){
 			node = new_node(ND_ADD, node, mul());
-		} else if(consume("-")){
+		} else if(consume(TK_RESERVED, "-")){
 			node = new_node(ND_SUB, node, mul());
 		} else{
 			return node;
@@ -146,9 +152,9 @@ Node_t *mul(void){
 	Node_t *node = unary();
 	
 	for(;;){
-		if(consume("*")){
+		if(consume(TK_RESERVED, "*")){
 			node = new_node(ND_MUL, node, unary());
-		} else if(consume("/")){
+		} else if(consume(TK_RESERVED, "/")){
 			node = new_node(ND_DIV, node, unary());
 		} else{
 			return node;
@@ -159,10 +165,10 @@ Node_t *mul(void){
 // unary      = ("+" | "-")? primary
 Node_t* unary(){
   DEBUG_WRITE("\n");
-	if(consume("+")){
+	if(consume(TK_RESERVED, "+")){
 		return primary();
 	}
-	if(consume("-")){
+	if(consume(TK_RESERVED, "-")){
 		return new_node(ND_SUB, new_node_num(0), primary());
 	}
 	return primary();
@@ -193,9 +199,9 @@ Node_t *primary() {
 	}
 	
   // 次のトークンが"("なら、"(" expr ")"のはず
-  if (consume("(")) {
+  if (consume(TK_RESERVED, "(")) {
   	Node_t *node = expr();
-    expect(")");
+    expect(TK_RESERVED, ")");
     return node;
   }
 

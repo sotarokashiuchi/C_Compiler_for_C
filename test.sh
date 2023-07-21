@@ -26,10 +26,6 @@ assert() {
 # x = y;
 # y = tmp;
 # "
-assert "12" "
-a = 3;
-b = 5 * 6 - 8;
-return a + b / 2;
-"
+assert "12" "a = 3; b = 5 * 6 - 8; return a + b / 2;"
 
 echo OK

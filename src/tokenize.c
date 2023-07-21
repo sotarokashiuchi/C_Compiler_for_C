@@ -123,16 +123,16 @@ bool at_eof(){
 }
 
 
-bool consume(char *op){
-	if(token->kind != TK_RESERVED || token->len != strlen(op) || memcmp(token->str, op, token->len)){
+bool consume(TokenKind kind, char *op){
+	if(token->kind != kind || token->len != strlen(op) || memcmp(token->str, op, token->len)){
 		return false;
 	}
 	token = token->next;
 	return true;
 }
 
-void expect(char *op) {
-	if(token->kind != TK_RESERVED || token->len != strlen(op) || memcmp(token->str, op, token->len)){
+void expect(TokenKind kind, char *op) {
+	if(token->kind != kind || token->len != strlen(op) || memcmp(token->str, op, token->len)){
 		error_at(token->str, "'%s'ではありません", op);
 	}
 	token = token->next;
