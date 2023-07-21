@@ -16,6 +16,14 @@ void gen_lval(Node_t *node){
 
 void gen(Node_t *node) {
   switch (node->kind){
+  case ND_RETURN:
+    // returnは左方方向の木構造しかない
+    gen(node->lhs);
+    printf("  pop rax\n");
+    printf("  mov rsp, rbp\n");
+    printf("  pop rbp\n");
+    printf("  ret\n");
+    return;
   case ND_NUM:
     printf("  push %d\n", node->val);
     return;
