@@ -19,6 +19,10 @@ static Token_t* new_token(TokenKind kind, Token_t *cur, char **str, int len);
 /// @param fmt 出力フォーマット(標準入出力関数と同じ仕様)
 static void error_at(char *loc, char *fmt, ...);
 
+/// @brief トークンを構成する文字か判断
+/// @param c 判断したい文字
+/// @return 1:トークンを構成する文字列, 0:トークンを構成しない文字列
+int is_alnum(char c);
 
 Token_t* tokenize(char *p){
 	int i;
@@ -37,7 +41,7 @@ Token_t* tokenize(char *p){
 		}
 
 		// keyword
-		if(!strncmp(p, "return", 6)){
+		if(!strncmp(p, "return", 6) && !is_alnum(p[6])){
 			cur = new_token(TK_RETURN, cur, &p, 6);
 			continue;
 		}
@@ -105,6 +109,13 @@ int expect_number() {
 	int val = token->val;
 	token = token->next;
 	return val;
+}
+
+int is_alnum(char c){
+	  return 	('a' <= c && c <= 'z') ||
+						('A' <= c && c <= 'Z') ||
+						('0' <= c && c <= '9') ||
+						(c == '_');
 }
 
 bool at_eof(){
