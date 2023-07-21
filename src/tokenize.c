@@ -21,16 +21,24 @@ static void error_at(char *loc, char *fmt, ...);
 
 
 Token_t* tokenize(char *p){
+	int i;
 	// ダミーリスト(トークンリストの先頭)
 	Token_t head;
 	head.next = NULL;
 	// トークンリスト
 	Token_t *cur = &head;
 
-	while(*p){
+	for(i=0; *p; i++){
 		// 空白文字をスキップ
 		if(isspace(*p)){
 			p++;
+			i--;
+			continue;
+		}
+
+		// keyword
+		if(!strncmp(p, "return", 6)){
+			cur = new_token(TK_RETURN, cur, &p, 6);
 			continue;
 		}
 
@@ -71,6 +79,7 @@ Token_t* tokenize(char *p){
 
 	// トークンリストの末尾を作成
 	new_token(TK_EOF, cur, &p, 0);
+	DEBUG_WRITE("number of token is %d\n", i);
 	return head.next;
 }
 

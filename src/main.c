@@ -19,6 +19,7 @@ int main(int argc, char **argv){
   locals = &dummy;
   // トークナイズ
 	token = tokenize(argv[1]);
+  exit(1);
   // パーサ
 	program();
 
