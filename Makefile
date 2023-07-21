@@ -4,16 +4,16 @@ COPTION=-std=c11 -g -I ./include -static
 	# gcc -std=c11 -g -static -o 9cc main.o tokenize.o parse.o codegen.o
 	gcc codegen.o main.o parse.o tokenize.o -o 9cc
 
-main.o:	./src/main.c
+main.o:	./src/main.c ./include/common.h
 	cc  $(COPTION) -c -o main.o ./src/main.c
 
-tokenize.o: ./src/tokenize.c
+tokenize.o: ./src/tokenize.c ./include/tokenize.h
 	cc  $(COPTION) -c -o tokenize.o ./src/tokenize.c
 
-parse.o: ./src/parse.c
+parse.o: ./src/parse.c ./include/parse.h
 	cc  $(COPTION) -c -o parse.o ./src/parse.c
 
-codegen.o: ./src/codegen.c
+codegen.o: ./src/codegen.c ./include/codegen.h
 	cc  $(COPTION) -c -o codegen.o ./src/codegen.c
 
 test: 9cc
