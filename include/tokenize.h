@@ -20,11 +20,21 @@ typedef struct Token {
 	int	len;				// トークンの長さ
 } Token_t;
 
+/// @brief ローカル変数の型
+typedef struct LVar {
+	struct LVar* next;
+	char *name;
+	int len;
+	int offset;
+} LVar_t;
+
 /* グローバル変数宣言 */
 /// @brief 現在着目しているトークン
 extern Token_t *token;
 /// @brief 入力文字列
 extern char *user_input;
+/// @brief ローカル変数
+extern LVar_t *locals;
 
 
 /// @brief 入力文字列pをトークナイズする
@@ -52,6 +62,11 @@ extern void expect(char *op);
 ///					トークンを1つ読み進めてトークン構造体を返す。それ以外の場合にはNULLを返す。
 /// @return Token_t:トークンが識別子. NULL:トークンが非識別子
 Token_t* consume_ident(void);
+
+/// @brief 変数名を検索する
+/// @param tok 検索したい変数の情報が格納されたLVar_t
+/// @return 一致したLVar_tを返す, 一致しなければNULLを返す
+LVar_t* find_lvar(Token_t *tok);
 
 /// @brief トークンが終端か確認する
 /// @return 終端だとtrue, 非終端だとfalseを返す

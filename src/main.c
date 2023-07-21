@@ -7,7 +7,7 @@
 char *user_input;
 
 int main(int argc, char **argv){
-  DEBUG_WRITE("debug用");
+  DEBUG_WRITE("test\n");
 	// 入力データの確認
   if(argc != 2){
     fprintf(stderr, "エラー:引数の個数が正しくありません\n");
@@ -17,10 +17,10 @@ int main(int argc, char **argv){
 	user_input = argv[1];
   LVar_t dummy = {NULL, NULL, 0, 0};
   locals = &dummy;
+  // トークナイズ
 	token = tokenize(argv[1]);
-  // exit(1);
+  // パーサ
 	program();
-  exit(1);
 
 	// 前半部分のコード生成
   printf(".intel_syntax noprefix\n");
@@ -50,7 +50,6 @@ int main(int argc, char **argv){
 void debug_write(char *fmt, ...){
   va_list ap;
   va_start(ap, fmt);
-  fprintf(stderr, "[%s:%s:%d]", __FILE__, __func__, __LINE__);
   vfprintf(stderr, fmt, ap);
   va_end(ap);
 }

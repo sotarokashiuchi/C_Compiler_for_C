@@ -18,7 +18,13 @@ assert() {
 
 # assert 理想の実行結果 入力データ
 assert "1" "2*(3+4)+-14==2+2*(3+4*(1-2));"
-assert "9" "a=3; a*3;"
-assert "15" "a=3; b=5; c=a*b; c;"
+assert "9" "abc=3; def=abc*3;"
+assert "3" "
+x = 3;
+y = 5;
+tmp = x;
+x = y;
+y = tmp;
+"
 
 echo OK

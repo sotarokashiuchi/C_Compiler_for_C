@@ -55,6 +55,7 @@ Node_t *new_node_num(int val){
 
 // program    = stmt*
 void program(void){
+  DEBUG_WRITE("header node\n");
 	int i = 0;
 	while(!at_eof()){
 		code[i++] = stmt();
@@ -64,6 +65,7 @@ void program(void){
 
 // stmt       = expr ";"
 Node_t* stmt(void){
+  DEBUG_WRITE("\n");
 	Node_t *node = expr();
 	expect(";");
 	return node;
@@ -71,13 +73,16 @@ Node_t* stmt(void){
 
 // expr       = assign
 Node_t *expr(void) {
+  DEBUG_WRITE("\n");
 	return assign();
 }
 
 // assign     = equality ("=" assign)?
 Node_t* assign(void){
+  DEBUG_WRITE("\n");
 	Node_t *node = equality();
 	if(consume("=")){
+		DEBUG_WRITE("=の読み込み\n");
 		node = new_node(ND_ASSIGN, node, assign());
 	}
 	return node;
@@ -85,6 +90,7 @@ Node_t* assign(void){
 
 // equality   = relational ("==" relational | "!=" relational)*
 Node_t* equality(void){
+  DEBUG_WRITE("\n");
 	Node_t *node = relational();
 
 	for(;;){
@@ -100,6 +106,7 @@ Node_t* equality(void){
 
 // relational = add ("<" add | "<=" add | ">" add | ">=" add)*
 Node_t* relational(void){
+  DEBUG_WRITE("\n");
 	Node_t *node = add();
 
 	for(;;){
@@ -119,6 +126,7 @@ Node_t* relational(void){
 
 // add        = mul ("+" mul | "-" mul)*
 Node_t* add(void) {
+  DEBUG_WRITE("\n");
 	Node_t *node = mul();
 
 	for(;;){
@@ -134,6 +142,7 @@ Node_t* add(void) {
 
 // mul        = unary ("*" unary | "/" unary)*
 Node_t *mul(void){
+  DEBUG_WRITE("\n");
 	Node_t *node = unary();
 	
 	for(;;){
@@ -149,6 +158,7 @@ Node_t *mul(void){
 
 // unary      = ("+" | "-")? primary
 Node_t* unary(){
+  DEBUG_WRITE("\n");
 	if(consume("+")){
 		return primary();
 	}
@@ -160,20 +170,36 @@ Node_t* unary(){
 
 // primary    = num | ident | "(" expr ")"
 Node_t *primary() {
+  DEBUG_WRITE("\n");
 	Token_t *tok = consume_ident();
 	if(tok != NULL){
+  	DEBUG_WRITE("this is ident.\n");
 		Node_t *node = new_node(ND_LVAR, NULL, NULL);
-		node->offset = (tok->str[0] - 'a' + 1) * 8;
+		LVar_t *lvar = find_lvar(tok);
+		if(lvar){
+			// 既に変数が存在する
+			node->offset = lvar->offset;
+		}else{
+			// 新しく変数を定義する
+			lvar = calloc(1, sizeof(LVar_t));
+			lvar->next = locals;
+			lvar->name = tok->str;
+			lvar->len = tok->len;
+			lvar->offset = locals->offset + 8;
+			node->offset = lvar->offset;
+			locals = lvar;
+		}
 		return node;
 	}
 	
   // 次のトークンが"("なら、"(" expr ")"のはず
   if (consume("(")) {
-   Node_t *node = expr();
+  	Node_t *node = expr();
     expect(")");
     return node;
   }
 
   // そうでなければ数値のはず
+  DEBUG_WRITE("this is number.\n");
   return new_node_num(expect_number());
 }

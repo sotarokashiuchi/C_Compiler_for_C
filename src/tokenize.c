@@ -4,6 +4,7 @@
 
 /* グローバル変数定義 */
 Token_t *token;
+LVar_t *locals = NULL;
 
 /// @brief 新しいトークンを作成し、リストにつなげる
 /// @param kind 新しいトークンの種類
@@ -45,15 +46,11 @@ Token_t* tokenize(char *p){
 			continue;
 		}
 		
-		// // 変数(1文字)
-		// if('a' <= *p && *p <= 'z'){
-		// 	cur = new_token(TK_IDENT, cur, &p, 1);
-		// 	continue;
-		// }
 		// 変数(複数文字列)
 		if(isalpha(*p) || *p == '_'){
 			int i;
 			char *tmpp = p;
+			tmpp++;
 			// 英数字又は_である
 			for(i=1; isalnum(*tmpp) || *tmpp == '_'; i++){
 				tmpp++;
@@ -116,7 +113,7 @@ bool consume(char *op){
 
 void expect(char *op) {
 	if(token->kind != TK_RESERVED || token->len != strlen(op) || memcmp(token->str, op, token->len)){
-		error_at(token->str, "'%c'ではありません", op);
+		error_at(token->str, "'%s'ではありません", op);
 	}
 	token = token->next;
 }
@@ -130,17 +127,17 @@ Token_t* consume_ident(void){
 	return tok;
 }
 
-// /// @brief 変数名を検索する
-// /// @param tok 検索したい変数の情報が格納されたLVar_t
-// /// @return 一致したLVar_tを返す, 一致しなければNULLを返す
-// LVar_t* find_lvar(Token_t *tok){
-// 	for(LVar_t *var = locals; var; var = var->next){
-// 		if(var->len == tok->len && !memcmp(tok->str, var->name, var->len)){
-// 			return var;
-// 		}
-// 	}
-// 	return NULL;
-// }
+/// @brief 変数名を検索する
+/// @param tok 検索したい変数の情報が格納されたLVar_t
+/// @return 一致したLVar_tを返す, 一致しなければNULLを返す
+LVar_t* find_lvar(Token_t *tok){
+	for(LVar_t *var = locals; var; var = var->next){
+		if(var->len == tok->len && !memcmp(tok->str, var->name, var->len)){
+			return var;
+		}
+	}
+	return NULL;
+}
 
 static void error_at(char *loc, char *fmt, ...){
 	// 可変長引数の処理
