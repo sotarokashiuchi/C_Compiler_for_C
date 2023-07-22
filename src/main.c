@@ -7,7 +7,7 @@
 char *user_input;
 
 int main(int argc, char **argv){
-  DEBUG_WRITE("test\n");
+  DEBUG_WRITE("\n");
 	// 入力データの確認
   if(argc != 2){
     fprintf(stderr, "エラー:引数の個数が正しくありません\n");
@@ -19,6 +19,7 @@ int main(int argc, char **argv){
   locals = &dummy;
   // トークナイズ
 	token = tokenize(argv[1]);
+  exit(1);
   // パーサ
 	program();
   // exit(1);

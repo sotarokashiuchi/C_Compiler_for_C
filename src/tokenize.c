@@ -46,6 +46,26 @@ Token_t* tokenize(char *p){
 			continue;
 		}
 
+		if(!strncmp(p, "if", 2) && !is_alnum(p[2])){
+			cur = new_token(TK_RETURN, cur, &p, 2);
+			continue;
+		}
+
+		if(!strncmp(p, "else", 4) && !is_alnum(p[4])){
+			cur = new_token(TK_RETURN, cur, &p, 4);
+			continue;
+		}
+
+		if(!strncmp(p, "while", 5) && !is_alnum(p[5])){
+			cur = new_token(TK_RETURN, cur, &p, 5);
+			continue;
+		}
+
+		if(!strncmp(p, "for", 3) && !is_alnum(p[3])){
+			cur = new_token(TK_RETURN, cur, &p, 3);
+			continue;
+		}
+
 		// 2文字
 		if(!strncmp(p, "<=", 2) || !strncmp(p, ">=", 2) || !strncmp(p, "==", 2) || !strncmp(p, "!=", 2)){
 			cur = new_token(TK_RESERVED, cur, &p, 2);
@@ -88,6 +108,7 @@ Token_t* tokenize(char *p){
 }
 
 static Token_t* new_token(TokenKind kind, Token_t *cur, char **str, int len){
+	DEBUG_WRITE(": kind of token is %d (str:\"%.10s...\" len:%d)\n", kind, *str, len);
 	Token_t *new_tok = calloc(1, sizeof(Token_t));
 	new_tok->kind = kind;
 	new_tok->str = *str;
