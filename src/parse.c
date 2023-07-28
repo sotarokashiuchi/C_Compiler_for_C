@@ -77,10 +77,10 @@ Node_t* stmt(void){
 	Node_t *node;
 	Node_t *lhs, *rhs;
 	
-  if (consume(TK_RETURN, "return")) {
+  if (consume(TK_KEYWORD, "return")) {
 		node = new_node(ND_RETURN, NULL, expr());
 		expect(TK_RESERVED, ";");
-  } else if(consume(TK_IF, "if")) {
+  } else if(consume(TK_KEYWORD, "if")) {
 		// 左ノードに条件式を 右ノードに処理を
 		expect(TK_RESERVED, "(");
 		lhs = expr();
@@ -88,7 +88,7 @@ Node_t* stmt(void){
 		rhs = stmt();
 		node = new_node(ND_IF, lhs, rhs);
 
-		if(consume(TK_ELSE, "else")){
+		if(consume(TK_KEYWORD, "else")){
 			node = new_node(ND_ELSE, NULL, stmt());
 		}
 	}else {

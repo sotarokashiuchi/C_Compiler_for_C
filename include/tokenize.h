@@ -7,11 +7,7 @@
 typedef enum{
 	TK_RESERVED,		// 記号
 	TK_IDENT,				// 識別子
-	TK_RETURN,			// return
-	TK_IF,
-	TK_ELSE,
-	TK_WHILE,
-	TK_FOR,
+	TK_KEYWORD,			// Keyword(予約語)
 	TK_NUM,					// 整数トークン
 	TK_EOF,					// 入力の終わりを表すトークン
 } TokenKind;

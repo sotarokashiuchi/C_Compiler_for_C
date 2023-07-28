@@ -42,27 +42,27 @@ Token_t* tokenize(char *p){
 
 		// keyword
 		if(!strncmp(p, "return", 6) && !is_alnum(p[6])){
-			cur = new_token(TK_RETURN, cur, &p, 6);
+			cur = new_token(TK_KEYWORD, cur, &p, 6);
 			continue;
 		}
 
 		if(!strncmp(p, "if", 2) && !is_alnum(p[2])){
-			cur = new_token(TK_IF, cur, &p, 2);
+			cur = new_token(TK_KEYWORD, cur, &p, 2);
 			continue;
 		}
 
 		if(!strncmp(p, "else", 4) && !is_alnum(p[4])){
-			cur = new_token(TK_ELSE, cur, &p, 4);
+			cur = new_token(TK_KEYWORD, cur, &p, 4);
 			continue;
 		}
 
 		if(!strncmp(p, "while", 5) && !is_alnum(p[5])){
-			cur = new_token(TK_WHILE, cur, &p, 5);
+			cur = new_token(TK_KEYWORD, cur, &p, 5);
 			continue;
 		}
 
 		if(!strncmp(p, "for", 3) && !is_alnum(p[3])){
-			cur = new_token(TK_FOR, cur, &p, 3);
+			cur = new_token(TK_KEYWORD, cur, &p, 3);
 			continue;
 		}
 
