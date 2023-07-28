@@ -21,15 +21,27 @@ void gen(Node_t *node) {
   // 再帰的に読み込んでも値を保持できる
   int lavelIndexLocal = labelIndex++;
   switch (node->kind){
-  case ND_IF:
+  case ND_ELSE:
+    gen(node->lhs->lhs);
+    printf("  pop rax\n");
+    printf("  cmp rax, 0\n");
+    printf("  je .else_%03d\n", lavelIndexLocal);
+    gen(node->lhs->rhs);
+    printf("  jmp .ifelseend_%03d\n",lavelIndexLocal);
+
+    printf(".else_%03d:\n", lavelIndexLocal);
     gen(node->rhs);
+    printf(".ifelseend_%03d:\n", lavelIndexLocal);
+    return;
+  case ND_IF:
+    gen(node->lhs);
     printf("  pop rax\n");
     printf("  cmp rax, 0\n");
     printf("  je  .ifend_%03d\n", lavelIndexLocal);    // ifの条件式が偽の場合jmp
     gen(node->rhs);
 
     printf(".ifend_%03d:\n", lavelIndexLocal);
-    break;
+    return;
   case ND_RETURN:
     // returnは右方方向の木構造しかない
     gen(node->rhs);

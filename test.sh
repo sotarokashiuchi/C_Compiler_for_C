@@ -38,6 +38,13 @@ assert() {
 assert "14" "a = 3; b = 5 * 6 - 8; return a + b / 2;"
 assert "5" "i=0; if(i==0)i=5; return i;"
 assert "6" "i=0; if(i==1)i=5; else i=6; return i;"
+assert "4" "
+i=0;
+if(i==1)i=2;
+else if(i==0)i=4;
+  else i=5;
+return i;
+"
 # assert "10" "i=0; while(i<10) i=i+1; return i;"
 
 echo finished

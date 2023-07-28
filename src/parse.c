@@ -92,6 +92,7 @@ Node_t* stmt(void){
 
 		if(consume(TK_KEYWORD, "else")){
 			// ("else" stmt)?
+			// 左ノードにifを 右ノードに処理を
 			node = new_node(ND_ELSE, node, stmt());
 		}
 	}else {
