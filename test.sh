@@ -14,6 +14,7 @@ assert() {
   actual="$?"
 
   if [ "$actual" = "$expected" ]; then
+    echo "successful!!"
     echo "$input => $actual"
   else
     echo "$input => $expected expected, but got $actual"
@@ -35,6 +36,7 @@ assert() {
 # y = tmp;
 # "
 assert "14" "a = 3; b = 5 * 6 - 8; return a + b / 2;"
-assert "10" "i=0; while(i<10) i=i+1; return i;"
+assert "5" "i=0; if(i==0)i=5; return i;"
+# assert "10" "i=0; while(i<10) i=i+1; return i;"
 
 echo finished

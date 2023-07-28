@@ -16,6 +16,8 @@ typedef enum{
   ND_GREATER_THAN_OR_EQUAL_TO,  // >=
   ND_LESS_THAN_OR_EQUALT_TO,    // <=
   ND_RETURN,      // return
+  ND_IF,
+  ND_ELSE,
   ND_NUM, 				// 整数
 } NodeKind;
 

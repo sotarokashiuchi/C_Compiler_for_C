@@ -4,7 +4,11 @@
 
 /* EBNF
  * program    = stmt* 
- * stmt       = expr ";" | "return" expr ";"
+ * stmt    = expr ";"
+					| "return" expr ";"
+					| "if" "(" expr ")" stmt ("else" stmt)?
+					| "while" "(" expr ")" stmt
+					| "for" "(" expr? ";" expr? ";" expr? ")" stmt
  * expr       = assign
  * assign     = equality ("=" assign)?
  * equality   = relational ("==" relational | "!=" relational)*
@@ -64,17 +68,34 @@ void program(void){
 }
 
 // stmt       = expr ";" | "return" expr ";"
+//  stmt    = expr ";"
+// 					| "return" expr ";"
+// 					| "if" "(" expr ")" stmt ("else" stmt)?
+// 					| "while" "(" expr ")" stmt
 Node_t* stmt(void){
   DEBUG_WRITE("\n");
 	Node_t *node;
+	Node_t *lhs, *rhs;
 	
   if (consume(TK_RETURN, "return")) {
-		node = new_node(ND_RETURN, expr(), NULL);
-  } else {
+		node = new_node(ND_RETURN, NULL, expr());
+		expect(TK_RESERVED, ";");
+  } else if(consume(TK_IF, "if")) {
+		// 左ノードに条件式を 右ノードに処理を
+		expect(TK_RESERVED, "(");
+		lhs = expr();
+		expect(TK_RESERVED, ")");
+		rhs = stmt();
+		node = new_node(ND_IF, lhs, rhs);
+
+		if(consume(TK_ELSE, "else")){
+			node = new_node(ND_ELSE, NULL, stmt());
+		}
+	}else {
     node = expr();
+		expect(TK_RESERVED, ";");
   }
 
-	expect(TK_RESERVED, ";");
 	return node;
 }
 

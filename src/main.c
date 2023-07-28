@@ -19,10 +19,9 @@ int main(int argc, char **argv){
   locals = &dummy;
   // トークナイズ
 	token = tokenize(argv[1]);
-  exit(1);
   // パーサ
 	program();
-  // exit(1);
+  exit(1);
 
 	// 前半部分のコード生成
   printf(".intel_syntax noprefix\n");
