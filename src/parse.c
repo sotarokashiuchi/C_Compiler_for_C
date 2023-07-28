@@ -95,7 +95,14 @@ Node_t* stmt(void){
 			// 左ノードにifを 右ノードに処理を
 			node = new_node(ND_ELSE, node, stmt());
 		}
-	}else {
+	} else if(consume(TK_KEYWORD, "while")){
+		// "while" "(" expr ")" stmt
+		expect(TK_RESERVED, "(");
+		lhs = expr();
+		expect(TK_RESERVED, ")");
+		rhs = stmt();
+		node = new_node(ND_WHILE, lhs, rhs);
+	} else {
     node = expr();
 		expect(TK_RESERVED, ";");
   }

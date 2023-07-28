@@ -42,6 +42,17 @@ void gen(Node_t *node) {
 
     printf(".ifend_%03d:\n", lavelIndexLocal);
     return;
+  case ND_WHILE:
+    printf(".while_%03d:\n", lavelIndexLocal);
+    gen(node->lhs);
+    printf("  pop rax\n");
+    printf("  cmp rax, 0\n");
+    printf("  je  .whileend_%03d\n", lavelIndexLocal);    // whileの条件式が偽の場合jmp
+    gen(node->rhs);
+    printf("  jmp .while_%03d\n", lavelIndexLocal);
+
+    printf(".whileend_%03d:\n", lavelIndexLocal);
+    return;
   case ND_RETURN:
     // returnは右方方向の木構造しかない
     gen(node->rhs);

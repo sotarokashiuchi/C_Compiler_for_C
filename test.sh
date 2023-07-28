@@ -45,6 +45,13 @@ else if(i==0)i=4;
   else i=5;
 return i;
 "
-# assert "10" "i=0; while(i<10) i=i+1; return i;"
+assert "10" "i=0; while(i<10) i=i+1; return i;"
+assert "15" "
+i=0;
+while(i<10)
+  if(i<5)i=i+1;
+  else i=i+10;
+return i;
+"
 
 echo finished
