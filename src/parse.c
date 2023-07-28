@@ -67,8 +67,8 @@ void program(void){
 	code[i] = NULL;
 }
 
-// stmt       = expr ";" | "return" expr ";"
 //  stmt    = expr ";"
+//  				| expr ";"
 // 					| "return" expr ";"
 // 					| "if" "(" expr ")" stmt ("else" stmt)?
 // 					| "while" "(" expr ")" stmt
@@ -78,9 +78,11 @@ Node_t* stmt(void){
 	Node_t *lhs, *rhs;
 	
   if (consume(TK_KEYWORD, "return")) {
+		// "return" expr ";"
 		node = new_node(ND_RETURN, NULL, expr());
 		expect(TK_RESERVED, ";");
   } else if(consume(TK_KEYWORD, "if")) {
+		// "if" "(" expr ")" stmt
 		// 左ノードに条件式を 右ノードに処理を
 		expect(TK_RESERVED, "(");
 		lhs = expr();
@@ -89,7 +91,8 @@ Node_t* stmt(void){
 		node = new_node(ND_IF, lhs, rhs);
 
 		if(consume(TK_KEYWORD, "else")){
-			node = new_node(ND_ELSE, NULL, stmt());
+			// ("else" stmt)?
+			node = new_node(ND_ELSE, node, stmt());
 		}
 	}else {
     node = expr();
