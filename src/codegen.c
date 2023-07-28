@@ -1,6 +1,8 @@
 #include "common.h"
 #include "codegen.h"
 
+static int labelIndex = 0;
+
 /// @brief 左辺値の評価(アドレス計算)
 /// @param node 
 void gen_lval(Node_t *node){
@@ -15,7 +17,19 @@ void gen_lval(Node_t *node){
 }
 
 void gen(Node_t *node) {
+  // ローカル変数にアセンブリのラベル識別用の変数を定義することで、
+  // 再帰的に読み込んでも値を保持できる
+  int lavelIndexLocal = labelIndex++;
   switch (node->kind){
+  case ND_IF:
+    gen(node->rhs);
+    printf("  pop rax\n");
+    printf("  cmp rax, 0\n");
+    printf("  je  .ifend_%03d\n", lavelIndexLocal);    // ifの条件式が偽の場合jmp
+    gen(node->rhs);
+
+    printf(".ifend_%03d:\n", lavelIndexLocal);
+    break;
   case ND_RETURN:
     // returnは右方方向の木構造しかない
     gen(node->rhs);
