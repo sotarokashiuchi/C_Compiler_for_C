@@ -35,14 +35,20 @@ Node_t* primary();
 
 /// @brief ノードを生成する
 /// @param kind ノードの種類
-/// @param lhs 左辺
-/// @param rhs 右辺
+/// @param expr1 左辺
+/// @param expr2 右辺
+/// @param expr3 右辺
+/// @param expr4 右辺
+/// @param expr5 右辺
 /// @return 生成したノード
-Node_t *new_node(NodeKind kind, Node_t *lhs, Node_t *rhs){
+Node_t *new_node(NodeKind kind, Node_t *expr1, Node_t *expr2, Node_t *expr3, Node_t *expr4, Node_t *expr5){
 	Node_t *node = calloc(1, sizeof(Node_t));
 	node->kind = kind;
-	node->lhs = lhs;
-	node->rhs = rhs;
+	node->expr1 = expr1;
+	node->expr2 = expr2;
+	node->expr3 = expr3;
+	node->expr4 = expr4;
+	node->expr5 = expr5;
 	return node;
 }
 
@@ -79,7 +85,7 @@ Node_t* stmt(void){
 	
   if (consume(TK_KEYWORD, "return")) {
 		// "return" expr ";"
-		node = new_node(ND_RETURN, NULL, expr());
+		node = new_node(ND_RETURN, NULL, expr(), NULL, NULL, NULL);
 		expect(TK_RESERVED, ";");
   } else if(consume(TK_KEYWORD, "if")) {
 		// "if" "(" expr ")" stmt
@@ -88,12 +94,12 @@ Node_t* stmt(void){
 		lhs = expr();
 		expect(TK_RESERVED, ")");
 		rhs = stmt();
-		node = new_node(ND_IF, lhs, rhs);
+		node = new_node(ND_IF, lhs, rhs, NULL, NULL, NULL);
 
 		if(consume(TK_KEYWORD, "else")){
 			// ("else" stmt)?
 			// 左ノードにifを 右ノードに処理を
-			node = new_node(ND_ELSE, node, stmt());
+			node = new_node(ND_ELSE, node, stmt(), NULL, NULL, NULL);
 		}
 	} else if(consume(TK_KEYWORD, "while")){
 		// "while" "(" expr ")" stmt
@@ -101,7 +107,7 @@ Node_t* stmt(void){
 		lhs = expr();
 		expect(TK_RESERVED, ")");
 		rhs = stmt();
-		node = new_node(ND_WHILE, lhs, rhs);
+		node = new_node(ND_WHILE, lhs, rhs, NULL, NULL, NULL);
 	} else {
     node = expr();
 		expect(TK_RESERVED, ";");
@@ -121,7 +127,7 @@ Node_t* assign(void){
   DEBUG_WRITE("\n");
 	Node_t *node = equality();
 	if(TK_RESERVED, consume(TK_RESERVED, "=")){
-		node = new_node(ND_ASSIGN, node, assign());
+		node = new_node(ND_ASSIGN, node, assign(), NULL, NULL, NULL);
 	}
 	return node;
 }
@@ -133,9 +139,9 @@ Node_t* equality(void){
 
 	for(;;){
 		if(consume(TK_RESERVED, "==")){
-			node = new_node(ND_EQUALTO, node, relational());
+			node = new_node(ND_EQUALTO, node, relational(), NULL, NULL, NULL);
 		} else if(consume(TK_RESERVED, "!=")){
-			node = new_node(ND_NOT_EQUAL_TO, node, relational());
+			node = new_node(ND_NOT_EQUAL_TO, node, relational(), NULL, NULL, NULL);
 		} else{
 			return node;
 		}
@@ -149,13 +155,13 @@ Node_t* relational(void){
 
 	for(;;){
 		if(consume(TK_RESERVED, "<")){
-			node = new_node(ND_LESS_THAN, node, add());
+			node = new_node(ND_LESS_THAN, node, add(), NULL, NULL, NULL);
 		} else if(consume(TK_RESERVED, "<=")){
-			node = new_node(ND_LESS_THAN_OR_EQUALT_TO, node, add());
+			node = new_node(ND_LESS_THAN_OR_EQUALT_TO, node, add(), NULL, NULL, NULL);
 		} else if(consume(TK_RESERVED, ">")){
-			node = new_node(ND_LESS_THAN, add(), node);
+			node = new_node(ND_LESS_THAN, add(), node, NULL, NULL, NULL);
 		} else if(consume(TK_RESERVED, ">=")){
-			node = new_node(ND_LESS_THAN_OR_EQUALT_TO, add(), node);
+			node = new_node(ND_LESS_THAN_OR_EQUALT_TO, add(), node, NULL, NULL, NULL);
 		} else {
 			return node;
 		}
@@ -169,9 +175,9 @@ Node_t* add(void) {
 
 	for(;;){
 		if(consume(TK_RESERVED, "+")){
-			node = new_node(ND_ADD, node, mul());
+			node = new_node(ND_ADD, node, mul(), NULL, NULL, NULL);
 		} else if(consume(TK_RESERVED, "-")){
-			node = new_node(ND_SUB, node, mul());
+			node = new_node(ND_SUB, node, mul(), NULL, NULL, NULL);
 		} else{
 			return node;
 		}
@@ -185,9 +191,9 @@ Node_t *mul(void){
 	
 	for(;;){
 		if(consume(TK_RESERVED, "*")){
-			node = new_node(ND_MUL, node, unary());
+			node = new_node(ND_MUL, node, unary(), NULL, NULL, NULL);
 		} else if(consume(TK_RESERVED, "/")){
-			node = new_node(ND_DIV, node, unary());
+			node = new_node(ND_DIV, node, unary(), NULL, NULL, NULL);
 		} else{
 			return node;
 		}
@@ -201,7 +207,7 @@ Node_t* unary(){
 		return primary();
 	}
 	if(consume(TK_RESERVED, "-")){
-		return new_node(ND_SUB, new_node_num(0), primary());
+		return new_node(ND_SUB, new_node_num(0), primary(), NULL, NULL, NULL);
 	}
 	return primary();
 }
@@ -212,7 +218,7 @@ Node_t *primary() {
 	Token_t *tok = consume_ident();
 	if(tok != NULL){
   	DEBUG_WRITE("this is ident.\n");
-		Node_t *node = new_node(ND_LVAR, NULL, NULL);
+		Node_t *node = new_node(ND_LVAR, NULL, NULL, NULL, NULL, NULL);
 		LVar_t *lvar = find_lvar(tok);
 		if(lvar){
 			// 既に変数が存在する

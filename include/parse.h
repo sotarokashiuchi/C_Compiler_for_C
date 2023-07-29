@@ -25,8 +25,11 @@ typedef enum{
 /// @brief 抽象構文木のノードの型
 typedef struct Node {
 	NodeKind kind;		// ノードの型
-	struct Node *lhs;	// 左辺
-	struct Node *rhs; // 右辺
+	struct Node *expr1;	// 左辺
+	struct Node *expr2; // 右辺
+  struct Node *expr3;
+  struct Node *expr4;
+  struct Node *expr5;
 	int val;					// kindがND_NUMの場合のみ使う
 	int offset;			  // kindがND_LVAEの場合のみ使う
 } Node_t;

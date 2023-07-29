@@ -22,40 +22,40 @@ void gen(Node_t *node) {
   int lavelIndexLocal = labelIndex++;
   switch (node->kind){
   case ND_ELSE:
-    gen(node->lhs->lhs);
+    gen(node->expr1->expr1);
     printf("  pop rax\n");
     printf("  cmp rax, 0\n");
     printf("  je .else_%03d\n", lavelIndexLocal);
-    gen(node->lhs->rhs);
+    gen(node->expr1->expr2);
     printf("  jmp .ifelseend_%03d\n",lavelIndexLocal);
 
     printf(".else_%03d:\n", lavelIndexLocal);
-    gen(node->rhs);
+    gen(node->expr2);
     printf(".ifelseend_%03d:\n", lavelIndexLocal);
     return;
   case ND_IF:
-    gen(node->lhs);
+    gen(node->expr1);
     printf("  pop rax\n");
     printf("  cmp rax, 0\n");
     printf("  je  .ifend_%03d\n", lavelIndexLocal);    // ifの条件式が偽の場合jmp
-    gen(node->rhs);
+    gen(node->expr2);
 
     printf(".ifend_%03d:\n", lavelIndexLocal);
     return;
   case ND_WHILE:
     printf(".while_%03d:\n", lavelIndexLocal);
-    gen(node->lhs);
+    gen(node->expr1);
     printf("  pop rax\n");
     printf("  cmp rax, 0\n");
     printf("  je  .whileend_%03d\n", lavelIndexLocal);    // whileの条件式が偽の場合jmp
-    gen(node->rhs);
+    gen(node->expr2);
     printf("  jmp .while_%03d\n", lavelIndexLocal);
 
     printf(".whileend_%03d:\n", lavelIndexLocal);
     return;
   case ND_RETURN:
     // returnは右方方向の木構造しかない
-    gen(node->rhs);
+    gen(node->expr2);
     printf("  pop rax\n");
     printf("  mov rsp, rbp\n");
     printf("  pop rbp\n");
@@ -72,9 +72,9 @@ void gen(Node_t *node) {
     return;
   case ND_ASSIGN:
     // 左辺の評価
-    gen_lval(node->lhs);
+    gen_lval(node->expr1);
     // 右辺の評価
-    gen(node->rhs);
+    gen(node->expr2);
 
     printf("  pop rdi\n");
     printf("  pop rax\n");
@@ -84,8 +84,8 @@ void gen(Node_t *node) {
     return;
   }
 
-  gen(node->lhs);
-  gen(node->rhs);
+  gen(node->expr1);
+  gen(node->expr2);
 
   printf("  pop rdi\n");
   printf("  pop rax\n");
