@@ -53,6 +53,26 @@ void gen(Node_t *node) {
 
     printf(".whileend_%03d:\n", lavelIndexLocal);
     return;
+  case ND_FOR:
+    if(node->expr1 != NULL){
+      gen(node->expr1);
+    }
+    printf(".for_%03d:\n", lavelIndexLocal);
+    if(node->expr2 != NULL){
+      gen(node->expr2);
+    }
+    printf("  pop rax\n");
+    printf("  cmp rax, 0\n");
+    printf("  je  .forend_%03d\n", lavelIndexLocal);    // forの条件式が偽の場合jmp
+    
+    gen(node->expr4);
+    if(node->expr3 != NULL){
+      gen(node->expr3);
+    }
+    printf("  jmp .for_%03d\n", lavelIndexLocal);
+
+    printf(".forend_%03d:\n", lavelIndexLocal);
+    return;
   case ND_RETURN:
     // returnは右方方向の木構造しかない
     gen(node->expr2);

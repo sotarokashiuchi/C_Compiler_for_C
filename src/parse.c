@@ -138,7 +138,7 @@ Node_t* stmt(void){
 		}
 		
 		expr4 = stmt();
-		node = new_node(ND_WHILE, expr1, expr2, expr3, expr4, NULL);
+		node = new_node(ND_FOR, expr1, expr2, expr3, expr4, NULL);
 	}else {
     node = expr();
 		expect(TK_RESERVED, ";");

@@ -19,6 +19,7 @@ typedef enum{
   ND_IF,
   ND_ELSE,
   ND_WHILE,
+  ND_FOR,
   ND_NUM, 				// 整数
 } NodeKind;
 
