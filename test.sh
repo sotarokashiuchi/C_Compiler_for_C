@@ -54,4 +54,17 @@ while(i<10)
 return i;
 "
 
+assert "20" "
+a=0;
+for(i=0; i<10; i=i+1)a = a+2;
+return a;
+"
+
+assert "20" "
+a=0;
+i=0;
+for( ; i<10; i=i+1)a = a+2;
+return a;
+"
+
 echo finished

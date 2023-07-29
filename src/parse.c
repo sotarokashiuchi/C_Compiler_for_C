@@ -78,10 +78,11 @@ void program(void){
 // 					| "return" expr ";"
 // 					| "if" "(" expr ")" stmt ("else" stmt)?
 // 					| "while" "(" expr ")" stmt
+// 					| "for" "(" expr? ";" expr? ";" expr? ")" stmt
 Node_t* stmt(void){
   DEBUG_WRITE("\n");
 	Node_t *node;
-	Node_t *lhs, *rhs;
+	Node_t *expr1, *expr2, *expr3, *expr4;
 	
   if (consume(TK_KEYWORD, "return")) {
 		// "return" expr ";"
@@ -91,10 +92,10 @@ Node_t* stmt(void){
 		// "if" "(" expr ")" stmt
 		// 左ノードに条件式を 右ノードに処理を
 		expect(TK_RESERVED, "(");
-		lhs = expr();
+		expr1 = expr();
 		expect(TK_RESERVED, ")");
-		rhs = stmt();
-		node = new_node(ND_IF, lhs, rhs, NULL, NULL, NULL);
+		expr2 = stmt();
+		node = new_node(ND_IF, expr1, expr2, NULL, NULL, NULL);
 
 		if(consume(TK_KEYWORD, "else")){
 			// ("else" stmt)?
@@ -104,11 +105,41 @@ Node_t* stmt(void){
 	} else if(consume(TK_KEYWORD, "while")){
 		// "while" "(" expr ")" stmt
 		expect(TK_RESERVED, "(");
-		lhs = expr();
+		expr1 = expr();
 		expect(TK_RESERVED, ")");
-		rhs = stmt();
-		node = new_node(ND_WHILE, lhs, rhs, NULL, NULL, NULL);
-	} else {
+		expr2 = stmt();
+		node = new_node(ND_WHILE, expr1, expr2, NULL, NULL, NULL);
+	} else if(consume(TK_KEYWORD, "for")){
+		// "for" "(" expr? ";" expr? ";" expr? ")" stmt
+		// for(A; B; C)D
+		expect(TK_RESERVED, "(");
+		if(consume(TK_RESERVED, ";")){
+			expr1 = NULL;
+		}else{
+			// Aの読み込み
+			expr1 = expr();
+			expect(TK_RESERVED, ";");
+		}
+
+		if(consume(TK_RESERVED, ";")){
+			expr2 = NULL;
+		}else{
+			// Bの読み込み
+			expr2 = expr();
+			expect(TK_RESERVED, ";");
+		}
+
+		if(consume(TK_RESERVED, ")")){
+			expr3 = NULL;
+		}else{
+			// Cの読み込み
+			expr3 = expr();
+			expect(TK_RESERVED, ")");
+		}
+		
+		expr4 = stmt();
+		node = new_node(ND_WHILE, expr1, expr2, expr3, expr4, NULL);
+	}else {
     node = expr();
 		expect(TK_RESERVED, ";");
   }
