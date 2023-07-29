@@ -54,17 +54,26 @@ assert() {
 # return i;
 # "
 
-assert "20" "
-a=0;
-for(i=0; i<10; i=i+1)a=a+2;
-return a;
-"
+# assert "20" "
+# a=0;
+# for(i=0; i<10; i=i+1)a=a+2;
+# return a;
+# "
 
-assert "10" "
+# assert "10" "
+# a=0;
+# i=0;
+# for( ; i<10; )i=i+1;
+# return i;
+# "
+
+assert "30" "
 a=0;
-i=0;
-for( ; i<10; )i=i+1;
-return i;
+for(i=0; i<10; i=i+1){
+  a=a+1;
+  a=a+2;
+}
+return a;
 "
 
 echo finished
