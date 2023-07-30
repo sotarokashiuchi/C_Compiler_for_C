@@ -21,6 +21,17 @@ void gen(Node_t *node) {
   // 再帰的に読み込んでも値を保持できる
   int lavelIndexLocal = labelIndex++;
   switch (node->kind){
+  case ND_BLOCK:
+    Vector_t *vector = node->vector;
+    for( ; ; ){
+      gen(vector->node);
+      printf("  pop rax\n");
+      if(vector->next == NULL){
+        break;
+      }
+      vector = vector->next;
+    }
+    return;
   case ND_ELSE:
     gen(node->expr1->expr1);
     printf("  pop rax\n");

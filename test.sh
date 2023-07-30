@@ -76,4 +76,16 @@ for(i=0; i<10; i=i+1){
 return a;
 "
 
+assert "18" "
+sum=0;
+based=3;
+for(i=0; i<12; i=i+1){
+  if(i/based==1){
+    sum = sum + i;
+    based = based + 3;
+  }
+}
+return sum;
+"
+
 echo finished
