@@ -20,20 +20,31 @@ typedef enum{
   ND_ELSE,
   ND_WHILE,
   ND_FOR,
+  ND_BLOCK,
   ND_NUM, 				// 整数
 } NodeKind;
 
+typedef struct Node_tag Node_t;
+typedef struct Vector_tag Vector_t;
+
+/// @brief 複文のリスト
+struct Vector_tag {
+  Node_t *node;   // 単文のポインタ
+  Vector_t *next; // 次のVector_t
+};
+
 /// @brief 抽象構文木のノードの型
-typedef struct Node {
-	NodeKind kind;		// ノードの型
-	struct Node *expr1;	// 左辺
-	struct Node *expr2; // 右辺
-  struct Node *expr3;
-  struct Node *expr4;
-  struct Node *expr5;
+struct Node_tag {
+	NodeKind kind;	// ノードの型
+	Node_t *expr1;	// 左辺
+	Node_t *expr2;  // 右辺
+  Node_t *expr3;
+  Node_t *expr4;
+  Node_t *expr5;
+  Vector_t *vector;
 	int val;					// kindがND_NUMの場合のみ使う
 	int offset;			  // kindがND_LVAEの場合のみ使う
-} Node_t;
+};
 
 // グローバル変数
 extern Node_t *code[100];
