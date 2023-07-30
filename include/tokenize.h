@@ -61,6 +61,10 @@ extern bool consume(TokenKind kind, char *op);
 /// @param op 期待する文字列
 extern void expect(TokenKind kind, char *op);
 
+/// @brief tokenグローバル変数に任意のトークンを代入する
+/// @param tok 任意のトークン
+void back_token(Token_t *tok);
+
 /// @brief  次のトークンが識別子か調べ、識別子の場合には、
 ///					トークンを1つ読み進めてトークン構造体を返す。それ以外の場合にはNULLを返す。
 /// @return Token_t:トークンが識別子. NULL:トークンが非識別子

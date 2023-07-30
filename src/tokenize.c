@@ -159,6 +159,11 @@ void expect(TokenKind kind, char *op) {
 	token = token->next;
 }
 
+void back_token(Token_t *tok){
+	token = tok;
+	return;
+}
+
 Token_t* consume_ident(void){
 	if(token->kind != TK_IDENT){
 		return NULL;
@@ -168,9 +173,6 @@ Token_t* consume_ident(void){
 	return tok;
 }
 
-/// @brief 変数名を検索する
-/// @param tok 検索したい変数の情報が格納されたLVar_t
-/// @return 一致したLVar_tを返す, 一致しなければNULLを返す
 LVar_t* find_lvar(Token_t *tok){
 	for(LVar_t *var = identHead; var; var = var->next){
 		if(var->len == tok->len && !memcmp(tok->str, var->name, var->len)){

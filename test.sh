@@ -88,4 +88,9 @@ for(i=0; i<12; i=i+1){
 return sum;
 "
 
+assert "0" "
+foo()
+return 0;
+"
+
 echo finished

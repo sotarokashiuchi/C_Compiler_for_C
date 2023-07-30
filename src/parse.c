@@ -132,14 +132,26 @@ Node_t* stmt(void){
   DEBUG_WRITE("\n");
 	Node_t *node;
 	Node_t *expr1, *expr2, *expr3, *expr4;
+	Token_t *tok;
 	
-  if(consume(0,"")){
-
-	} else if (consume(TK_KEYWORD, "return")) {
+  if((tok = consume_ident()) != NULL){
+		if(consume(TK_RESERVED, "(")){
+			expect(TK_RESERVED, ")");
+			node = manage_lvar(tok);
+			return node;
+		}else{
+			back_token(tok);
+		}
+	}
+	
+	if (consume(TK_KEYWORD, "return")) {
 		// "return" expr ";"
 		node = new_node(ND_RETURN, NULL, expr(), NULL, NULL, NULL, NULL);
 		expect(TK_RESERVED, ";");
-  } else if(consume(TK_KEYWORD, "if")) {
+		return node;
+  }
+	
+	if(consume(TK_KEYWORD, "if")) {
 		// "if" "(" expr ")" stmt
 		// 左ノードに条件式を 右ノードに処理を
 		expect(TK_RESERVED, "(");
@@ -153,14 +165,20 @@ Node_t* stmt(void){
 			// 左ノードにifを 右ノードに処理を
 			node = new_node(ND_ELSE, node, stmt(), NULL, NULL, NULL, NULL);
 		}
-	} else if(consume(TK_KEYWORD, "while")){
+		return node;
+	}
+	
+	if(consume(TK_KEYWORD, "while")){
 		// "while" "(" expr ")" stmt
 		expect(TK_RESERVED, "(");
 		expr1 = expr();
 		expect(TK_RESERVED, ")");
 		expr2 = stmt();
 		node = new_node(ND_WHILE, expr1, expr2, NULL, NULL, NULL, NULL);
-	} else if(consume(TK_KEYWORD, "for")){
+		return node;
+	}
+	
+	if(consume(TK_KEYWORD, "for")){
 		// "for" "(" expr? ";" expr? ";" expr? ")" stmt
 		// for(A; B; C)D
 		expect(TK_RESERVED, "(");
@@ -190,7 +208,10 @@ Node_t* stmt(void){
 		
 		expr4 = stmt();
 		node = new_node(ND_FOR, expr1, expr2, expr3, expr4, NULL, NULL);
-	} else if(consume(TK_RESERVED, "{")){
+		return node;
+	}
+	
+	if(consume(TK_RESERVED, "{")){
 		// "{" stmt* "}"
 		Vector_t *vector;
 		vector = new_vector(stmt(), NULL);
@@ -198,11 +219,11 @@ Node_t* stmt(void){
 		while(!consume(TK_RESERVED, "}")){
 			vector = new_vector(stmt(), vector);
 		}
-	}else {
-    node = expr();
-		expect(TK_RESERVED, ";");
-  }
+		return node;
+	}
 
+	node = expr();
+	expect(TK_RESERVED, ";");
 	return node;
 }
 
