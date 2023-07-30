@@ -34,8 +34,8 @@ typedef struct LVar {
 extern Token_t *token;
 /// @brief 入力文字列
 extern char *user_input;
-/// @brief ローカル変数
-extern LVar_t *locals;
+/// @brief Lvar_t構造体のリストの先頭
+extern LVar_t *identHead;
 
 
 /// @brief 入力文字列pをトークナイズする

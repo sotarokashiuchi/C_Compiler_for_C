@@ -16,7 +16,7 @@ int main(int argc, char **argv){
 	// 抽象構文木作成
 	user_input = argv[1];
   LVar_t dummy = {NULL, NULL, 0, 0};
-  locals = &dummy;
+  identHead = &dummy;
   // トークナイズ
 	token = tokenize(argv[1]);
   // パーサ

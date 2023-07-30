@@ -4,7 +4,7 @@
 
 /* グローバル変数定義 */
 Token_t *token;
-LVar_t *locals = NULL;
+LVar_t *identHead = NULL;
 
 /// @brief 新しいトークンを作成し、リストにつなげる
 /// @param kind 新しいトークンの種類
@@ -172,7 +172,7 @@ Token_t* consume_ident(void){
 /// @param tok 検索したい変数の情報が格納されたLVar_t
 /// @return 一致したLVar_tを返す, 一致しなければNULLを返す
 LVar_t* find_lvar(Token_t *tok){
-	for(LVar_t *var = locals; var; var = var->next){
+	for(LVar_t *var = identHead; var; var = var->next){
 		if(var->len == tok->len && !memcmp(tok->str, var->name, var->len)){
 			return var;
 		}

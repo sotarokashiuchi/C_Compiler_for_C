@@ -4,11 +4,13 @@
 
 /* EBNF
  * program    = stmt* 
- * stmt    = expr ";"
-					| "return" expr ";"
-					| "if" "(" expr ")" stmt ("else" stmt)?
-					| "while" "(" expr ")" stmt
-					| "for" "(" expr? ";" expr? ";" expr? ")" stmt
+ * stmt    		= expr ";"
+ * 						| ident ("(" ")")?
+ * 						| "return" expr ";"
+ * 						| "if" "(" expr ")" stmt ("else" stmt)?
+ * 						| "while" "(" expr ")" stmt
+ * 						| "for" "(" expr? ";" expr? ";" expr? ")" stmt
+ *  					| "{" stmt* "}"
  * expr       = assign
  * assign     = equality ("=" assign)?
  * equality   = relational ("==" relational | "!=" relational)*
@@ -54,6 +56,16 @@ Node_t *new_node(NodeKind kind, Node_t *expr1, Node_t *expr2, Node_t *expr3, Nod
 	return node;
 }
 
+/// @brief numノード(終端記号)を生成する
+/// @param val ノードに設定する数値
+/// @return 生成したノード
+Node_t *new_node_num(int val){
+	Node_t *node = calloc(1, sizeof(Node_t));
+	node->kind = ND_NUM;
+	node->val = val;
+	return node;
+}
+
 /// @brief 新しいベクタを生成する
 /// @param node ベクタに登録するノード
 /// @param current 単方リストの現在のベクタ(リストの生成の場合はNULL)
@@ -67,15 +79,36 @@ Vector_t* new_vector(Node_t *node, Vector_t *current){
 	return vector;
 }
 
+/// @brief 新しいラベルを生成する
+/// @param node 
+/// @param tok 識別子を指すトークン
+/// @return 生成したラベル
+LVar_t* new_lvar(Token_t *tok){
+	// 新しく変数を定義する	
+	LVar_t *lvar = calloc(1, sizeof(LVar_t));
+	lvar->next = identHead;
+	lvar->name = tok->str;
+	lvar->len = tok->len;
+	lvar->offset = identHead->offset + 8;
+	identHead = lvar;
+	return lvar;
+}
 
-/// @brief numノード(終端記号)を生成する
-/// @param val ノードに設定する数値
-/// @return 生成したノード
-Node_t *new_node_num(int val){
-	Node_t *node = calloc(1, sizeof(Node_t));
-	node->kind = ND_NUM;
-	node->val = val;
-	return node;
+/// @brief 識別子の管理を行う(新しい識別子の定義、識別子ごとのメモリの確保)
+/// @param tok 識別子を指すトークン
+/// @return 設定完了後のノード
+Node_t* manage_lvar(Token_t *tok){
+	DEBUG_WRITE("this is ident.\n");
+	Node_t *node = new_node(ND_LVAR, NULL, NULL, NULL, NULL, NULL, NULL);
+	LVar_t *lvar = find_lvar(tok);
+	if(lvar){
+		// 既に識別子が存在する
+		node->offset = lvar->offset;
+	}else{
+		// 新しく識別子を定義する
+		lvar = new_lvar(tok);
+		node->offset = lvar->offset;
+	}
 }
 
 // program    = stmt*
@@ -89,7 +122,7 @@ void program(void){
 }
 
 //  stmt    = expr ";"
-//  				| expr ";"
+//  				| ident ("(" ")")?
 // 					| "return" expr ";"
 // 					| "if" "(" expr ")" stmt ("else" stmt)?
 // 					| "while" "(" expr ")" stmt
@@ -100,7 +133,9 @@ Node_t* stmt(void){
 	Node_t *node;
 	Node_t *expr1, *expr2, *expr3, *expr4;
 	
-  if (consume(TK_KEYWORD, "return")) {
+  if(consume(0,"")){
+
+	} else if (consume(TK_KEYWORD, "return")) {
 		// "return" expr ";"
 		node = new_node(ND_RETURN, NULL, expr(), NULL, NULL, NULL, NULL);
 		expect(TK_RESERVED, ";");
@@ -272,23 +307,7 @@ Node_t *primary() {
   DEBUG_WRITE("\n");
 	Token_t *tok = consume_ident();
 	if(tok != NULL){
-  	DEBUG_WRITE("this is ident.\n");
-		Node_t *node = new_node(ND_LVAR, NULL, NULL, NULL, NULL, NULL, NULL);
-		LVar_t *lvar = find_lvar(tok);
-		if(lvar){
-			// 既に変数が存在する
-			node->offset = lvar->offset;
-		}else{
-			// 新しく変数を定義する
-			lvar = calloc(1, sizeof(LVar_t));
-			lvar->next = locals;
-			lvar->name = tok->str;
-			lvar->len = tok->len;
-			lvar->offset = locals->offset + 8;
-			node->offset = lvar->offset;
-			locals = lvar;
-		}
-		return node;
+		return manage_lvar(tok);
 	}
 	
   // 次のトークンが"("なら、"(" expr ")"のはず
