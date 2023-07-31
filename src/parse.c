@@ -70,11 +70,14 @@ Node_t *new_node_num(int val){
 
 /// @brief 新しいベクタを生成する
 /// @param node ベクタに登録するノード
-/// @param current 単方リストの現在のベクタ(リストの生成の場合はNULL)
+/// @param current 双方向リストの現在のベクタ(リストの生成の場合はNULL)
 Vector_t* new_vector(Node_t *node, Vector_t *current){
 	Vector_t *vector = calloc(1, sizeof(Vector_t));
 	if(current!=NULL){
 		current->next = vector;
+		vector->prev = current;
+	}else{
+		vector->prev = NULL;
 	}
 	vector->node = node;
 	vector->next = NULL;
@@ -146,11 +149,11 @@ Node_t* stmt(void){
 
 			if(!consume(TK_RESERVED, ")")){
 				vector = new_vector(expr(), NULL);
-				node->vector = vector;
 				while(consume(TK_RESERVED, ",")){
 					vector = new_vector(expr(), vector);
 				}
 				expect(TK_RESERVED, ")");
+				node->vector = vector;
 			}
 			return node;
 		}else{

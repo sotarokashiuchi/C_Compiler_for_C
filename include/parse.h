@@ -30,9 +30,10 @@ typedef enum{
 typedef struct Node_tag Node_t;
 typedef struct Vector_tag Vector_t;
 
-/// @brief 複文のリスト
+/// @brief ベクタのリスト
 struct Vector_tag {
   Node_t *node;   // 単文のポインタ
+  Vector_t *prev; // 前のVector_t
   Vector_t *next; // 次のVector_t
 };
 

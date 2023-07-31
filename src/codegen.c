@@ -32,6 +32,43 @@ void gen(Node_t *node) {
   int lavelIndexLocal = labelIndex++;
   switch (node->kind){
   case ND_FUNCTION:
+    if(node->vector != NULL){
+      // 引数がある場合
+      int i;
+      Vector_t *vector = node->vector;
+      for(i=1; ; i++){
+        gen(vector->node);
+        if(vector->prev == NULL){
+          break;
+        }
+        vector = vector->prev;
+      }
+      printf("#引数詰め込み開始%d\n", i);
+      for( ; i>0; i--){
+        switch (i){
+          case 1:
+            printf("  pop rdi\n");
+            break;
+          case 2:
+            printf("  pop rsi\n");
+            break;
+          case 3:
+            printf("  pop rdx\n");
+            break;
+          case 4:
+            printf("  pop rcs\n");
+            break;
+          case 5:
+            printf("  pop r8\n");
+            break;
+          case 6:
+            printf("  pop r9\n");
+            break;
+          default:
+            break;
+        }
+      }
+    }
     printf("  call %s\n", gen_lval_name(node));
     return;
   case ND_BLOCK:

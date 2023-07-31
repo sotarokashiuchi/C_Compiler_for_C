@@ -99,12 +99,11 @@ return a;
 assert "0" "
 x = 3;
 y = 5;
-func_param(x, y)
+func_params(x, y)
 "
 
 assert "0" "
 x = 3;
-y = 5;
 func_param(x)
 "
 
