@@ -7,11 +7,11 @@ assert() {
   if [ "$option" = "0" ]; then
     ./9cc "$input" > tmp.s 2> /dev/null
   else
-  echo "******************************** [information] ********************************"
-  echo "Input:$input"
-  echo "********************************** [compile] **********************************"
-    ./9cc "$input" > tmp.s
-  echo "********************************* [assemble] **********************************"
+    echo "******************************** [information] ********************************"
+    echo "Input:$input"
+    echo "********************************** [compile] **********************************"
+      ./9cc "$input" > tmp.s
+    echo "********************************* [assemble] **********************************"
   fi
   cc -o link.o -c ./src/link.c
   cc -o tmp.o -c tmp.s
@@ -95,21 +95,21 @@ for(i=0; i<12; i=i+1){
 return sum;
 "
 
-assert "2" "
+assert "-g" "2" "
 a = 2;
 foo()
 return a;
 "
 
-assert "0" "
+assert "-g" "0" "
 x = 3;
 y = 5;
 func_params(x, y)
 "
 
-assert "0" "
+assert "-g" "0" "
 x = 3;
 func_param(x)
 "
 
-echo finished
+echo All finished
