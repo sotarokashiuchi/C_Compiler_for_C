@@ -12,8 +12,18 @@ void gen_lval(Node_t *node){
   }
 
   printf("  mov rax, rbp\n");
-  printf("  sub rax, %d\n", node->offset);
+  printf("  sub rax, %d\n", node->lvar->offset);
   printf("  push rax\n");
+}
+
+char* gen_lval_name(Node_t *node){
+  int i;
+  char *ident_name = calloc(node->lvar->len+1, sizeof(char));
+  for(i=0; i < node->lvar->len; i++){
+    ident_name[i] = node->lvar->name[i];
+  }
+  ident_name[i] = '\0';
+  return ident_name;
 }
 
 void gen(Node_t *node) {
@@ -21,6 +31,9 @@ void gen(Node_t *node) {
   // 再帰的に読み込んでも値を保持できる
   int lavelIndexLocal = labelIndex++;
   switch (node->kind){
+  case ND_FUNCTION:
+    printf("  call %s\n", gen_lval_name(node));
+    return;
   case ND_BLOCK:
     Vector_t *vector = node->vector;
     for( ; ; ){

@@ -1,6 +1,8 @@
 #ifndef PARSE_H
 #define PARSE_H
 
+#include "tokenize.h"
+
 /// @brief 抽象構文木のノードの種類
 typedef enum{
   ND_ADD, 				// +
@@ -21,6 +23,7 @@ typedef enum{
   ND_WHILE,
   ND_FOR,
   ND_BLOCK,
+  ND_FUNCTION,
   ND_NUM, 				// 整数
 } NodeKind;
 
@@ -44,6 +47,7 @@ struct Node_tag {
   Vector_t *vector;
 	int val;					// kindがND_NUMの場合のみ使う
 	int offset;			  // kindがND_LVAEの場合のみ使う
+  LVar_t *lvar;
 };
 
 // グローバル変数

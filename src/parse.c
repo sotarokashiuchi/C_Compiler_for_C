@@ -95,19 +95,22 @@ LVar_t* new_lvar(Token_t *tok){
 }
 
 /// @brief 識別子の管理を行う(新しい識別子の定義、識別子ごとのメモリの確保)
+/// @param kind ノードの種類
 /// @param tok 識別子を指すトークン
 /// @return 設定完了後のノード
-Node_t* manage_lvar(Token_t *tok){
+Node_t* manage_lvar(NodeKind kind, Token_t *tok){
 	DEBUG_WRITE("this is ident.\n");
-	Node_t *node = new_node(ND_LVAR, NULL, NULL, NULL, NULL, NULL, NULL);
+	Node_t *node = new_node(kind, NULL, NULL, NULL, NULL, NULL, NULL);
 	LVar_t *lvar = find_lvar(tok);
 	if(lvar){
 		// 既に識別子が存在する
-		node->offset = lvar->offset;
+		// node->offset = lvar->offset;
+		node->lvar = lvar;
 	}else{
 		// 新しく識別子を定義する
 		lvar = new_lvar(tok);
-		node->offset = lvar->offset;
+		// node->offset = lvar->offset;
+		node->lvar = lvar;
 	}
 }
 
@@ -137,7 +140,7 @@ Node_t* stmt(void){
   if((tok = consume_ident()) != NULL){
 		if(consume(TK_RESERVED, "(")){
 			expect(TK_RESERVED, ")");
-			node = manage_lvar(tok);
+			node = manage_lvar(ND_FUNCTION, tok);
 			return node;
 		}else{
 			back_token(tok);
@@ -328,7 +331,7 @@ Node_t *primary() {
   DEBUG_WRITE("\n");
 	Token_t *tok = consume_ident();
 	if(tok != NULL){
-		return manage_lvar(tok);
+		return manage_lvar(ND_LVAR, tok);
 	}
 	
   // 次のトークンが"("なら、"(" expr ")"のはず
