@@ -5,12 +5,14 @@
 /* EBNF
  * program    = stmt* 
  * stmt    		= expr ";"
+ *  					| ident ("(" parmlist ")")?
  * 						| ident ("(" ")")?
  * 						| "return" expr ";"
  * 						| "if" "(" expr ")" stmt ("else" stmt)?
  * 						| "while" "(" expr ")" stmt
  * 						| "for" "(" expr? ";" expr? ";" expr? ")" stmt
  *  					| "{" stmt* "}"
+ * parmlist		= expr? | expr ("," expr)?
  * expr       = assign
  * assign     = equality ("=" assign)?
  * equality   = relational ("==" relational | "!=" relational)*
@@ -125,7 +127,7 @@ void program(void){
 }
 
 //  stmt    = expr ";"
-//  				| ident ("(" ")")?
+//  				| ident ("(" expr? | expr ("," expr)? ")")?
 // 					| "return" expr ";"
 // 					| "if" "(" expr ")" stmt ("else" stmt)?
 // 					| "while" "(" expr ")" stmt
@@ -138,9 +140,18 @@ Node_t* stmt(void){
 	Token_t *tok;
 	
   if((tok = consume_ident()) != NULL){
+		Vector_t *vector;
 		if(consume(TK_RESERVED, "(")){
-			expect(TK_RESERVED, ")");
 			node = manage_lvar(ND_FUNCTION, tok);
+
+			if(!consume(TK_RESERVED, ")")){
+				vector = new_vector(expr(), NULL);
+				node->vector = vector;
+				while(consume(TK_RESERVED, ",")){
+					vector = new_vector(expr(), vector);
+				}
+				expect(TK_RESERVED, ")");
+			}
 			return node;
 		}else{
 			back_token(tok);

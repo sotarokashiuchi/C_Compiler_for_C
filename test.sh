@@ -8,7 +8,8 @@ assert() {
   echo "********************************** [compile] **********************************"
   ./9cc "$input" > tmp.s
   echo "********************************* [assemble] **********************************"
-  cc -c tmp.s -o tmp.o
+  cc -o link.o -c ./src/link.c
+  cc -o tmp.o -c tmp.s
   cc -o tmp link.o tmp.o
   echo "********************************* [execution] *********************************"
   ./tmp
@@ -89,9 +90,22 @@ for(i=0; i<12; i=i+1){
 return sum;
 "
 
-assert "0" "
+assert "2" "
+a = 2;
 foo()
-return 0;
+return a;
+"
+
+assert "0" "
+x = 3;
+y = 5;
+func_param(x, y)
+"
+
+assert "0" "
+x = 3;
+y = 5;
+func_param(x)
 "
 
 echo finished
