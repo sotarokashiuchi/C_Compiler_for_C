@@ -25,18 +25,9 @@ int main(int argc, char **argv){
 	// 前半部分のコード生成
   printf(".intel_syntax noprefix\n");
   printf(".globl main\n");
-  printf("main:\n");
-  
-  // プロローグ
-  // 変数26個分(8byte*26=208byte)の領域を確保する
-  printf("  push rbp\n");
-  printf("  mov rbp, rsp\n");
-  printf("  sub rsp, 208\n");
 
   for(int i=0; code[i] != NULL; i++){
     gen(code[i]);
-    // これの必要性は？
-    printf("  pop rax\n");
   }
 
   // エピローグ

@@ -70,6 +70,18 @@ void gen(Node_t *node) {
       }
     }
     printf("  call %s\n", gen_lval_name(node));
+    printf("  #戻り値をpush\n");
+    printf("  push rax\n");
+    return;
+  case ND_FUNCDEFINE:
+    // printf("  jmp entory\n");
+    printf("%s:\n", gen_lval_name(node));
+    printf("  #プロローグ\n");
+    printf("  push rbp\n");
+    printf("  mov rbp, rsp\n");
+    // 変数26個分(8byte*26=208byte)の領域を確保する
+    printf("  sub rsp, 208\n");
+    gen(node->expr1);
     return;
   case ND_BLOCK:
     Vector_t *vector = node->vector;
@@ -138,6 +150,7 @@ void gen(Node_t *node) {
     // returnは右方方向の木構造しかない
     gen(node->expr2);
     printf("  pop rax\n");
+    printf("  #エピローグ\n");
     printf("  mov rsp, rbp\n");
     printf("  pop rbp\n");
     printf("  ret\n");

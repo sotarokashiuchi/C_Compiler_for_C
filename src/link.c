@@ -14,3 +14,8 @@ int func_param(int x){
   printf("x = %d\n", x);
   return 0;
 }
+
+int print(int x){
+  printf("%d ", x);
+  return 0;
+}

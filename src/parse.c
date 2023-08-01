@@ -3,17 +3,36 @@
 #include "tokenize.h"
 
 /* EBNF
- * program    = stmt* 
+ * program    = funcDefine
+ * funcDefine = ident ("(" ")"){ stmt* }
  * stmt    		= expr ";"
- *  					| ident ("(" parmlist ")")?
- * 						| ident ("(" ")")?
  * 						| "return" expr ";"
  * 						| "if" "(" expr ")" stmt ("else" stmt)?
  * 						| "while" "(" expr ")" stmt
  * 						| "for" "(" expr? ";" expr? ";" expr? ")" stmt
  *  					| "{" stmt* "}"
- * parmlist		= expr? | expr ("," expr)?
  * expr       = assign
+ * assign     = equality ("=" assign)?
+ * equality   = relational ("==" relational | "!=" relational)*
+ * relational = add ("<" add | "<=" add | ">" add | ">=" add)*
+ * add        = mul ("+" mul | "-" mul)*
+ * mul        = unary ("*" unary | "/" unary)*
+ * unary      = ("+" | "-")? primary
+ * primary    = num | ident | funcCall | "(" expr ")"
+ * funcCall 	= ident ("(" expr? | expr ("," expr)? ")")?
+ */
+
+/* EBNF
+ * program    = funcDefine
+ * funcDefine = ident ("(" ")"){ stmt* }
+ * stmt    		= expr ";"
+ * 						| "return" expr ";"
+ * 						| "if" "(" expr ")" stmt ("else" stmt)?
+ * 						| "while" "(" expr ")" stmt
+ * 						| "for" "(" expr? ";" expr? ";" expr? ")" stmt
+ *  					| "{" stmt* "}"
+ * expr       = funcCall | assign
+ * funcCall 	= ident ("(" expr? | expr ("," expr)? ")")?
  * assign     = equality ("=" assign)?
  * equality   = relational ("==" relational | "!=" relational)*
  * relational = add ("<" add | "<=" add | ">" add | ">=" add)*
@@ -22,13 +41,14 @@
  * unary      = ("+" | "-")? primary
  * primary    = num | ident | "(" expr ")"
  */
-
 // 文ごとの先頭ノードを格納
 Node_t *code[100];
 
-// void program(void);
+void program(void);
+Node_t* funcDefine();
 Node_t* stmt(void);
 Node_t* expr(void);
+Vector_t* parmlist(void);
 Node_t* assign(void);
 Node_t* equality(void);
 Node_t* relational(void);
@@ -36,6 +56,7 @@ Node_t* add(void);
 Node_t* mul(void);
 Node_t* unary();
 Node_t* primary();
+Node_t *funcCall(void);
 
 /// @brief ノードを生成する
 /// @param kind ノードの種類
@@ -119,17 +140,60 @@ Node_t* manage_lvar(NodeKind kind, Token_t *tok){
 	}
 }
 
-// program    = stmt*
+// program    = functionDefine
 void program(void){
   DEBUG_WRITE("header node\n");
 	int i = 0;
 	while(!at_eof()){
-		code[i++] = stmt();
+		code[i++] = funcDefine();
 	}
 	code[i] = NULL;
 }
 
+// funcDefine = ident ("(" ")"){ stmt* }
+Node_t* funcDefine(){
+	Node_t *node;
+	Token_t *tok;
+	Vector_t *vector;
+	int i = 0;
+
+  if((tok = consume_ident()) != NULL){
+		if(consume(TK_RESERVED, "(")){
+			node = manage_lvar(ND_FUNCDEFINE, tok);
+
+			if(!consume(TK_RESERVED, ")")){
+				// 引数がある場合 未実装
+				// node->vector = parmlist();
+				expect(TK_RESERVED, ")");
+			}
+			expect(TK_RESERVED, "{");
+			vector = new_vector(stmt(), NULL);
+			// node->kind = ND_FUNCDEFIN;
+			node->expr1 = new_node(ND_BLOCK, NULL, NULL, NULL, NULL, NULL, vector);
+			while(!consume(TK_RESERVED, "}")){
+				vector = new_vector(stmt(), vector);
+			}
+			return node;
+		}else{
+			back_token(tok);
+		}
+	}
+}
+
+// {
+// 				// 関数定義
+// 				// "{" stmt* "}"
+// 				Vector_t *vector;
+// 				vector = new_vector(stmt(), NULL);
+// 				node->kind = ND_FUNCDEFIN;
+// 				node->expr1 = new_node(ND_BLOCK, NULL, NULL, NULL, NULL, NULL, vector);
+// 				while(!consume(TK_RESERVED, "}")){
+// 					vector = new_vector(stmt(), vector);
+// 				}
+// 			}
+
 //  stmt    = expr ";"
+// 					| ident ("(" parmlist ")"){ stmt* }
 //  				| ident ("(" expr? | expr ("," expr)? ")")?
 // 					| "return" expr ";"
 // 					| "if" "(" expr ")" stmt ("else" stmt)?
@@ -142,24 +206,25 @@ Node_t* stmt(void){
 	Node_t *expr1, *expr2, *expr3, *expr4;
 	Token_t *tok;
 	
-  if((tok = consume_ident()) != NULL){
-		Vector_t *vector;
-		if(consume(TK_RESERVED, "(")){
-			node = manage_lvar(ND_FUNCTION, tok);
+  // if((tok = consume_ident()) != NULL){
+	// 	Vector_t *vector;
+	// 	if(consume(TK_RESERVED, "(")){
+	// 		node = manage_lvar(-1, tok);
 
-			if(!consume(TK_RESERVED, ")")){
-				vector = new_vector(expr(), NULL);
-				while(consume(TK_RESERVED, ",")){
-					vector = new_vector(expr(), vector);
-				}
-				expect(TK_RESERVED, ")");
-				node->vector = vector;
-			}
-			return node;
-		}else{
-			back_token(tok);
-		}
-	}
+	// 		if(!consume(TK_RESERVED, ")")){
+	// 			node->vector = parmlist();
+	// 			expect(TK_RESERVED, ")");
+	// 		}
+			
+	// 		if(!consume(TK_RESERVED, "{")){
+	// 			// 関数呼び出し
+	// 			node->kind = ND_FUNCTION;
+	// 		} 
+	// 		return node;
+	// 	}else{
+	// 		back_token(tok);
+	// 	}
+	// }
 	
 	if (consume(TK_KEYWORD, "return")) {
 		// "return" expr ";"
@@ -276,6 +341,14 @@ Node_t* equality(void){
 	}
 }
 
+Vector_t* parmlist(void){
+	Vector_t *vector = new_vector(expr(), NULL);
+	while(consume(TK_RESERVED, ",")){
+		vector = new_vector(expr(), vector);
+	}
+	return vector;
+}
+
 // relational = add ("<" add | "<=" add | ">" add | ">=" add)*
 Node_t* relational(void){
   DEBUG_WRITE("\n");
@@ -345,7 +418,14 @@ Node_t *primary() {
   DEBUG_WRITE("\n");
 	Token_t *tok = consume_ident();
 	if(tok != NULL){
-		return manage_lvar(ND_LVAR, tok);
+		if(consume(TK_RESERVED, "(")){
+			// function
+			back_token(tok);
+			return funcCall();
+		}else{
+			// 変数
+			return manage_lvar(ND_LVAR, tok);
+		}
 	}
 	
   // 次のトークンが"("なら、"(" expr ")"のはず
@@ -358,4 +438,30 @@ Node_t *primary() {
   // そうでなければ数値のはず
   DEBUG_WRITE("this is number.\n");
   return new_node_num(expect_number());
+}
+
+Node_t *funcCall(void){
+	Node_t *node;
+	Token_t *tok;
+	
+  if((tok = consume_ident()) != NULL){
+		Vector_t *vector;
+		if(consume(TK_RESERVED, "(")){
+			node = manage_lvar(ND_FUNCTION, tok);
+
+			if(!consume(TK_RESERVED, ")")){
+				node->vector = parmlist();
+				expect(TK_RESERVED, ")");
+			}
+			
+			// if(!consume(TK_RESERVED, "{")){
+			// 	// 関数呼び出し
+			// 	node->kind = ND_FUNCTION;
+			// } 
+			return node;
+		}else{
+			back_token(tok);
+			return NULL;
+		}
+	}
 }
