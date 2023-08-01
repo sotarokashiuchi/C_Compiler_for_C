@@ -56,7 +56,7 @@ void gen(Node_t *node) {
             printf("  pop rdx\n");
             break;
           case 4:
-            printf("  pop rcs\n");
+            printf("  pop rcx\n");
             break;
           case 5:
             printf("  pop r8\n");

@@ -141,6 +141,16 @@ foo2(){
   return 2;
 }
 "
+
+assert "-g" "34" "
+foo(){
+  return 1;
+}
+main(){
+  x = 3 + foo() + 2;
+  return add(x, 1, 2, 3, 4, 5, 6, 7);
+}
+"
 # assert "-g" "0" "
 # fibonacci(n){
 #   if(n<=0){
