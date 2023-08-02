@@ -176,5 +176,26 @@ main(){
   return i;
 }
 "
+assert "-g" "34" "
+fibonacci(n){
+  if(n<=0){
+    return 0;
+  }
+  if(n==1){
+    return 1;
+  } 
+  if(n>1) {
+    return fibonacci(n-1)+fibonacci(n-2);
+  }
+}
+
+main(){
+  n = 10;
+  for(i=0; i<n; i=i+1){
+    x = fibonacci(i);
+  }
+  return x;
+}
+"
 
 echo All finished
