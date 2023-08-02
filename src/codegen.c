@@ -31,20 +31,20 @@ void gen(Node_t *node) {
   // 再帰的に読み込んでも値を保持できる
   int lavelIndexLocal = labelIndex++;
   switch (node->kind){
-  case ND_FUNCTION:
+  case ND_FUNCCALL:
+    int numOfArgu = 0;
     if(node->vector != NULL){
       // 引数がある場合
-      int i;
       Vector_t *vector = node->vector;
-      for(i=1; ; i++){
+      for(numOfArgu=1; ; numOfArgu++){
         gen(vector->node);
         if(vector->prev == NULL){
           break;
         }
         vector = vector->prev;
       }
-      printf("#引数詰め込み開始%d\n", i);
-      for( ; i>0; i--){
+      printf("#引数詰め込み開始\n");
+      for(int i=1 ; i<=numOfArgu; i++){
         switch (i){
           case 1:
             printf("  pop rdi\n");
@@ -70,6 +70,9 @@ void gen(Node_t *node) {
       }
     }
     printf("  call %s\n", gen_lval_name(node));
+    for(int i=7; i<=numOfArgu; i++){
+      printf("  pop rdi\n");
+    }
     printf("  #戻り値をpush\n");
     printf("  push rax\n");
     return;
@@ -79,8 +82,52 @@ void gen(Node_t *node) {
     printf("  #プロローグ\n");
     printf("  push rbp\n");
     printf("  mov rbp, rsp\n");
-    // 変数26個分(8byte*26=208byte)の領域を確保する
-    printf("  sub rsp, 208\n");
+    printf("  sub rsp, %d\n", local_variable_stack);
+    if(node->vector != NULL){
+      // 引数がある場合
+      printf("#仮引数に実引数を代入\n");
+      int i;
+      Vector_t *vector = node->vector;
+      for(i=1; ; i++){
+        gen_lval(vector->node);
+        printf("  pop rax\n");
+        switch (i){
+          case 1:
+            printf("  mov [rax], rdi\n");
+            break;
+          case 2:
+            printf("  mov [rax], rsi\n");
+            break;
+          case 3:
+            printf("  mov [rax], rdx\n");
+            break;
+          case 4:
+            printf("  mov [rax], rcx\n");
+            break;
+          case 5:
+            printf("  mov [rax], r8\n");
+            break;
+          case 6:
+            printf("  mov [rax], r9\n");
+            break;
+          default:
+            // printf("  pop rdi\n");
+            printf("  mov rdi, [rbp+%d]\n", 16+(i-7)*8);
+            printf("  mov [rax], rdi\n");
+            break;
+        }
+        if(vector->next == NULL){
+          break;
+        }
+        vector = vector->next;
+      }
+      printf("#deru\n");
+    }
+
+    // // printf("  call %s\n", gen_lval_name(node));
+    // printf("  #戻り値をpush\n");
+    // printf("  push rax\n");
+
     gen(node->expr1);
     return;
   case ND_BLOCK:

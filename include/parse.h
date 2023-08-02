@@ -23,7 +23,7 @@ typedef enum{
   ND_WHILE,
   ND_FOR,
   ND_BLOCK,
-  ND_FUNCTION,
+  ND_FUNCCALL,
   ND_FUNCDEFINE,
   ND_NUM, 				// 整数
 } NodeKind;

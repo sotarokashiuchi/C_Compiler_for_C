@@ -7,6 +7,9 @@
 // 可変引数用
 #include <stdarg.h>
 
+// ローカル変数用のスタックサイズ 26文字 * 8byte
+#define local_variable_stack (26*8)
+
 /// @brief デバッグ用の情報を表示
 /// @param fmt printf()と同様に使用できる
 void debug_write(char *fmt, ...);

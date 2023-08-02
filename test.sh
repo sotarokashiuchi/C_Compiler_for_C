@@ -108,7 +108,7 @@ assert() {
 # "
 
 
-assert "-g" "3" "
+assert "0" "3" "
 foo(){
   return 0;
 }
@@ -122,14 +122,14 @@ foo2(){
 "
 
 
-assert "-g" "0" "
+assert "0" "0" "
 main(){
   x = 3;
   func_param(x);
 }
 "
 
-assert "-g" "6" "
+assert "0" "6" "
 foo(){
   return 1;
 }
@@ -142,7 +142,7 @@ foo2(){
 }
 "
 
-assert "-g" "34" "
+assert "0" "34" "
 foo(){
   return 1;
 }
@@ -151,23 +151,30 @@ main(){
   return add(x, 1, 2, 3, 4, 5, 6, 7);
 }
 "
-# assert "-g" "0" "
-# fibonacci(n){
-#   if(n<=0){
-#     return 0;
-#   } else if(n==1){
-#     return 1;
-#   } else {
-#     return fibonacci(n-1)+fibonacci(n-2);
-#   }
-# }
-# "
 
-# mains(){
-#   n = 10;
-#   for(i=0; i<n; i++){
-#     print(fibonacci(i));
-#   }
-# }
+assert "0" "3" "
+func(x, y){
+  z = x - y;
+  return z;
+}
+
+main(){
+  i = 4;
+  i = func(i, 1);
+  return i;
+}
+"
+
+assert "-g" "36" "
+total(a, b, c, d, e, f, g, h){
+  x = a+b+c+d+e+f+g+h;
+  return x;
+}
+
+main(){
+  i = total(1, 2, 3, 4, 5, 6, 7, 8);
+  return i;
+}
+"
 
 echo All finished

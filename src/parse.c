@@ -3,7 +3,7 @@
 #include "tokenize.h"
 
 /* EBNF
- * program    = funcDefine
+ * program    = funcDefine*
  * funcDefine = ident ("(" ")"){ stmt* }
  * stmt    		= expr ";"
  * 						| "return" expr ";"
@@ -22,25 +22,6 @@
  * funcCall 	= ident ("(" expr? | expr ("," expr)? ")")?
  */
 
-/* EBNF
- * program    = funcDefine
- * funcDefine = ident ("(" ")"){ stmt* }
- * stmt    		= expr ";"
- * 						| "return" expr ";"
- * 						| "if" "(" expr ")" stmt ("else" stmt)?
- * 						| "while" "(" expr ")" stmt
- * 						| "for" "(" expr? ";" expr? ";" expr? ")" stmt
- *  					| "{" stmt* "}"
- * expr       = funcCall | assign
- * funcCall 	= ident ("(" expr? | expr ("," expr)? ")")?
- * assign     = equality ("=" assign)?
- * equality   = relational ("==" relational | "!=" relational)*
- * relational = add ("<" add | "<=" add | ">" add | ">=" add)*
- * add        = mul ("+" mul | "-" mul)*
- * mul        = unary ("*" unary | "/" unary)*
- * unary      = ("+" | "-")? primary
- * primary    = num | ident | "(" expr ")"
- */
 // 文ごとの先頭ノードを格納
 Node_t *code[100];
 
@@ -93,6 +74,7 @@ Node_t *new_node_num(int val){
 /// @param node ベクタに登録するノード
 /// @param current 双方向リストの現在のベクタ(リストの生成の場合はNULL)
 Vector_t* new_vector(Node_t *node, Vector_t *current){
+	DEBUG_WRITE("\n");
 	Vector_t *vector = calloc(1, sizeof(Vector_t));
 	if(current!=NULL){
 		current->next = vector;
@@ -140,7 +122,7 @@ Node_t* manage_lvar(NodeKind kind, Token_t *tok){
 	}
 }
 
-// program    = functionDefine
+// program    = functionDefine*
 void program(void){
   DEBUG_WRITE("header node\n");
 	int i = 0;
@@ -150,8 +132,9 @@ void program(void){
 	code[i] = NULL;
 }
 
-// funcDefine = ident ("(" ")"){ stmt* }
+// funcDefine = ident ("(" ")") "{" stmt* "}"
 Node_t* funcDefine(){
+	DEBUG_WRITE("\n");
 	Node_t *node;
 	Token_t *tok;
 	Vector_t *vector;
@@ -163,12 +146,22 @@ Node_t* funcDefine(){
 
 			if(!consume(TK_RESERVED, ")")){
 				// 引数がある場合 未実装
-				// node->vector = parmlist();
+				// 一つ目の仮引数
+				tok = consume_ident();
+				vector = new_vector(manage_lvar(ND_LVAR, tok), NULL);
+				node->vector = vector;
+
+				while(consume(TK_RESERVED, ",")){
+					// 二つ目以降の仮引数
+					tok = consume_ident();
+					if(tok != NULL){
+						vector = new_vector(manage_lvar(ND_LVAR, tok), vector);
+					}
+				}
 				expect(TK_RESERVED, ")");
 			}
 			expect(TK_RESERVED, "{");
 			vector = new_vector(stmt(), NULL);
-			// node->kind = ND_FUNCDEFIN;
 			node->expr1 = new_node(ND_BLOCK, NULL, NULL, NULL, NULL, NULL, vector);
 			while(!consume(TK_RESERVED, "}")){
 				vector = new_vector(stmt(), vector);
@@ -179,18 +172,6 @@ Node_t* funcDefine(){
 		}
 	}
 }
-
-// {
-// 				// 関数定義
-// 				// "{" stmt* "}"
-// 				Vector_t *vector;
-// 				vector = new_vector(stmt(), NULL);
-// 				node->kind = ND_FUNCDEFIN;
-// 				node->expr1 = new_node(ND_BLOCK, NULL, NULL, NULL, NULL, NULL, vector);
-// 				while(!consume(TK_RESERVED, "}")){
-// 					vector = new_vector(stmt(), vector);
-// 				}
-// 			}
 
 //  stmt    = expr ";"
 // 					| ident ("(" parmlist ")"){ stmt* }
@@ -205,26 +186,6 @@ Node_t* stmt(void){
 	Node_t *node;
 	Node_t *expr1, *expr2, *expr3, *expr4;
 	Token_t *tok;
-	
-  // if((tok = consume_ident()) != NULL){
-	// 	Vector_t *vector;
-	// 	if(consume(TK_RESERVED, "(")){
-	// 		node = manage_lvar(-1, tok);
-
-	// 		if(!consume(TK_RESERVED, ")")){
-	// 			node->vector = parmlist();
-	// 			expect(TK_RESERVED, ")");
-	// 		}
-			
-	// 		if(!consume(TK_RESERVED, "{")){
-	// 			// 関数呼び出し
-	// 			node->kind = ND_FUNCTION;
-	// 		} 
-	// 		return node;
-	// 	}else{
-	// 		back_token(tok);
-	// 	}
-	// }
 	
 	if (consume(TK_KEYWORD, "return")) {
 		// "return" expr ";"
@@ -441,13 +402,14 @@ Node_t *primary() {
 }
 
 Node_t *funcCall(void){
+	DEBUG_WRITE("\n");
 	Node_t *node;
 	Token_t *tok;
 	
   if((tok = consume_ident()) != NULL){
 		Vector_t *vector;
 		if(consume(TK_RESERVED, "(")){
-			node = manage_lvar(ND_FUNCTION, tok);
+			node = manage_lvar(ND_FUNCCALL, tok);
 
 			if(!consume(TK_RESERVED, ")")){
 				node->vector = parmlist();
