@@ -18,13 +18,13 @@ typedef enum{
   ND_GREATER_THAN_OR_EQUAL_TO,  // >=
   ND_LESS_THAN_OR_EQUALT_TO,    // <=
   ND_RETURN,      // return
-  ND_IF,
-  ND_ELSE,
-  ND_WHILE,
-  ND_FOR,
-  ND_BLOCK,
-  ND_FUNCCALL,
-  ND_FUNCDEFINE,
+  ND_IF,          // if
+  ND_ELSE,        // else
+  ND_WHILE,       // while
+  ND_FOR,         // for
+  ND_BLOCK,       // block
+  ND_FUNCCALL,    // funcCall
+  ND_FUNCDEFINE,  // funcDefine
   ND_NUM, 				// 整数
 } NodeKind;
 
@@ -41,20 +41,22 @@ struct Vector_tag {
 /// @brief 抽象構文木のノードの型
 struct Node_tag {
 	NodeKind kind;	// ノードの型
-	Node_t *expr1;	// 左辺
-	Node_t *expr2;  // 右辺
-  Node_t *expr3;
-  Node_t *expr4;
-  Node_t *expr5;
+	Node_t *expr1;	// Node1
+	Node_t *expr2;  // Node2
+  Node_t *expr3;  // Node3
+  Node_t *expr4;  // Node4
+  Node_t *expr5;  // Node5
   Vector_t *vector;
-	int val;					// kindがND_NUMの場合のみ使う
-	int offset;			  // kindがND_LVAEの場合のみ使う
-  LVar_t *lvar;
+	int val;			  // kindがND_NUMの場合のみ使う
+  LVar_t *lvar;   // ラベル用
 };
 
-// グローバル変数
+/* グローバル変数 */
+/// @brief 関数のノードの配列
 extern Node_t *code[100];
 
+/* 関数プロトタイプ宣言 */
+/// @brief パースプログラム
 void program(void);
 
 #endif

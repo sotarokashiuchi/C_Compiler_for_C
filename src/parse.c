@@ -1,10 +1,14 @@
 #include "common.h"
 #include "parse.h"
 #include "tokenize.h"
+/* グローバル変数 */
+// 文ごとの先頭ノードを格納
+Node_t *code[100];
 
+/* 関数プロトタイプ宣言 */
 /* EBNF
  * program    = funcDefine*
- * funcDefine = ident ("(" ")"){ stmt* }
+ * funcDefine = ident ("(" ident? | ident ("," ident)* ")"){ stmt* }
  * stmt    		= expr ";"
  * 						| "return" expr ";"
  * 						| "if" "(" expr ")" stmt ("else" stmt)?
@@ -19,33 +23,48 @@
  * mul        = unary ("*" unary | "/" unary)*
  * unary      = ("+" | "-")? primary
  * primary    = num | ident | funcCall | "(" expr ")"
- * funcCall 	= ident ("(" expr? | expr ("," expr)? ")")?
+ * funcCall 	= ident ("(" expr? | expr ("," expr)* ")")
  */
 
-// 文ごとの先頭ノードを格納
-Node_t *code[100];
-
+// program    = funcDefine*
 void program(void);
+// funcDefine = ident ("(" ident? | ident ("," ident)* ")"){ stmt* }
 Node_t* funcDefine();
+// stmt    		= expr ";"
+// 						| "return" expr ";"
+// 						| "if" "(" expr ")" stmt ("else" stmt)?
+// 						| "while" "(" expr ")" stmt
+// 						| "for" "(" expr? ";" expr? ";" expr? ")" stmt
+//  					| "{" stmt* "}"
 Node_t* stmt(void);
+// expr       = assign
 Node_t* expr(void);
-Vector_t* parmlist(void);
+// assign     = equality ("=" assign)?
 Node_t* assign(void);
+// equality   = relational ("==" relational | "!=" relational)*
 Node_t* equality(void);
+// relational = add ("<" add | "<=" add | ">" add | ">=" add)*
 Node_t* relational(void);
+// add        = mul ("+" mul | "-" mul)*
 Node_t* add(void);
+// mul        = unary ("*" unary | "/" unary)*
 Node_t* mul(void);
+// unary      = ("+" | "-")? primary
 Node_t* unary();
+// primary    = num | ident | funcCall | "(" expr ")"
 Node_t* primary();
+// funcCall 	= ident ("(" expr? | expr ("," expr)* ")")
 Node_t *funcCall(void);
+
+Vector_t* parmlist(void);
 
 /// @brief ノードを生成する
 /// @param kind ノードの種類
-/// @param expr1 左辺
-/// @param expr2 右辺
-/// @param expr3 右辺
-/// @param expr4 右辺
-/// @param expr5 右辺
+/// @param expr1 Node1
+/// @param expr2 Node2
+/// @param expr3 Node3
+/// @param expr4 Node4
+/// @param expr5 Node5
 /// @param vector ベクタ
 /// @return 生成したノード
 Node_t *new_node(NodeKind kind, Node_t *expr1, Node_t *expr2, Node_t *expr3, Node_t *expr4, Node_t *expr5, Vector_t *vector){
@@ -88,7 +107,6 @@ Vector_t* new_vector(Node_t *node, Vector_t *current){
 }
 
 /// @brief 新しいラベルを生成する
-/// @param node 
 /// @param tok 識別子を指すトークン
 /// @return 生成したラベル
 LVar_t* new_lvar(Token_t *tok){
@@ -112,17 +130,15 @@ Node_t* manage_lvar(NodeKind kind, Token_t *tok){
 	LVar_t *lvar = find_lvar(tok);
 	if(lvar){
 		// 既に識別子が存在する
-		// node->offset = lvar->offset;
 		node->lvar = lvar;
 	}else{
 		// 新しく識別子を定義する
 		lvar = new_lvar(tok);
-		// node->offset = lvar->offset;
 		node->lvar = lvar;
 	}
+	return node;
 }
 
-// program    = functionDefine*
 void program(void){
   DEBUG_WRITE("header node\n");
 	int i = 0;
@@ -132,7 +148,6 @@ void program(void){
 	code[i] = NULL;
 }
 
-// funcDefine = ident ("(" ")") "{" stmt* "}"
 Node_t* funcDefine(){
 	DEBUG_WRITE("\n");
 	Node_t *node;
@@ -173,14 +188,6 @@ Node_t* funcDefine(){
 	}
 }
 
-//  stmt    = expr ";"
-// 					| ident ("(" parmlist ")"){ stmt* }
-//  				| ident ("(" expr? | expr ("," expr)? ")")?
-// 					| "return" expr ";"
-// 					| "if" "(" expr ")" stmt ("else" stmt)?
-// 					| "while" "(" expr ")" stmt
-// 					| "for" "(" expr? ";" expr? ";" expr? ")" stmt
-//  				| "{" stmt* "}"
 Node_t* stmt(void){
   DEBUG_WRITE("\n");
 	Node_t *node;
@@ -270,13 +277,11 @@ Node_t* stmt(void){
 	return node;
 }
 
-// expr       = assign
 Node_t *expr(void) {
   DEBUG_WRITE("\n");
 	return assign();
 }
 
-// assign     = equality ("=" assign)?
 Node_t* assign(void){
   DEBUG_WRITE("\n");
 	Node_t *node = equality();
@@ -286,7 +291,6 @@ Node_t* assign(void){
 	return node;
 }
 
-// equality   = relational ("==" relational | "!=" relational)*
 Node_t* equality(void){
   DEBUG_WRITE("\n");
 	Node_t *node = relational();
@@ -310,7 +314,6 @@ Vector_t* parmlist(void){
 	return vector;
 }
 
-// relational = add ("<" add | "<=" add | ">" add | ">=" add)*
 Node_t* relational(void){
   DEBUG_WRITE("\n");
 	Node_t *node = add();
@@ -330,7 +333,6 @@ Node_t* relational(void){
 	}
 }
 
-// add        = mul ("+" mul | "-" mul)*
 Node_t* add(void) {
   DEBUG_WRITE("\n");
 	Node_t *node = mul();
@@ -346,7 +348,6 @@ Node_t* add(void) {
 	}
 }
 
-// mul        = unary ("*" unary | "/" unary)*
 Node_t *mul(void){
   DEBUG_WRITE("\n");
 	Node_t *node = unary();
@@ -362,7 +363,6 @@ Node_t *mul(void){
 	}
 }
 
-// unary      = ("+" | "-")? primary
 Node_t* unary(){
   DEBUG_WRITE("\n");
 	if(consume(TK_RESERVED, "+")){
@@ -374,7 +374,6 @@ Node_t* unary(){
 	return primary();
 }
 
-// primary    = num | ident | "(" expr ")"
 Node_t *primary() {
   DEBUG_WRITE("\n");
 	Token_t *tok = consume_ident();
@@ -416,10 +415,6 @@ Node_t *funcCall(void){
 				expect(TK_RESERVED, ")");
 			}
 			
-			// if(!consume(TK_RESERVED, "{")){
-			// 	// 関数呼び出し
-			// 	node->kind = ND_FUNCTION;
-			// } 
 			return node;
 		}else{
 			back_token(tok);

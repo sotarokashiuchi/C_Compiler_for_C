@@ -21,7 +21,7 @@ typedef struct Token {
 	int	len;				// トークンの長さ
 } Token_t;
 
-/// @brief ローカル変数の型
+/// @brief 識別子の型
 typedef struct LVar {
 	struct LVar* next;
 	char *name;
@@ -37,7 +37,7 @@ extern char *user_input;
 /// @brief Lvar_t構造体のリストの先頭
 extern LVar_t *identHead;
 
-
+/* プロトタイプ宣言 */
 /// @brief 入力文字列pをトークナイズする
 /// @param p トークナイズしたい文字列
 /// @return トークンリストの先頭アドレス

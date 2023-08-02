@@ -125,7 +125,7 @@ foo2(){
 assert "0" "0" "
 main(){
   x = 3;
-  func_param(x);
+  return func_param(x);
 }
 "
 
@@ -165,7 +165,7 @@ main(){
 }
 "
 
-assert "-g" "36" "
+assert "0" "36" "
 total(a, b, c, d, e, f, g, h){
   x = a+b+c+d+e+f+g+h;
   return x;
@@ -176,7 +176,7 @@ main(){
   return i;
 }
 "
-assert "-g" "34" "
+assert "0" "34" "
 fibonacci(n){
   if(n<=0){
     return 0;

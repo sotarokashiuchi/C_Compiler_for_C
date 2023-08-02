@@ -1,10 +1,12 @@
 #include "common.h"
 #include "codegen.h"
 
+/* グローバル変数 */
+/// 一意のラベル生成用変数:
 static int labelIndex = 0;
 
 /// @brief 左辺値の評価(アドレス計算)
-/// @param node 
+/// @param node 評価対象のノード
 void gen_lval(Node_t *node){
   if(node->kind != ND_LVAR){
     fprintf(stderr, "代入の左辺値が変数ではありません\n");
@@ -16,6 +18,9 @@ void gen_lval(Node_t *node){
   printf("  push rax\n");
 }
 
+/// @brief lvalの名前の文字列を取得
+/// @param node lvar名を求めたいノード
+/// @return 取得した文字列の先頭ポインタ(文字列の末尾には'\0'が格納されている)
 char* gen_lval_name(Node_t *node){
   int i;
   char *ident_name = calloc(node->lvar->len+1, sizeof(char));
@@ -111,7 +116,7 @@ void gen(Node_t *node) {
             printf("  mov [rax], r9\n");
             break;
           default:
-            // printf("  pop rdi\n");
+            // スタックから実引数を仮引数に移動
             printf("  mov rdi, [rbp+%d]\n", 16+(i-7)*8);
             printf("  mov [rax], rdi\n");
             break;
@@ -121,12 +126,7 @@ void gen(Node_t *node) {
         }
         vector = vector->next;
       }
-      printf("#deru\n");
     }
-
-    // // printf("  call %s\n", gen_lval_name(node));
-    // printf("  #戻り値をpush\n");
-    // printf("  push rax\n");
 
     gen(node->expr1);
     return;

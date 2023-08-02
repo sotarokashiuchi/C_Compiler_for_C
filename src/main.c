@@ -13,16 +13,20 @@ int main(int argc, char **argv){
     fprintf(stderr, "エラー:引数の個数が正しくありません\n");
     return 1;
   }
-	// 抽象構文木作成
+
+  /* 初期化 */
 	user_input = argv[1];
   LVar_t dummy = {NULL, NULL, 0, 0};
   identHead = &dummy;
-  // トークナイズ
+
+  /* トークナイズ */
 	token = tokenize(argv[1]);
-  // パーサ
+
+  /* パーサ */
 	program();
 
-	// 前半部分のコード生成
+  /* コード生成 */
+  // 前半部分のコード生成
   printf(".intel_syntax noprefix\n");
   printf(".globl main\n");
 
@@ -30,11 +34,6 @@ int main(int argc, char **argv){
     gen(code[i]);
   }
 
-  // エピローグ
-  // 最後の式の結果がRAXに残っているのでそれが返り値になる
-  printf("  mov rsp, rbp\n");
-  printf("  pop rbp\n");
-  printf("  ret\n");
   return 0;
 }
 

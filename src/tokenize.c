@@ -3,7 +3,9 @@
 #include "tokenize.h"
 
 /* グローバル変数定義 */
+// 現在のトークン
 Token_t *token;
+// lvarのリストの先頭ポインタ
 LVar_t *identHead = NULL;
 
 /// @brief 新しいトークンを作成し、リストにつなげる
