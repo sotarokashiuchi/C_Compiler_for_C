@@ -5,6 +5,8 @@
 /* グローバル変数定義 */
 // 現在のトークン
 Token_t *token;
+// 文字列位置
+char charPoint[PROGRAM_LINE];
 // lvarのリストの先頭ポインタ
 LVar_t *identHead = NULL;
 
@@ -19,26 +21,41 @@ static Token_t* new_token(TokenKind kind, Token_t *cur, char **str, int len);
 /// @brief エラー処理
 /// @param loc エラー発生文字
 /// @param fmt 出力フォーマット(標準入出力関数と同じ仕様)
-static void error_at(char *loc, char *fmt, ...);
+static void error_at(Token_t *loc, char *fmt, ...);
 
 /// @brief トークンを構成する文字か判断
 /// @param c 判断したい文字
 /// @return 1:トークンを構成する文字列, 0:トークンを構成しない文字列
 int is_alnum(char c);
 
-Token_t* tokenize(char *p){
-	int i;
+Token_t* tokenize(void){
+	char *p=NULL;
+	int count, line;
+	char *row;
 	// ダミーリスト(トークンリストの先頭)
 	Token_t head;
 	head.next = NULL;
 	// トークンリスト
 	Token_t *cur = &head;
 
-	for(i=0; *p; i++){
-		// 空白文字をスキップ
+	for(row = p = user_input, line=1; *p; ){
+		// 改行
+		if(*p == '\n'){
+			// '\n'も1文字と数える
+			charPoint[line] = (p-row) + 1;
+			p++;
+			row=p;
+			line++;
+			continue;
+		}
+		p++;
+	}
+
+	for(count=0, p=user_input; *p; count++){
+		// 制御文字、空白文字をスキップ
 		if(isspace(*p)){
 			p++;
-			i--;
+			count--;
 			continue;
 		}
 
@@ -100,12 +117,13 @@ Token_t* tokenize(char *p){
 			continue;
 		}
 		
-		error_at(cur->str, "トークナイズできません");
+		cur = new_token(TK_ERROR, cur, &p, 1);
+		error_at(cur, "トークナイズできません");
 	}
 
 	// トークンリストの末尾を作成
 	new_token(TK_EOF, cur, &p, 0);
-	DEBUG_WRITE("number of token is %d\n", i);
+	DEBUG_WRITE("number of token is %d\n", count);
 	return head.next;
 }
 
@@ -127,7 +145,7 @@ static Token_t* new_token(TokenKind kind, Token_t *cur, char **str, int len){
 
 int expect_number() {
 	if(token->kind != TK_NUM){
-		error_at(token->str, "数値ではありません");
+		error_at(token, "数値ではありません");
 	}
 	int val = token->val;
 	token = token->next;
@@ -156,7 +174,7 @@ bool consume(TokenKind kind, char *op){
 
 void expect(TokenKind kind, char *op) {
 	if(token->kind != kind || token->len != strlen(op) || memcmp(token->str, op, token->len)){
-		error_at(token->str, "'%s'ではありません", op);
+		error_at(token, "'%s'ではありません", op);
 	}
 	token = token->next;
 }
@@ -184,16 +202,30 @@ LVar_t* find_lvar(Token_t *tok){
 	return NULL;
 }
 
-static void error_at(char *loc, char *fmt, ...){
+static void error_at(Token_t *loc, char *fmt, ...){
 	// 可変長引数の処理
 	va_list ap;
 	va_start(ap, fmt);
-
-	// ポインタ演算(先頭からの文字数計算)
-	int pos = loc - user_input;
-	fprintf(stderr, "%s\n", user_input);
-	fprintf(stderr, "%*s", pos, " ");
-	fprintf(stderr, "^ ");
+	int row, line;
+	char *outputLine;
+	int errorPoint = loc->str - user_input + 1;
+	int charTotal;
+	
+	for(line=1, charTotal=0; line<PROGRAM_LINE; line++){
+		charTotal += charPoint[line];
+		if(errorPoint<=charTotal){
+			// 列計算
+			row = errorPoint - (charTotal - charPoint[line]);
+			// エラー行の末尾にヌル文字を追加
+			outputLine = user_input+charTotal-1;
+			*outputLine = '\0';
+			outputLine = user_input+charTotal-charPoint[line];
+			break;
+		}
+	}
+	fprintf(stderr, "%d:%d \n", line, row);
+	fprintf(stderr, "%8d |  %s\n", line, outputLine);
+	fprintf(stderr, "         |  \x1b[31m%*s-\x1b[0m", row, "^");
 	vfprintf(stderr, fmt, ap);
 	fprintf(stderr, "\n");
 	exit(1);

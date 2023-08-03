@@ -20,7 +20,10 @@ int main(int argc, char **argv){
   identHead = &dummy;
 
   /* トークナイズ */
-	token = tokenize(argv[1]);
+	token = tokenize();
+  for(int i=0; i<128; i++){
+    DEBUG_WRITE("charPoint[%d] = %d\n", i, charPoint[i]);
+  }
 
   /* パーサ */
 	program();

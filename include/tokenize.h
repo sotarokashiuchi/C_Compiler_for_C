@@ -3,6 +3,9 @@
 
 #include <string.h>
 
+// ソースコードの行数
+#define PROGRAM_LINE 128
+
 /// @brief トークンの種類
 typedef enum{
 	TK_RESERVED,		// 記号
@@ -10,6 +13,7 @@ typedef enum{
 	TK_KEYWORD,			// Keyword(予約語)
 	TK_NUM,					// 整数トークン
 	TK_EOF,					// 入力の終わりを表すトークン
+	TK_ERROR,				// エラートークン
 } TokenKind;
 
 /// @brief トークンの型
@@ -34,6 +38,8 @@ typedef struct LVar {
 extern Token_t *token;
 /// @brief 入力文字列
 extern char *user_input;
+// 文字列位置
+extern char charPoint [128];
 /// @brief Lvar_t構造体のリストの先頭
 extern LVar_t *identHead;
 
@@ -41,7 +47,7 @@ extern LVar_t *identHead;
 /// @brief 入力文字列pをトークナイズする
 /// @param p トークナイズしたい文字列
 /// @return トークンリストの先頭アドレス
-extern Token_t* tokenize(char *p);
+extern Token_t* tokenize(void);
 
 /// @brief 次のトークンが数値の場合、トークンを1つ読み進めてその数値を返す。
 ///				 それ以外の場合にはエラーを報告する。
