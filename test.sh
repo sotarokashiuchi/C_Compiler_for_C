@@ -151,4 +151,21 @@ main(){
 }
 "
 
+assert "-g" "5" "
+main(){
+  x=5;
+  y=&x;
+  return *y;
+}
+"
+
+assert "-g" "5" "
+main(){
+  x=5;
+  y=&x;
+  z=&y;
+  return **z;
+}
+"
+
 echo All finished

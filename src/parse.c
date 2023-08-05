@@ -21,7 +21,10 @@ Node_t *code[100];
  * relational = add ("<" add | "<=" add | ">" add | ">=" add)*
  * add        = mul ("+" mul | "-" mul)*
  * mul        = unary ("*" unary | "/" unary)*
- * unary      = ("+" | "-")? primary
+ * unary      = "+"? primary
+							| "-"? primary
+							| "*" unary
+							| "&" unary
  * primary    = num | ident | funcCall | "(" expr ")"
  * funcCall 	= ident ("(" expr? | expr ("," expr)* ")")
  */
@@ -49,7 +52,10 @@ Node_t* relational(void);
 Node_t* add(void);
 // mul        = unary ("*" unary | "/" unary)*
 Node_t* mul(void);
-// unary      = ("+" | "-")? primary
+// unary      = "+"? primary
+// 						| "-"? primary
+// 						| "*" unary
+// 						| "&" unary
 Node_t* unary();
 // primary    = num | ident | funcCall | "(" expr ")"
 Node_t* primary();
@@ -372,6 +378,12 @@ Node_t* unary(){
 	}
 	if(consume(TK_RESERVED, "-")){
 		return new_node(ND_SUB, new_node_num(0), primary(), NULL, NULL, NULL, NULL);
+	}
+	if(consume(TK_RESERVED, "&")){
+		return new_node(ND_ADDR, unary(), NULL, NULL, NULL, NULL, NULL);
+	}
+	if(consume(TK_RESERVED, "*")){
+		return new_node(ND_DEREF, unary(), NULL, NULL, NULL, NULL, NULL);
 	}
 	return primary();
 }
