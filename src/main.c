@@ -21,9 +21,6 @@ int main(int argc, char **argv){
 
   /* トークナイズ */
 	token = tokenize();
-  for(int i=0; i<128; i++){
-    DEBUG_WRITE("charPoint[%d] = %d\n", i, charPoint[i]);
-  }
 
   /* パーサ */
 	program();

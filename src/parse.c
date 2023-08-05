@@ -177,6 +177,8 @@ Node_t* funcDefine(){
 			}
 			expect(TK_RESERVED, "{");
 			vector = new_vector(stmt(), NULL);
+			// LVar_t dummy = {NULL, NULL, 0, 0};
+  		// identHead = &dummy;
 			node->expr1 = new_node(ND_BLOCK, NULL, NULL, NULL, NULL, NULL, vector);
 			while(!consume(TK_RESERVED, "}")){
 				vector = new_vector(stmt(), vector);

@@ -124,26 +124,30 @@ main(){
 }
 "
 
-assert "-g" "34" "
-
-fibonacci(n){
-  if(n<=0){
-    return 0;
-  }
-  if(n==1){
-    return 1;
-  } 
-  if(n>1) {
-    return fibonacci(n-1)+fibonacci(n-2);
-  }
+assert "-g" "1" "
+add(x, y){
+  x = x+y;
+  return x;
 }
 
 main(){
-  n = 10;
-  for(i=0; i<n; i=i+1){
-    x = fib#onacci(i);
-  }
+  x=1;
+  y=2;
+  z = add(x, y);
   return x;
+}
+"
+
+assert "-g" "0" "
+main(){
+  return print();
+}
+"
+
+assert "-g" "0" "
+main(){
+  
+  return print();
 }
 "
 

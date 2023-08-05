@@ -15,8 +15,8 @@ int func_param(int x){
   return 0;
 }
 
-int print(int x){
-  printf("%d ", x);
+int print(void){
+  printf("text %d \n", 2);
   return 0;
 }
 
