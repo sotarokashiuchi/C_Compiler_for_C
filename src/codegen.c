@@ -43,10 +43,11 @@ char* gen_lval_name(Node_t *node){
 
 /// @brief アライメントを正しくする
 /// @param byte 揃えたいアライメントの境界を指定
-void setAlignment(int byte){
+int setAlignment(int byte){
   int displacement = alignmentCount%byte;
   printf("#alignmentCount = %d\n", alignmentCount);
   genPrint(displacement, "  sub rsp, %d\n", displacement);
+  return displacement;
 }
 
 void gen(Node_t *node) {
@@ -93,9 +94,9 @@ void gen(Node_t *node) {
         }
       }
     }
-    genPrint(8, "push rax\n");
-    setAlignment(16);
+    int displacement = setAlignment(16);
     genPrint(0, "  call %s\n", gen_lval_name(node));
+    genPrint(-displacement, "  add rsp, %d\n", displacement);
     for(int i=7; i<=numOfArgu; i++){
       genPrint(-8, "  pop rdi\n");
     }
