@@ -30,6 +30,21 @@ typedef enum{
   ND_NUM, 				// 整数
 } NodeKind;
 
+typedef enum {
+  INT,
+  PTR,
+} DataType;
+
+/// @brief 識別子の型
+typedef struct LVar {
+	struct LVar* next;
+	struct Types_tag *typePtr;
+	char *name;
+	int len;
+	int offset;
+} LVar_t;
+
+
 typedef struct Node_tag Node_t;
 typedef struct Vector_tag Vector_t;
 
@@ -53,12 +68,24 @@ struct Node_tag {
   LVar_t *lvar;   // ラベル用
 };
 
+typedef struct Types_tag {
+  DataType type;
+  struct Types_tag *next;
+} Types_t;
+
+
 /* グローバル変数 */
 /// @brief 関数のノードの配列
 extern Node_t *code[100];
+/// @brief Lvar_t構造体のリストの先頭
+extern LVar_t *identHead;
 
 /* 関数プロトタイプ宣言 */
 /// @brief パースプログラム
 void program(void);
+/// @brief 変数名を検索する
+/// @param tok 検索したい変数の情報が格納されたLVar_t
+/// @return 一致したLVar_tを返す, 一致しなければNULLを返す
+LVar_t* find_lvar(Token_t *tok);
 
 #endif

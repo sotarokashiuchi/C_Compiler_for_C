@@ -127,7 +127,7 @@ main(){
 }
 "
 
-assert "-g" "5" "
+assert "0" "5" "
 int main(){
   int x;
   x=5;
@@ -137,7 +137,7 @@ int main(){
 }
 "
 
-assert "-g" "5" "
+assert "0" "5" "
 int main(){
   int x;
   int y;
@@ -149,7 +149,7 @@ int main(){
 }
 "
 
-assert "-g" "5" "
+assert "0" "5" "
 int inc(x){
   x=x+1;
   return x;
@@ -161,7 +161,7 @@ int main(){
 }
 "
 
-assert "-g" "5" "
+assert "0" "5" "
 int inc(int x){
   x=x+1;
   return x;

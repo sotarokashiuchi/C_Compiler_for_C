@@ -4,6 +4,9 @@
 /* グローバル変数 */
 // 文ごとの先頭ノードを格納
 Node_t *code[100];
+// lvarのリストの先頭ポインタ
+LVar_t *identHead = NULL;
+
 
 /* 関数プロトタイプ宣言 */
 /* EBNF
@@ -67,6 +70,17 @@ Node_t *funcCall(void);
 void typeSpec(void);
 
 Vector_t* parmlist(void);
+
+
+LVar_t* find_lvar(Token_t *tok){
+	for(LVar_t *var = identHead; var; var = var->next){
+		if(var->len == tok->len && !memcmp(tok->str, var->name, var->len)){
+			return var;
+		}
+	}
+	return NULL;
+}
+
 
 /// @brief ノードを生成する
 /// @param kind ノードの種類
