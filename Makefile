@@ -1,4 +1,4 @@
-COPTION=-std=c11 -g -I ./include -static
+COPTION=--pedantic -std=c11 -g -I ./include -static
 INCLUDEOBJ=./include/common.h ./include/tokenize.h ./include/parse.h ./include/codegen.h
 
 9cc: main.o tokenize.o parse.o codegen.o

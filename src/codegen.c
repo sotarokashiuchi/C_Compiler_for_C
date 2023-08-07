@@ -68,7 +68,7 @@ void gen(Node_t *node) {
   // 再帰的に読み込んでも値を保持できる
   int lavelIndexLocal = labelIndex++;
   switch (node->kind){
-  case ND_FUNCCALL:
+  case ND_FUNCCALL:{
     int numOfArgu = 0;
     if(node->vector != NULL){
       // 引数がある場合
@@ -117,7 +117,8 @@ void gen(Node_t *node) {
     asmPrint("  #戻り値をpush\n");
     pushPrint("  push rax\n");
     return;
-  case ND_FUNCDEFINE:
+  }
+  case ND_FUNCDEFINE:{
     alignmentCount = 8;
     asmPrint("%s:\n", gen_lval_name(node));
     asmPrint("  #プロローグ\n");
@@ -166,7 +167,8 @@ void gen(Node_t *node) {
 
     gen(node->expr1);
     return;
-  case ND_BLOCK:
+  }
+  case ND_BLOCK:{
     Vector_t *vector = node->vector;
     for( ; ; ){
       gen(vector->node);
@@ -177,7 +179,8 @@ void gen(Node_t *node) {
       vector = vector->next;
     }
     return;
-  case ND_ELSE:
+  }
+  case ND_ELSE:{
     gen(node->expr1->expr1);
     popPrint("  pop rax\n");
     asmPrint("  cmp rax, 0\n");
@@ -189,7 +192,8 @@ void gen(Node_t *node) {
     gen(node->expr2);
     asmPrint(".ifelseend_%03d:\n", lavelIndexLocal);
     return;
-  case ND_IF:
+  }
+  case ND_IF:{
     gen(node->expr1);
     popPrint("  pop rax\n");
     asmPrint("  cmp rax, 0\n");
@@ -198,7 +202,8 @@ void gen(Node_t *node) {
 
     asmPrint(".ifend_%03d:\n", lavelIndexLocal);
     return;
-  case ND_WHILE:
+  }
+  case ND_WHILE:{
     asmPrint(".while_%03d:\n", lavelIndexLocal);
     gen(node->expr1);
     popPrint("  pop rax\n");
@@ -209,7 +214,8 @@ void gen(Node_t *node) {
 
     asmPrint(".whileend_%03d:\n", lavelIndexLocal);
     return;
-  case ND_FOR:
+  }
+  case ND_FOR:{
     if(node->expr1 != NULL){
       gen(node->expr1);
     }
@@ -229,7 +235,8 @@ void gen(Node_t *node) {
 
     asmPrint(".forend_%03d:\n", lavelIndexLocal);
     return;
-  case ND_RETURN:
+  }
+  case ND_RETURN:{
     // returnは右方方向の木構造しかない
     gen(node->expr2);
     popPrint("  pop rax\n");
@@ -238,27 +245,32 @@ void gen(Node_t *node) {
     popPrint("  pop rbp\n");
     asmPrint("  ret\n");
     return;
-  case ND_NUM:
+  }
+  case ND_NUM:{
     pushPrint("  push %d\n", node->val);
     return;
-  case ND_LVAR:
+  }
+  case ND_LVAR:{
     gen_lval(node);
     popPrint("  pop rax\n");
     asmPrint("  mov rax, [rax]\n");
     pushPrint("  push rax\n");
     return;
-  case ND_ADDR:
+  }
+  case ND_ADDR:{
     asmPrint("  #ND_ADDR\n");
     gen_lval(node->expr1);
     return;
-  case ND_DEREF:
+  }
+  case ND_DEREF:{
     asmPrint("  #ND_DEREF\n");
     gen(node->expr1);
     popPrint("  pop rax\n");
     asmPrint("  mov rax, [rax]\n");
     asmPrint("  push rax\n");
     return;
-  case ND_ASSIGN:
+  }
+  case ND_ASSIGN:{
     // 左辺の評価
     gen_lval(node->expr1);
     // 右辺の評価
@@ -271,6 +283,7 @@ void gen(Node_t *node) {
     pushPrint("  push rdi\n");
     return;
   }
+  }
 
   gen(node->expr1);
   gen(node->expr2);
@@ -279,39 +292,47 @@ void gen(Node_t *node) {
   popPrint("  pop rax\n");
 
   switch (node->kind) {
-  case ND_ADD:
+  case ND_ADD:{
     asmPrint("  add rax, rdi\n");
     break;
-  case ND_SUB:
+  }
+  case ND_SUB:{
     asmPrint("  sub rax, rdi\n");
     break;
-  case ND_MUL:
+  }
+  case ND_MUL:{
     asmPrint("  imul rax, rdi\n");
     break;
-  case ND_DIV:
+  }
+  case ND_DIV:{
     asmPrint("  cqo\n");
     asmPrint("  idiv rdi\n");
     break;
-  case ND_EQUALTO:
+  }
+  case ND_EQUALTO:{
     asmPrint("  cmp rax, rdi\n");
     asmPrint("  sete al\n");
     asmPrint("  movzb rax, al\n");
     break;
-  case ND_NOT_EQUAL_TO:
+  }
+  case ND_NOT_EQUAL_TO:{
     asmPrint("  cmp rax, rdi\n");
     asmPrint("  setne al\n");
     asmPrint("  movzb rax, al\n");
     break;
-  case ND_LESS_THAN:
+  }
+  case ND_LESS_THAN:{
     asmPrint("  cmp rax, rdi\n");
     asmPrint("  setl al\n");
     asmPrint("  movzb rax, al\n");
     break;
-  case ND_LESS_THAN_OR_EQUALT_TO:
+  }
+  case ND_LESS_THAN_OR_EQUALT_TO:{
     asmPrint("  cmp rax, rdi\n");
     asmPrint("  setle al\n");
     asmPrint("  movzb rax, al\n");
     break;
+  }
   }
 
   pushPrint("  push rax\n");
