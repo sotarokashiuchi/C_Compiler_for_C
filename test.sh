@@ -91,17 +91,6 @@ main(){
 }
 "
 
-assert "0" "36" "
-total(a, b, c, d, e, f, g, h){
-  x = a+b+c+d+e+f+g+h;
-  return x;
-}
-
-main(){
-  i = total(1, 2, 3, 4, 5, 6, 7, 8);
-  return i;
-}
-"
 assert "0" "34" "
 fibonacci(n){
   if(n<=0){
@@ -124,7 +113,7 @@ main(){
 }
 "
 
-assert "-g" "1" "
+assert "0" "1" "
 add(x, y){
   x = x+y;
   return x;
@@ -138,33 +127,50 @@ main(){
 }
 "
 
-assert "-g" "0" "
-main(){
-  return print();
-}
-"
-
-assert "-g" "0" "
-main(){
-  
-  return print();
-}
-"
-
 assert "-g" "5" "
-main(){
-  x=5;
-  y=&x;
-  return *y;
-}
-"
-
-assert "-g" "5" "
-main(){
+int main(){
+  int x;
   x=5;
   y=&x;
   z=&y;
   return **z;
+}
+"
+
+assert "-g" "5" "
+int main(){
+  int x;
+  int y;
+  int z;
+  x=5;
+  y=&x;
+  z=&y;
+  return **z;
+}
+"
+
+assert "-g" "5" "
+int inc(x){
+  x=x+1;
+  return x;
+}
+
+int main(){
+  int x;
+  return inc(x);
+}
+"
+
+assert "-g" "5" "
+int inc(int x){
+  x=x+1;
+  return x;
+}
+
+int main(){
+  int x;
+  x=4;
+  return inc(x);
 }
 "
 

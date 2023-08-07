@@ -15,6 +15,7 @@ Node_t *code[100];
  * 						| "while" "(" expr ")" stmt
  * 						| "for" "(" expr? ";" expr? ";" expr? ")" stmt
  *  					| "{" stmt* "}"
+ * 						| typeSpec ident ";"
  * expr       = assign
  * assign     = equality ("=" assign)?
  * equality   = relational ("==" relational | "!=" relational)*
@@ -27,6 +28,7 @@ Node_t *code[100];
 							| "&" unary
  * primary    = num | ident | funcCall | "(" expr ")"
  * funcCall 	= ident ("(" expr? | expr ("," expr)* ")")
+ * typeSpec		= int
  */
 
 // program    = funcDefine*
@@ -61,6 +63,8 @@ Node_t* unary();
 Node_t* primary();
 // funcCall 	= ident ("(" expr? | expr ("," expr)* ")")
 Node_t *funcCall(void);
+
+void typeSpec(void);
 
 Vector_t* parmlist(void);
 
@@ -160,6 +164,9 @@ Node_t* funcDefine(){
 	Token_t *tok;
 	Vector_t *vector;
 	int i = 0;
+	
+	// 戻り値の型
+	typeSpec();
 
   if((tok = consume_ident()) != NULL){
 		if(consume(TK_RESERVED, "(")){
@@ -168,12 +175,14 @@ Node_t* funcDefine(){
 			if(!consume(TK_RESERVED, ")")){
 				// 引数がある場合 未実装
 				// 一つ目の仮引数
+				typeSpec();
 				tok = consume_ident();
 				vector = new_vector(manage_lvar(ND_LVAR, tok), NULL);
 				node->vector = vector;
 
 				while(consume(TK_RESERVED, ",")){
 					// 二つ目以降の仮引数
+					typeSpec();
 					tok = consume_ident();
 					if(tok != NULL){
 						vector = new_vector(manage_lvar(ND_LVAR, tok), vector);
@@ -201,6 +210,18 @@ Node_t* stmt(void){
 	Node_t *node;
 	Node_t *expr1, *expr2, *expr3, *expr4;
 	Token_t *tok;
+
+	// 変数宣言
+	if(consume(TK_KEYWORD, "int")){
+  	if((tok = consume_ident()) != NULL){
+			node = manage_lvar(ND_LVAR, tok); 
+			expect(TK_RESERVED, ";");
+			return node;
+		}else{
+			fprintf(stderr, "パーサできません\n");
+			exit(1);
+		}
+	}
 	
 	if (consume(TK_KEYWORD, "return")) {
 		// "return" expr ";"
@@ -398,7 +419,17 @@ Node_t *primary() {
 			return funcCall();
 		}else{
 			// 変数
-			return manage_lvar(ND_LVAR, tok);
+			// return manage_lvar(ND_LVAR, tok);
+			Node_t *node = new_node(ND_LVAR, NULL, NULL, NULL, NULL, NULL, NULL);
+			LVar_t *lvar = find_lvar(tok);
+			if(lvar){
+				// 既に識別子が存在する
+				node->lvar = lvar;
+				return node;
+			}else{
+				fprintf(stderr, "宣言されていない変数です\n");
+				exit(1);
+			}
 		}
 	}
 	
@@ -412,6 +443,15 @@ Node_t *primary() {
   // そうでなければ数値のはず
   DEBUG_WRITE("this is number.\n");
   return new_node_num(expect_number());
+}
+
+void typeSpec(void){
+	if(consume(TK_KEYWORD, "int")){
+		return;
+	}else{
+		fprintf(stderr, "データ型がありません。\n");
+		exit(1);
+	}
 }
 
 Node_t *funcCall(void){
