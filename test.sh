@@ -37,11 +37,11 @@ assert() {
 }
 
 debug_assert() {
-  sub_assert "$1" "$2"
+  sub_assert "-g" "$1" "$2"
 }
 
 # assert 理想の実行結果 入力データ
-debug_assert "1" "
+assert "1" "
 int add(int x, int y){
   int x;
   int y;
@@ -60,41 +60,7 @@ int main(){
 }
 "
 
-debug_assert "5" "
-int main(){
-  int x;
-  x=5;
-  y=&x;
-  z=&y;
-  return **z;
-}
-"
-
 assert "5" "
-int main(){
-  int x;
-  int y;
-  int z;
-  x=5;
-  y=&x;
-  z=&y;
-  return **z;
-}
-"
-
-assert "5" "
-int inc(x){
-  x=x+1;
-  return x;
-}
-
-int main(){
-  int x;
-  return inc(x);
-}
-"
-
-debug_assert "5" "
 int inc(int x){
   x=x+1;
   return x;
@@ -107,4 +73,32 @@ int main(){
 }
 "
 
+# debug_assert "5" "
+# int main(){
+#   int x;
+#   int *y;
+#   return x;
+# }
+# "
+debug_assert "5" "
+int main(){
+  int x;
+  int *y;
+  int z;
+  y = &x;
+  *y = 5;
+  z = *y;
+  return z;
+}
+"
+
+debug_assert "5" "
+int main(){
+  int x;
+  int *y;
+  y = &x;
+  *y = 5;
+  return x;
+}
+"
 echo All finished

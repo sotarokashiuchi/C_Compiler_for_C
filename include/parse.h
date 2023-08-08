@@ -31,8 +31,9 @@ typedef enum{
 } NodeKind;
 
 typedef enum {
-  INT,
-  PTR,
+  DT_INT,
+  DT_PTR,
+  DT_FUNC,
 } DataType;
 
 /// @brief 識別子の型
@@ -58,6 +59,7 @@ struct Vector_tag {
 /// @brief 抽象構文木のノードの型
 struct Node_tag {
 	NodeKind kind;	// ノードの型
+  // Token_t *; // token
 	Node_t *expr1;	// Node1
 	Node_t *expr2;  // Node2
   Node_t *expr3;  // Node3
@@ -69,8 +71,8 @@ struct Node_tag {
 };
 
 typedef struct Types_tag {
-  DataType type;
-  struct Types_tag *next;
+  DataType dataType;
+  struct Types_tag *inner;
 } Types_t;
 
 

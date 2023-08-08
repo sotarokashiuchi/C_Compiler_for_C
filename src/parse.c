@@ -19,6 +19,7 @@ Identifier_t *identHead = NULL;
  * 						| "for" "(" expr? ";" expr? ";" expr? ")" stmt
  *  					| "{" stmt* "}"
  * 						| typeSpec ident ";"
+ * typeSpec		= "int" "*"*
  * expr       = assign
  * assign     = equality ("=" assign)?
  * equality   = relational ("==" relational | "!=" relational)*
@@ -31,7 +32,6 @@ Identifier_t *identHead = NULL;
 							| "&" unary
  * primary    = num | ident | funcCall | "(" expr ")"
  * funcCall 	= ident ("(" expr? | expr ("," expr)* ")")
- * typeSpec		= int
  */
 
 // program    = funcDefine*
@@ -67,7 +67,7 @@ Node_t* primary();
 // funcCall 	= ident ("(" expr? | expr ("," expr)* ")")
 Node_t *funcCall(void);
 
-void typeSpec(void);
+Types_t* typeSpec(void);
 
 Vector_t* parmlist(void);
 
@@ -148,7 +148,7 @@ Vector_t* new_vector(Node_t *node, Vector_t *current){
 /// @brief 新しいローカル変数を生成する
 /// @param tok 識別子を指すトークン
 /// @param type
-/// @return 生成したラベル
+/// @return 生成した識別子
 Node_t* new_identifier(NodeKind kind, Token_t *tok, Types_t *type){
 	// 新しく変数を定義する	
 	Node_t *node = new_node(kind, NULL, NULL, NULL, NULL, NULL, NULL);
@@ -182,6 +182,7 @@ Node_t* funcDefine(){
 	Node_t *node;
 	Token_t *tok;
 	Vector_t *vector;
+	Types_t *type;
 	int i = 0;
 	
 	// 戻り値の型
@@ -467,13 +468,24 @@ Node_t *primary() {
   return new_node_num(expect_number());
 }
 
-void typeSpec(void){
+Types_t* new_type(DataType dataType, Types_t* inner){
+	Types_t* type = calloc(1, sizeof(Types_t));
+	type->dataType = dataType;
+	type->inner = inner;
+	return type;
+}
+
+Types_t* typeSpec(void){
+	Types_t *type;
 	if(consume(TK_KEYWORD, "int")){
-		return;
-	}else{
-		fprintf(stderr, "データ型がありません。\n");
-		exit(1);
+		type = new_type(DT_INT, NULL);
+	} else {
+		todoError("データ型がありません\n");
 	}
+	while(consume(TK_RESERVED, "*")){
+		type = new_type(DT_PTR, type);
+	}
+	return type;
 }
 
 Node_t *funcCall(void){

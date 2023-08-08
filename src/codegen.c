@@ -30,14 +30,16 @@ void asmPrint(char *fmt, ...){
 /// @brief 左辺値の評価(アドレス計算)
 /// @param node 評価対象のノード
 void gen_lval(Node_t *node){
-  if(node->kind != ND_LVAR){
+  if(node->kind == ND_LVAR){
+    asmPrint("  mov rax, rbp\n");
+    asmPrint("  sub rax, %d\n", node->identifier->offset);
+    pushPrint("  push rax\n");
+  } else if(node->kind == ND_DEREF){
+    gen(node->expr1);
+  } else if(node->kind != ND_LVAR){
     fprintf(stderr, "代入の左辺値が変数ではありません\n");
     return;
   }
-
-  asmPrint("  mov rax, rbp\n");
-  asmPrint("  sub rax, %d\n", node->lvar->offset);
-  pushPrint("  push rax\n");
 }
 
 /// @brief lvalの名前の文字列を取得
@@ -45,9 +47,9 @@ void gen_lval(Node_t *node){
 /// @return 取得した文字列の先頭ポインタ(文字列の末尾には'\0'が格納されている)
 char* gen_lval_name(Node_t *node){
   int i;
-  char *ident_name = calloc(node->lvar->len+1, sizeof(char));
-  for(i=0; i < node->lvar->len; i++){
-    ident_name[i] = node->lvar->name[i];
+  char *ident_name = calloc(node->identifier->len+1, sizeof(char));
+  for(i=0; i < node->identifier->len; i++){
+    ident_name[i] = node->identifier->name[i];
   }
   ident_name[i] = '\0';
   return ident_name;
