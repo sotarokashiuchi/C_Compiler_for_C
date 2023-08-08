@@ -5,6 +5,7 @@
 
 /* グローバル変数定義 */
 char *user_input;
+int debugEnabled;
 
 int main(int argc, char **argv){
   DEBUG_WRITE("\n");
@@ -15,6 +16,8 @@ int main(int argc, char **argv){
   }
 
   /* 初期化 */
+  char *debug = getenv("CC_DEBUG");
+  debugEnabled = debug && !strcmp(debug, "1");
 	user_input = argv[1];
   LVar_t dummy = {NULL, NULL, 0, 0};
   identHead = &dummy;
@@ -38,6 +41,9 @@ int main(int argc, char **argv){
 }
 
 void debug_write(char *fmt, ...){
+  if(!debugEnabled){
+    return;
+  }
   va_list ap;
   va_start(ap, fmt);
   vfprintf(stderr, fmt, ap);

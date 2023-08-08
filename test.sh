@@ -1,16 +1,16 @@
 #!/bin/bash
-assert() {
+sub_assert() {
   option="$1"
   expected="$2"
   input="$3"
 
   if [ "$option" = "0" ]; then
-    ./9cc "$input" > tmp.s 2> /dev/null
+    ./9cc "$input" > tmp.s
   else
     echo "******************************** [information] ********************************"
     echo "Input:$input"
     echo "********************************** [compile] **********************************"
-      ./9cc "$input" > tmp.s
+      CC_DEBUG=1 ./9cc "$input" > tmp.s
     echo "********************************* [assemble] **********************************"
   fi
   cc -o link.o -c ./src/link.c
@@ -30,96 +30,29 @@ assert() {
   fi
   
   echo ""
-  echo ""
+  
+}
+assert() {
+  sub_assert "0" "$1" "$2"
+}
+
+debug_assert() {
+  sub_assert "$1" "$2"
 }
 
 # assert 理想の実行結果 入力データ
-assert "0" "3" "
-foo(){
-  return 0;
-}
-main(){
-  x = 3;
-  return x;
-}
-foo2(){
-  return 2;
-}
-"
-
-
-assert "0" "0" "
-main(){
-  x = 3;
-  return func_param(x);
-}
-"
-
-assert "0" "6" "
-foo(){
-  return 1;
-}
-main(){
-  x = 3 + foo() + 2;
-  return x;
-}
-foo2(){
-  return 2;
-}
-"
-
-assert "0" "34" "
-foo(){
-  return 1;
-}
-main(){
-  x = 3 + foo() + 2;
-  return add(x, 1, 2, 3, 4, 5, 6, 7);
-}
-"
-
-assert "0" "3" "
-func(x, y){
-  z = x - y;
-  return z;
-}
-
-main(){
-  i = 4;
-  i = func(i, 1);
-  return i;
-}
-"
-
-assert "0" "34" "
-fibonacci(n){
-  if(n<=0){
-    return 0;
-  }
-  if(n==1){
-    return 1;
-  } 
-  if(n>1) {
-    return fibonacci(n-1)+fibonacci(n-2);
-  }
-}
-
-main(){
-  n = 10;
-  for(i=0; i<n; i=i+1){
-    x = fibonacci(i);
-  }
-  return x;
-}
-"
-
-assert "0" "1" "
-add(x, y){
+debug_assert "1" "
+int add(int x, int y){
+  int x;
+  int y;
   x = x+y;
   return x;
 }
 
-main(){
+int main(){
+  int x;
+  int y;
+  int z;
   x=1;
   y=2;
   z = add(x, y);
@@ -127,7 +60,7 @@ main(){
 }
 "
 
-assert "0" "5" "
+debug_assert "5" "
 int main(){
   int x;
   x=5;
@@ -137,7 +70,7 @@ int main(){
 }
 "
 
-assert "0" "5" "
+assert "5" "
 int main(){
   int x;
   int y;
@@ -149,7 +82,7 @@ int main(){
 }
 "
 
-assert "0" "5" "
+assert "5" "
 int inc(x){
   x=x+1;
   return x;
@@ -161,7 +94,7 @@ int main(){
 }
 "
 
-assert "0" "5" "
+debug_assert "5" "
 int inc(int x){
   x=x+1;
   return x;

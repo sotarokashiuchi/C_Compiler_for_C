@@ -19,4 +19,6 @@
 /// @param fmt printf()と同様に使用できる
 void debug_write(char *fmt, ...);
 
+extern int debugEnabled;
+
 #endif
