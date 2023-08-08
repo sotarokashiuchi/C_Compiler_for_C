@@ -81,6 +81,21 @@ Identifier_t* find_lvar(Token_t *tok){
 	return NULL;
 }
 
+void parseError(char *fmt, ...){
+	va_list ap;
+	va_start(ap, fmt);
+	fprintf(stderr, "\x1b[31mParse Error:\x1b[0m");
+	vfprintf(stderr, fmt, ap);
+	exit(1);
+}
+
+void todoError(char *fmt, ...){
+	va_list ap;
+	va_start(ap, fmt);
+	fprintf(stderr, "Todo Error:");
+	vfprintf(stderr, fmt, ap);
+	exit(1);
+}
 
 /// @brief ノードを生成する
 /// @param kind ノードの種類
