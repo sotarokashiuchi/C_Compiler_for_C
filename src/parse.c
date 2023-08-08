@@ -5,7 +5,7 @@
 // 文ごとの先頭ノードを格納
 Node_t *code[100];
 // lvarのリストの先頭ポインタ
-LVar_t *identHead = NULL;
+Identifier_t *identHead = NULL;
 
 
 /* 関数プロトタイプ宣言 */
@@ -72,8 +72,8 @@ void typeSpec(void);
 Vector_t* parmlist(void);
 
 
-LVar_t* find_lvar(Token_t *tok){
-	for(LVar_t *var = identHead; var; var = var->next){
+Identifier_t* find_lvar(Token_t *tok){
+	for(Identifier_t *var = identHead; var; var = var->next){
 		if(var->len == tok->len && !memcmp(tok->str, var->name, var->len)){
 			return var;
 		}
@@ -130,36 +130,26 @@ Vector_t* new_vector(Node_t *node, Vector_t *current){
 	return vector;
 }
 
-/// @brief 新しいラベルを生成する
+/// @brief 新しいローカル変数を生成する
 /// @param tok 識別子を指すトークン
+/// @param type
 /// @return 生成したラベル
-LVar_t* new_lvar(Token_t *tok){
+Node_t* new_identifier(NodeKind kind, Token_t *tok, Types_t *type){
 	// 新しく変数を定義する	
-	LVar_t *lvar = calloc(1, sizeof(LVar_t));
-	lvar->next = identHead;
-	lvar->name = tok->str;
-	lvar->len = tok->len;
-	lvar->offset = identHead->offset + 8;
-	identHead = lvar;
-	return lvar;
-}
-
-/// @brief 識別子の管理を行う(新しい識別子の定義、識別子ごとのメモリの確保)
-/// @param kind ノードの種類
-/// @param tok 識別子を指すトークン
-/// @return 設定完了後のノード
-Node_t* manage_lvar(NodeKind kind, Token_t *tok){
-	DEBUG_WRITE("this is ident.\n");
 	Node_t *node = new_node(kind, NULL, NULL, NULL, NULL, NULL, NULL);
-	LVar_t *lvar = find_lvar(tok);
-	if(lvar){
-		// 既に識別子が存在する
-		node->lvar = lvar;
-	}else{
-		// 新しく識別子を定義する
-		lvar = new_lvar(tok);
-		node->lvar = lvar;
+	Identifier_t *identifier = calloc(1, sizeof(Identifier_t));
+	identifier->next = identHead;
+	identifier->name = tok->str;
+	identifier->len = tok->len;
+	identifier->type = type;
+	if(kind==ND_LVAR){
+		identifier->offset = identHead->offset + 8;
 	}
+	if(kind==ND_FUNCDEFINE || kind==ND_FUNCDEFINE){
+		identifier->offset = 0;
+	}
+	identHead = identifier;
+	node->identifier = identifier;
 	return node;
 }
 
@@ -184,14 +174,14 @@ Node_t* funcDefine(){
 
   if((tok = consume_ident()) != NULL){
 		if(consume(TK_RESERVED, "(")){
-			node = manage_lvar(ND_FUNCDEFINE, tok);
+			node = new_identifier(ND_FUNCDEFINE, tok, NULL);
 
 			if(!consume(TK_RESERVED, ")")){
 				// 引数がある場合 未実装
 				// 一つ目の仮引数
-				typeSpec();
+				type = typeSpec();
 				tok = consume_ident();
-				vector = new_vector(manage_lvar(ND_LVAR, tok), NULL);
+				vector = new_vector(new_identifier(ND_LVAR, tok, type), NULL);
 				node->vector = vector;
 
 				while(consume(TK_RESERVED, ",")){
@@ -199,14 +189,14 @@ Node_t* funcDefine(){
 					typeSpec();
 					tok = consume_ident();
 					if(tok != NULL){
-						vector = new_vector(manage_lvar(ND_LVAR, tok), vector);
+						vector = new_vector(new_identifier(ND_LVAR, tok, type), vector);
 					}
 				}
 				expect(TK_RESERVED, ")");
 			}
 			expect(TK_RESERVED, "{");
 			vector = new_vector(stmt(), NULL);
-			// LVar_t dummy = {NULL, NULL, 0, 0};
+			// Identifier_t dummy = {NULL, NULL, 0, 0};
   		// identHead = &dummy;
 			node->expr1 = new_node(ND_BLOCK, NULL, NULL, NULL, NULL, NULL, vector);
 			while(!consume(TK_RESERVED, "}")){
@@ -224,11 +214,14 @@ Node_t* stmt(void){
 	Node_t *node;
 	Node_t *expr1, *expr2, *expr3, *expr4;
 	Token_t *tok;
+	Types_t *type;
 
 	// 変数宣言
-	if(consume(TK_KEYWORD, "int")){
+	if(peek(TK_KEYWORD, "int")){
+		type = typeSpec();
   	if((tok = consume_ident()) != NULL){
-			node = manage_lvar(ND_LVAR, tok); 
+			// node = (ND_LVAR, tok); 
+			node = new_identifier(ND_LVAR, tok, type);
 			expect(TK_RESERVED, ";");
 			return node;
 		}else{
@@ -435,10 +428,10 @@ Node_t *primary() {
 			// 変数
 			// return manage_lvar(ND_LVAR, tok);
 			Node_t *node = new_node(ND_LVAR, NULL, NULL, NULL, NULL, NULL, NULL);
-			LVar_t *lvar = find_lvar(tok);
-			if(lvar){
+			Identifier_t *identifier = find_lvar(tok);
+			if(identifier){
 				// 既に識別子が存在する
-				node->lvar = lvar;
+				node->identifier = identifier;
 				return node;
 			}else{
 				fprintf(stderr, "宣言されていない変数です\n");
@@ -476,7 +469,7 @@ Node_t *funcCall(void){
   if((tok = consume_ident()) != NULL){
 		Vector_t *vector;
 		if(consume(TK_RESERVED, "(")){
-			node = manage_lvar(ND_FUNCCALL, tok);
+			node = new_identifier(ND_FUNCCALL, tok, NULL);
 
 			if(!consume(TK_RESERVED, ")")){
 				node->vector = parmlist();
