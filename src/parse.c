@@ -115,6 +115,32 @@ Node_t *new_node(NodeKind kind, Node_t *expr1, Node_t *expr2, Node_t *expr3, Nod
 	node->expr4 = expr4;
 	node->expr5 = expr5;
 	node->vector = vector;
+	if(kind == ND_ADD || kind == ND_SUB || kind == ND_MUL || kind == ND_DIV ){
+		// if(expr1->identifier->type)
+	}
+	// ND_ADD, 				// +
+  // ND_SUB, 				// -
+  // ND_MUL, 				// *
+  // ND_DIV, 				// /
+  // ND_ASSIGN,      // =
+  // ND_LVAR,        // ローカル変数
+  // ND_EQUALTO,     // ==
+  // ND_NOT_EQUAL_TO,// !=
+  // ND_GREATER_THAN,// >
+  // ND_LESS_THAN,   // <
+  // ND_GREATER_THAN_OR_EQUAL_TO,  // >=
+  // ND_LESS_THAN_OR_EQUALT_TO,    // <=
+  // ND_RETURN,      // return
+  // ND_IF,          // if
+  // ND_ELSE,        // else
+  // ND_WHILE,       // while
+  // ND_FOR,         // for
+  // ND_BLOCK,       // block
+  // ND_FUNCCALL,    // funcCall
+  // ND_FUNCDEFINE,  // funcDefine
+  // ND_ADDR,        // アドレス演算子
+  // ND_DEREF,       // 関節演算子
+  // ND_NUM, 				// 整数
 	return node;
 }
 
@@ -156,7 +182,8 @@ Node_t* new_identifier(NodeKind kind, Token_t *tok, Types_t *type){
 	identifier->next = identHead;
 	identifier->name = tok->str;
 	identifier->len = tok->len;
-	identifier->type = type;
+	node->type = type;
+	// identifier->type = type;
 	if(kind==ND_LVAR){
 		identifier->offset = identHead->offset + 8;
 	}
@@ -387,7 +414,7 @@ Node_t* relational(void){
 
 Node_t* add(void) {
   DEBUG_WRITE("\n");
-	Node_t *node = mul();
+	Node_t *node = mul(); 
 
 	for(;;){
 		if(consume(TK_RESERVED, "+")){
@@ -442,7 +469,6 @@ Node_t *primary() {
 			return funcCall();
 		}else{
 			// 変数
-			// return manage_lvar(ND_LVAR, tok);
 			Node_t *node = new_node(ND_LVAR, NULL, NULL, NULL, NULL, NULL, NULL);
 			Identifier_t *identifier = find_lvar(tok);
 			if(identifier){
@@ -450,8 +476,7 @@ Node_t *primary() {
 				node->identifier = identifier;
 				return node;
 			}else{
-				fprintf(stderr, "宣言されていない変数です\n");
-				exit(1);
+				parseError("宣言されていない変数です\n");
 			}
 		}
 	}

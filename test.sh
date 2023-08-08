@@ -101,4 +101,16 @@ int main(){
   return x;
 }
 "
+
+debug_assert "5" "
+int main(){
+  int x;
+  int *y;
+  int **z;
+  y = &x;
+  *y = 5;
+  z = &y;
+  return **z;
+}
+"
 echo All finished

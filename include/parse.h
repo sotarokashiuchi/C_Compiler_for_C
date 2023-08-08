@@ -39,7 +39,6 @@ typedef enum {
 /// @brief 識別子の型
 typedef struct Identifier_tag {
 	struct Identifier_tag* next;
-	struct Types_tag *type;
 	char *name;
 	int len;
 	int offset;
@@ -59,13 +58,13 @@ struct Vector_tag {
 /// @brief 抽象構文木のノードの型
 struct Node_tag {
 	NodeKind kind;	// ノードの型
-  // Token_t *; // token
 	Node_t *expr1;	// Node1
 	Node_t *expr2;  // Node2
   Node_t *expr3;  // Node3
   Node_t *expr4;  // Node4
   Node_t *expr5;  // Node5
   Vector_t *vector;
+  struct Types_tag *type;
 	int val;			  // kindがND_NUMの場合のみ使う
   Identifier_t *identifier;   // ラベル用
 };
