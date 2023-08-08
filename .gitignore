@@ -2,6 +2,7 @@
 *.o
 .*
 peda-session-9cc.txt
+peda-session-tmp.txt
 tmp*
 a.out
 9cc
