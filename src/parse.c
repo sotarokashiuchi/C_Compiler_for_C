@@ -18,7 +18,7 @@ Identifier_t *identHead = NULL;
  * 						| "while" "(" expr ")" stmt
  * 						| "for" "(" expr? ";" expr? ";" expr? ")" stmt
  *  					| "{" stmt* "}"
- * 						| typeSpec ident ";"
+ * 						| typeSpec ident ("[" num "]")? ";"
  * typeSpec		= "int" "*"*
  * expr       = assign
  * assign     = equality ("=" assign)?
@@ -30,6 +30,7 @@ Identifier_t *identHead = NULL;
 							| "-"? primary
 							| "*" unary
 							| "&" unary
+							| "sizeof" unary
  * primary    = num | ident | funcCall | "(" expr ")"
  * funcCall 	= ident ("(" expr? | expr ("," expr)* ")")
  */
@@ -44,6 +45,7 @@ Node_t* funcDefine();
 // 						| "while" "(" expr ")" stmt
 // 						| "for" "(" expr? ";" expr? ";" expr? ")" stmt
 //  					| "{" stmt* "}"
+// 						| typeSpec ident ("[" num "]")? ";"
 Node_t* stmt(void);
 // expr       = assign
 Node_t* expr(void);
@@ -279,12 +281,18 @@ Node_t* stmt(void){
 	Token_t *tok;
 	Types_t *type;
 
-	// 変数宣言
+	// 変数宣言 (int *a[5] などは非対応)
 	if(peek(TK_KEYWORD, "int")){
 		type = typeSpec();
   	if((tok = consume_ident()) != NULL){
-			// node = (ND_LVAR, tok); 
 			node = new_identifier(ND_LVAR, tok, type);
+			
+			if(consume(TK_RESERVED, "[")){
+				// 配列の宣言
+				expect_number();
+				expect(TK_RESERVED, "]");
+			}
+
 			expect(TK_RESERVED, ";");
 			return node;
 		}else{
@@ -292,6 +300,7 @@ Node_t* stmt(void){
 			exit(1);
 		}
 	}
+//	| typeSpec ident ("[" num "]")? ";"
 	
 	if (consume(TK_KEYWORD, "return")) {
 		// "return" expr ";"

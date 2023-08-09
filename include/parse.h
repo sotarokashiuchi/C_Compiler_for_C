@@ -33,6 +33,7 @@ typedef enum{
 typedef enum {
   DT_INT,
   DT_PTR,
+  DT_ARRAY,
   DT_FUNC,
 } DataType;
 
@@ -73,6 +74,7 @@ struct Node_tag {
 typedef struct Types_tag {
   DataType dataType;
   struct Types_tag *inner;
+  size_t array_size;
 } Types_t;
 
 
