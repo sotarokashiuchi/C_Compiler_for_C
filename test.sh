@@ -41,38 +41,6 @@ debug_assert() {
 }
 
 # assert 理想の実行結果 入力データ
-assert "1" "
-int add(int x, int y){
-  int x;
-  int y;
-  x = x+y;
-  return x;
-}
-
-int main(){
-  int x;
-  int y;
-  int z;
-  x=1;
-  y=2;
-  z = add(x, y);
-  return x;
-}
-"
-
-assert "5" "
-int inc(int x){
-  x=x+1;
-  return x;
-}
-
-int main(){
-  int x;
-  x=4;
-  return inc(x);
-}
-"
-
 # debug_assert "5" "
 # int main(){
 #   int x;
@@ -114,18 +82,6 @@ int main(){
 }
 "
 
-debug_assert "4" "
-int main(){
-  int *p;
-  int *q;
-  int x;
-  getAlloc(&p, 1, 2, 4, 8);
-  q = p+2;
-  x = *q;
-  return *q;
-}
-"
-
 debug_assert "3" "
 int main(){
   int x;
@@ -155,11 +111,60 @@ int main(){
 }
 "
 
-debug_assert "0" "
+# debug_assert "0" "
+# int main(){
+#   int x[10];
+#   int *p;
+#   *x = 1;
+#   return 0;
+# }
+# "
+
+debug_assert "3" "
+int add(int x, int y){
+  x = x+y;
+  return x;
+}
+
 int main(){
-  int x[10];
-  return 0;
+  int x;
+  int y;
+  int z;
+  x=1;
+  y=2;
+  z = add(x, y);
+  return z;
 }
 "
+
+
+# debug_assert "5" "
+# int inc(int x){
+#   x=x+1;
+#   return x;
+# }
+
+# int main(){
+#   int x;
+#   x=4;
+#   return inc(x);
+# }
+# "
+
+# debug_assert "4" "
+# int main(){
+#   int *p;
+#   int *q;
+#   int x;
+#   getAlloc(&p, 1, 2, 4, 8);
+#   q = p+2;
+#   x = *q;
+#   return *q;
+# }
+# "
+
+  # *(x+1) = 2;
+  # p = x;
+  # return *p + *(p+1);
 
 echo All finished

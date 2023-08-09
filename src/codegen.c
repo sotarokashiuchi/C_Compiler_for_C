@@ -255,6 +255,7 @@ void gen(Node_t *node) {
   case ND_LVAR:{
     gen_lval(node);
     popPrint("  pop rax\n");
+    // asmPrint("  mov %s, [rax]\n", getRegNameFromSize(sizeofType(node->type)));
     asmPrint("  mov rax, [rax]\n");
     pushPrint("  push rax\n");
     return;
@@ -268,6 +269,7 @@ void gen(Node_t *node) {
     asmPrint("  #ND_DEREF\n");
     gen(node->expr1);
     popPrint("  pop rax\n");
+    // asmPrint("  mov %s, [rax]\n",  getRegNameFromSize(sizeofType(node->type)));
     asmPrint("  mov rax, [rax]\n");
     asmPrint("  push rax\n");
     return;

@@ -207,6 +207,8 @@ Node_t* new_identifier(NodeKind kind, Token_t *tok, Types_t *type){
 	node->type = type;
 
 	if(kind==ND_LVAR){
+		DEBUG_WRITE("sizeofType = %d\n", sizeofType(type));
+		// identifier->offset = identHead->offset + sizeofType(type);
 		identifier->offset = identHead->offset + 8;
 	}
 	if(kind==ND_FUNCDEFINE || kind==ND_FUNCCALL){
