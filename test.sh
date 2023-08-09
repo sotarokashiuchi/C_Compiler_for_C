@@ -155,4 +155,11 @@ int main(){
 }
 "
 
+debug_assert "0" "
+int main(){
+  int x[10];
+  return 0;
+}
+"
+
 echo All finished
