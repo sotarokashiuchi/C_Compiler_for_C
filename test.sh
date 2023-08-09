@@ -136,7 +136,7 @@ int main(){
 }
 "
 
-debug_assert "24" "
+debug_assert "44" "
 int main(){
   int x;
   int *y;
@@ -147,12 +147,12 @@ int main(){
   z = z + sizeof(y);
   z = z + sizeof(x+3);
   z = z + sizeof(y+3);
+  z = z + sizeof(*y);
+  z = z + sizeof(&y);
+  z = z + sizeof(1);
+  z = z + sizeof(sizeof(1));
   return z;
 }
 "
-  # z = z + sizeof(*y);
-  # sizeof(1);
-  # sizeof(sizeof(1));
-
 
 echo All finished

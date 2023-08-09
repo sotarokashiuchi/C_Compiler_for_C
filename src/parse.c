@@ -133,6 +133,14 @@ Node_t *new_node(NodeKind kind, Node_t *expr1, Node_t *expr2, Node_t *expr3, Nod
 			node->type =  expr1->type;
 		}
 	}
+	
+	if(kind == ND_DEREF){
+		node->type = expr1->type->inner;
+	}
+
+	if(kind == ND_ADDR){
+		node->type = new_type(DT_PTR, expr1->type);
+	}
   // ND_ASSIGN,      // =
   // ND_LVAR,        // ローカル変数
   // ND_EQUALTO,     // ==
@@ -149,8 +157,6 @@ Node_t *new_node(NodeKind kind, Node_t *expr1, Node_t *expr2, Node_t *expr3, Nod
   // ND_BLOCK,       // block
   // ND_FUNCCALL,    // funcCall
   // ND_FUNCDEFINE,  // funcDefine
-  // ND_ADDR,        // アドレス演算子
-  // ND_DEREF,       // 関節演算子
   // ND_NUM, 				// 整数
 	return node;
 }
