@@ -136,20 +136,23 @@ int main(){
 }
 "
 
-# debug_assert "4" "
-# int x;
-# int *y;
-# int z;
+debug_assert "24" "
+int main(){
+  int x;
+  int *y;
+  int z;
 
-# z = sizeof(x);
-# sizeof(y);
-# sizeof(x+3);
-# sizeof(y+3);
-# sizeof(*y);
-# sizeof(1);
-# sizeof(sizeof(1));
-# return;
-# "
+  z = sizeof x;
+  z = sizeof(x);
+  z = z + sizeof(y);
+  z = z + sizeof(x+3);
+  z = z + sizeof(y+3);
+  return z;
+}
+"
+  # z = z + sizeof(*y);
+  # sizeof(1);
+  # sizeof(sizeof(1));
 
 
 echo All finished

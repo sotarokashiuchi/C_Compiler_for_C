@@ -470,10 +470,14 @@ Node_t* unary(){
 	if(consume(TK_RESERVED, "*")){
 		return new_node(ND_DEREF, unary(), NULL, NULL, NULL, NULL, NULL);
 	}
-	if(consume(TK_RESERVED, "sizeof")){
+	if(consume(TK_KEYWORD, "sizeof")){
 		Node_t *node = unary();
 		if(node->type->dataType == DT_INT){
-			// return new_node_num()
+			return new_node_num(4);
+		} else {
+			assert(node->type->dataType == DT_PTR &&
+						"must be integer or pointer");
+			return new_node_num(8);
 		}
 	}
 	return primary();
