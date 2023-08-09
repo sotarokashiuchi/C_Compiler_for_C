@@ -61,12 +61,18 @@ Node_t* mul(void);
 // 						| "-"? primary
 // 						| "*" unary
 // 						| "&" unary
+//						| "sizeof" unary
 Node_t* unary();
 // primary    = num | ident | funcCall | "(" expr ")"
 Node_t* primary();
 // funcCall 	= ident ("(" expr? | expr ("," expr)* ")")
 Node_t *funcCall(void);
 
+/// @brief 新しいType_tを作成する
+/// @param dataType 
+/// @param inner 
+/// @return 
+Types_t* new_type(DataType dataType, Types_t* inner);
 Types_t* typeSpec(void);
 
 Vector_t* parmlist(void);
@@ -150,12 +156,13 @@ Node_t *new_node(NodeKind kind, Node_t *expr1, Node_t *expr2, Node_t *expr3, Nod
 }
 
 /// @brief numノード(終端記号)を生成する
-/// @param val ノードに設定する数値
+/// @param val ノードに設定する数値 
 /// @return 生成したノード
 Node_t *new_node_num(int val){
 	Node_t *node = calloc(1, sizeof(Node_t));
 	node->kind = ND_NUM;
 	node->val = val;
+	node->type = new_type(DT_INT, NULL);
 	return node;
 }
 
@@ -463,6 +470,12 @@ Node_t* unary(){
 	if(consume(TK_RESERVED, "*")){
 		return new_node(ND_DEREF, unary(), NULL, NULL, NULL, NULL, NULL);
 	}
+	if(consume(TK_RESERVED, "sizeof")){
+		Node_t *node = unary();
+		if(node->type->dataType == DT_INT){
+			// return new_node_num()
+		}
+	}
 	return primary();
 }
 
@@ -501,6 +514,10 @@ Node_t *primary() {
   return new_node_num(expect_number());
 }
 
+/// @brief 新しいType_tを作成する
+/// @param dataType 
+/// @param inner 
+/// @return 
 Types_t* new_type(DataType dataType, Types_t* inner){
   DEBUG_WRITE("this is typeSpec\n");
 	Types_t* type = calloc(1, sizeof(Types_t));

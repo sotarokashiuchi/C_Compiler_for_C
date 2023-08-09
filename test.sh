@@ -125,6 +125,31 @@ int main(){
   return *q;
 }
 "
-  # return 0;
+
+debug_assert "3" "
+int main(){
+  int x;
+  int y;
+  x=0;
+  y=x+3;
+  return y;
+}
+"
+
+# debug_assert "4" "
+# int x;
+# int *y;
+# int z;
+
+# z = sizeof(x);
+# sizeof(y);
+# sizeof(x+3);
+# sizeof(y+3);
+# sizeof(*y);
+# sizeof(1);
+# sizeof(sizeof(1));
+# return;
+# "
+
 
 echo All finished

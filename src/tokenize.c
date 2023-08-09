@@ -88,6 +88,11 @@ Token_t* tokenize(void){
 			continue;
 		}
 
+		if(!strncmp(p, "sizeof", 6) && !is_alnum(p[6])){
+			cur = new_token(TK_KEYWORD, cur, &p, 6);
+			continue;
+		}
+
 		// 2文字
 		if(!strncmp(p, "<=", 2) || !strncmp(p, ">=", 2) || !strncmp(p, "==", 2) || !strncmp(p, "!=", 2)){
 			cur = new_token(TK_RESERVED, cur, &p, 2);
