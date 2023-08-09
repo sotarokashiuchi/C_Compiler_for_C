@@ -43,7 +43,7 @@ void popSizePrint(int size){
 }
 
 void pushSizePrint(int size){
-  alignmentCount -= size;
+  alignmentCount += size;
   // printf("  push %s", getRegNameFromSize(size));
   popPrint("  push rax\n");
 }
