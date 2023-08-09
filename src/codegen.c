@@ -303,7 +303,8 @@ void gen(Node_t *node) {
           asmPrint("  imul rax, 4\n");
         }
       } else {
-        assert(node->type->inner->dataType == DT_PTR);
+        assert(node->type->inner->dataType == DT_PTR &&
+          "must be pointer or integer");
         if(node->expr1->type->dataType == DT_PTR){
           asmPrint("  imul rdi, 8\n");
         } else {
