@@ -75,6 +75,7 @@ Vector_t* parmlist(void);
 Identifier_t* find_lvar(Token_t *tok){
 	for(Identifier_t *var = identHead; var; var = var->next){
 		if(var->len == tok->len && !memcmp(tok->str, var->name, var->len)){
+			DEBUG_WRITE("this is identifier.\n");
 			return var;
 		}
 	}
@@ -115,13 +116,17 @@ Node_t *new_node(NodeKind kind, Node_t *expr1, Node_t *expr2, Node_t *expr3, Nod
 	node->expr4 = expr4;
 	node->expr5 = expr5;
 	node->vector = vector;
+	// typeリストの最後のリストを確認する
 	if(kind == ND_ADD || kind == ND_SUB || kind == ND_MUL || kind == ND_DIV ){
-		// if(expr1->identifier->type)
+		if(expr1->type->dataType == DT_PTR){
+			node->type = expr1->type;
+		}else if(expr2->type->dataType == DT_PTR){
+			node->type = expr2->type;
+		}else{
+			// expr1, 2 どちらでもよい?
+			node->type =  expr1->type;
+		}
 	}
-	// ND_ADD, 				// +
-  // ND_SUB, 				// -
-  // ND_MUL, 				// *
-  // ND_DIV, 				// /
   // ND_ASSIGN,      // =
   // ND_LVAR,        // ローカル変数
   // ND_EQUALTO,     // ==
@@ -176,18 +181,20 @@ Vector_t* new_vector(Node_t *node, Vector_t *current){
 /// @param type
 /// @return 生成した識別子
 Node_t* new_identifier(NodeKind kind, Token_t *tok, Types_t *type){
+  DEBUG_WRITE("this is identifier.\n");
 	// 新しく変数を定義する	
 	Node_t *node = new_node(kind, NULL, NULL, NULL, NULL, NULL, NULL);
 	Identifier_t *identifier = calloc(1, sizeof(Identifier_t));
 	identifier->next = identHead;
 	identifier->name = tok->str;
 	identifier->len = tok->len;
+	identifier->type = type;
 	node->type = type;
-	// identifier->type = type;
+
 	if(kind==ND_LVAR){
 		identifier->offset = identHead->offset + 8;
 	}
-	if(kind==ND_FUNCDEFINE || kind==ND_FUNCDEFINE){
+	if(kind==ND_FUNCDEFINE || kind==ND_FUNCCALL){
 		identifier->offset = 0;
 	}
 	identHead = identifier;
@@ -474,6 +481,7 @@ Node_t *primary() {
 			if(identifier){
 				// 既に識別子が存在する
 				node->identifier = identifier;
+				node->type = identifier->type;
 				return node;
 			}else{
 				parseError("宣言されていない変数です\n");
@@ -494,6 +502,7 @@ Node_t *primary() {
 }
 
 Types_t* new_type(DataType dataType, Types_t* inner){
+  DEBUG_WRITE("this is typeSpec\n");
 	Types_t* type = calloc(1, sizeof(Types_t));
 	type->dataType = dataType;
 	type->inner = inner;
@@ -510,6 +519,7 @@ Types_t* typeSpec(void){
 	while(consume(TK_RESERVED, "*")){
 		type = new_type(DT_PTR, type);
 	}
+	// int*** -> int** -> int* -> int の順に並ぶ
 	return type;
 }
 

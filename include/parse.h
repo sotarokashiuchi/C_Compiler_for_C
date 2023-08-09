@@ -42,6 +42,7 @@ typedef struct Identifier_tag {
 	char *name;
 	int len;
 	int offset;
+  struct Types_tag *type;
 } Identifier_t;
 
 

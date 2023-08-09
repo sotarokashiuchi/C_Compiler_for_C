@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <stdlib.h>
 
 int foo(){
   printf("call printf is OK\n");
@@ -22,4 +23,12 @@ int print(void){
 
 int add(int a, int b, int c, int d, int e, int f, int g, int h){
   return a+b+c+d+e+f+g+h;
+}
+
+void getAlloc(int **p, int w, int x, int y, int z){
+  *p = malloc(20);
+  (*p)[0] = w;
+  (*p)[1] = x;
+  (*p)[2] = y;
+  (*p)[3] = z;
 }

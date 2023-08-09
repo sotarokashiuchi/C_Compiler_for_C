@@ -290,11 +290,27 @@ void gen(Node_t *node) {
   gen(node->expr1);
   gen(node->expr2);
 
-  popPrint("  pop rdi\n");
-  popPrint("  pop rax\n");
+  popPrint("  pop rdi\n");  // 右辺
+  popPrint("  pop rax\n");  // 左辺
 
   switch (node->kind) {
   case ND_ADD:{
+    if(node->type->dataType == DT_PTR){
+      if(node->type->inner->dataType == DT_INT){
+        if(node->expr1->type->dataType == DT_PTR){
+          asmPrint("  imul rdi, 4\n");
+        } else {
+          asmPrint("  imul rax, 4\n");
+        }
+      } else {
+        assert(node->type->inner->dataType == DT_PTR);
+        if(node->expr1->type->dataType == DT_PTR){
+          asmPrint("  imul rdi, 8\n");
+        } else {
+          asmPrint("  imul rax, 8\n");
+        }
+      }
+    }
     asmPrint("  add rax, rdi\n");
     break;
   }

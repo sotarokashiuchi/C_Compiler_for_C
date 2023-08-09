@@ -113,4 +113,18 @@ int main(){
   return **z;
 }
 "
+
+debug_assert "4" "
+int main(){
+  int *p;
+  int *q;
+  int x;
+  getAlloc(&p, 1, 2, 4, 8);
+  q = p+2;
+  x = *q;
+  return *q;
+}
+"
+  # return 0;
+
 echo All finished
