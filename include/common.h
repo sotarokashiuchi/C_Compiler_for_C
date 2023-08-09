@@ -5,6 +5,7 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include <stdarg.h>
+#include <assert.h>
 
 /* マクロ定義 */
 // ローカル変数用のスタックサイズ 26文字 * 8byte
