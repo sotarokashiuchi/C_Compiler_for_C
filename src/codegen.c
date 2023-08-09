@@ -27,6 +27,28 @@ void asmPrint(char *fmt, ...){
   vprintf(fmt, ap);
 }
 
+const char* getRegNameFromSize(int size){
+  if(size==4){
+    return "eax";
+  }
+  if(size==8){
+    return "rax";
+  }
+}
+
+void popSizePrint(int size){
+  alignmentCount -= size;
+  // printf("  pop %s", getRegNameFromSize(size));
+  popPrint("  pop rax\n");
+}
+
+void pushSizePrint(int size){
+  alignmentCount -= size;
+  // printf("  push %s", getRegNameFromSize(size));
+  popPrint("  push rax\n");
+}
+
+
 /// @brief 左辺値の評価(アドレス計算)
 /// @param node 評価対象のノード
 void gen_lval(Node_t *node){
@@ -255,8 +277,8 @@ void gen(Node_t *node) {
   case ND_LVAR:{
     gen_lval(node);
     popPrint("  pop rax\n");
-    // asmPrint("  mov %s, [rax]\n", getRegNameFromSize(sizeofType(node->type)));
-    asmPrint("  mov rax, [rax]\n");
+    asmPrint("  mov %s, [rax]\n", getRegNameFromSize(sizeofType(node->type)));
+    // asmPrint("  mov rax, [rax]\n");
     pushPrint("  push rax\n");
     return;
   }
@@ -269,8 +291,8 @@ void gen(Node_t *node) {
     asmPrint("  #ND_DEREF\n");
     gen(node->expr1);
     popPrint("  pop rax\n");
-    // asmPrint("  mov %s, [rax]\n",  getRegNameFromSize(sizeofType(node->type)));
-    asmPrint("  mov rax, [rax]\n");
+    asmPrint("  mov %s, [rax]\n",  getRegNameFromSize(sizeofType(node->type)));
+    // asmPrint("  mov rax, [rax]\n");
     asmPrint("  push rax\n");
     return;
   }

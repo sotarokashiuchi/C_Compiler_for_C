@@ -92,4 +92,9 @@ void program(void);
 /// @return 一致したLVar_tを返す, 一致しなければNULLを返す
 Identifier_t* find_lvar(Token_t *tok);
 
+/// @brief 型のsizeを返す
+/// @param type 
+/// @return 
+int sizeofType(Types_t *type);
+
 #endif

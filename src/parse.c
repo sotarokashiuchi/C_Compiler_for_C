@@ -106,6 +106,23 @@ void todoError(char *fmt, ...){
 	exit(1);
 }
 
+int sizeofType(Types_t *type){
+	int size;
+	switch(type->dataType){
+		case DT_INT:
+			size = 4;
+			break;
+		case DT_ARRAY:
+			// if(type->inner)
+			size = type->array_size * sizeofType(type->inner);
+			break;
+		case DT_PTR:
+			size = 8;
+			break;
+	}
+	return size;
+}
+
 /// @brief ノードを生成する
 /// @param kind ノードの種類
 /// @param expr1 Node1
@@ -208,8 +225,8 @@ Node_t* new_identifier(NodeKind kind, Token_t *tok, Types_t *type){
 
 	if(kind==ND_LVAR){
 		DEBUG_WRITE("sizeofType = %d\n", sizeofType(type));
-		// identifier->offset = identHead->offset + sizeofType(type);
-		identifier->offset = identHead->offset + 8;
+		identifier->offset = identHead->offset + sizeofType(type);
+		// identifier->offset = identHead->offset + 8;
 	}
 	if(kind==ND_FUNCDEFINE || kind==ND_FUNCCALL){
 		identifier->offset = 0;
@@ -291,7 +308,7 @@ Node_t* stmt(void){
 			
 			if(consume(TK_RESERVED, "[")){
 				// 配列の宣言
-				expect_number();
+				node->type->array_size = expect_number();
 				expect(TK_RESERVED, "]");
 			}
 
@@ -302,7 +319,6 @@ Node_t* stmt(void){
 			exit(1);
 		}
 	}
-//	| typeSpec ident ("[" num "]")? ";"
 	
 	if (consume(TK_KEYWORD, "return")) {
 		// "return" expr ";"
