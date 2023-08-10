@@ -332,11 +332,11 @@ void gen(Node_t *node) {
 
   switch (node->kind) {
   case ND_ADD:{
-    if(node->type->dataType == DT_PTR){
-      if(node->expr1->type->dataType == DT_PTR){
-        asmPrint("  imul rdi, %d\n", sizeofType(node->type->inner));
-      } else {
+    if(node->type->dataType == DT_PTR || node->type->dataType == DT_ARRAY){
+      if(node->expr1->type->dataType == DT_INT){
         asmPrint("  imul rax, %d\n", sizeofType(node->type->inner));
+      } else {
+        asmPrint("  imul rdi, %d\n", sizeofType(node->type->inner));
       }
     }
     asmPrint("  add rax, rdi\n");

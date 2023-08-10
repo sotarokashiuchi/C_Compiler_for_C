@@ -156,14 +156,14 @@ int main(){
 "
 
 
-# debug_assert "3" "
-# int main(){
-#   int x[10];
-#   *x = 1;
-#   *(x+1) = 3;
-#   return *x;
-# }
-# "
+debug_assert "3" "
+int main(){
+  int x[10];
+  *x = 1;
+  *(x+1) = 3;
+  return *(x+1);
+}
+"
 
   # *(x+1) = 2;
   # p = x;

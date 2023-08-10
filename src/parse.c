@@ -147,6 +147,12 @@ Node_t *new_node(NodeKind kind, Node_t *expr1, Node_t *expr2, Node_t *expr3, Nod
 			node->type = expr1->type;
 		}else if(expr2->type->dataType == DT_PTR){
 			node->type = expr2->type;
+		}else if(expr1->type->dataType == DT_ARRAY){
+			// 
+			node->type = new_type(DT_PTR, expr1->type->inner);
+		}else if(expr2->type->dataType == DT_ARRAY){
+			// 
+			node->type = new_type(DT_PTR, expr2->type->inner);
 		}else{
 			// expr1, 2 どちらでもよい?
 			node->type =  expr1->type;
