@@ -55,13 +55,6 @@ simple_test() {
 }
 
 # assert 理想の実行結果 入力データ
-# assert "5" "
-# int main(){
-#   int x;
-#   int *y;
-#   return x;
-# }
-# "
 assert "5" "
 int main(){
   int x;
@@ -244,40 +237,70 @@ int main(){
 }
 "
 
-assert "0" " 
-int main() {
-  intPrint(1);
-  int base;     
-  base = 10000;
-  int n;         
-  n = 100;
-  int i;                
-  int temp;             
-  int out;              
-  int denom;            
-  int numerator[8401];  
-  intPrint(2);
-
-  for (i = 0; i < n; i=i+1) {
-    numerator[i] = base / 5;
-    intPrint(i);
-  }
-  out = 0;
-  for (n = 100; n > 0; n = n-14) {
-    temp = 0;
-    for (i = n - 1; i > 0; i=i-1) {
-      intPrint(i);
-      denom = 2 * i - 1;
-      temp = temp * i + numerator[i] * base;
-      numerator[i] = temp % denom;
-      temp = temp / denom;
+assert "0" "
+int main(){
+  int i;
+  int j;
+  int x[10];
+  x[0] = 4;
+  x[1] = 6;
+  x[2] = 5;
+  x[3] = 9;
+  x[4] = 20;
+  x[5] = 30;
+  x[6] = 5;
+  x[7] = 6;
+  x[8] = 8;
+  int tmp;
+  for(i=0; i<8; i=i+1){
+    for(j=i+1; j<9; j=j+1){
+      if(x[i] > x[j]){
+        tmp = x[j];
+        x[j] = x[i];
+        x[i] = tmp;
+      }
     }
-    intPrint(out + temp / base);
-    out = temp % base;
   }
+  x[9] = -1;
+  sortPrint(x);
   return 0;
 }
 "
+
+# assert "0" " 
+# int main() {
+#   intPrint(1);
+#   int base;     
+#   base = 10000;
+#   int n;         
+#   n = 100;
+#   int i;                
+#   int temp;             
+#   int out;              
+#   int denom;            
+#   int numerator[8401];  
+#   intPrint(2);
+
+#   for (i = 0; i < n; i=i+1) {
+#     numerator[i] = base / 5;
+#     intPrint(i);
+#   }
+#   out = 0;
+#   for (n = 100; n > 0; n = n-14) {
+#     temp = 0;
+#     for (i = n - 1; i > 0; i=i-1) {
+#       intPrint(i);
+#       denom = 2 * i - 1;
+#       temp = temp * i + numerator[i] * base;
+#       numerator[i] = temp % denom;
+#       temp = temp / denom;
+#     }
+#     intPrint(out + temp / base);
+#     out = temp % base;
+#   }
+#   return 0;
+# }
+# "
  
 
 echo All finished

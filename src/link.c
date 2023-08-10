@@ -37,3 +37,9 @@ void intPrint(int x){
   printf("%d\n", x);
   fflush(stdout);
 }
+
+void sortPrint(int *x){
+  for(int i=0; x[i]!=-1; i++){
+    printf("%d ", x[i]);
+  }
+}
