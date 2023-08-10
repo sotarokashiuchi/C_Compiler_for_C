@@ -348,25 +348,6 @@ Node_t* stmt(void){
 	// 変数宣言 (int *a[5] などは非対応)
 	if(peek(TK_KEYWORD, "int")){
 		return varDefine();
-		// type = typeSpec();
-  	// if((tok = consume_ident()) != NULL){
-		// 	node = new_identifier(ND_LVAR, tok, NULL);
-			
-		// 	if(consume(TK_RESERVED, "[")){
-		// 		// 配列の宣言
-		// 		new_type(DT_ARRAY, type);
-		// 		type->array_size = expect_number();
-		// 		expect(TK_RESERVED, "]");
-		// 	}
-			
-		// 	node->type = node->identifier->type = type;
-
-		// 	expect(TK_RESERVED, ";");
-		// 	return node;
-		// }else{
-		// 	fprintf(stderr, "パーサできません\n");
-		// 	exit(1);
-		// }
 	}
 	
 	if (consume(TK_KEYWORD, "return")) {

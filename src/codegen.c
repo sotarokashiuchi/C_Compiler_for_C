@@ -27,7 +27,17 @@ void asmPrint(char *fmt, ...){
   vprintf(fmt, ap);
 }
 
-const char* getRegNameFromSize(int size){
+const char* getRegNameFromSize(Types_t *type){
+  int size;
+  switch (type->dataType){
+    case DT_INT:
+    case DT_PTR:
+      size = sizeofType(type);
+      break;
+    case DT_ARRAY:
+      size = 8;
+  }
+
   if(size==4){
     return "eax";
   }
@@ -277,8 +287,7 @@ void gen(Node_t *node) {
   case ND_LVAR:{
     gen_lval(node);
     popPrint("  pop rax\n");
-    asmPrint("  mov %s, [rax]\n", getRegNameFromSize(sizeofType(node->type)));
-    // asmPrint("  mov rax, [rax]\n");
+    asmPrint("  mov %s, [rax]\n", getRegNameFromSize(node->type));
     pushPrint("  push rax\n");
     return;
   }
@@ -291,7 +300,7 @@ void gen(Node_t *node) {
     asmPrint("  #ND_DEREF\n");
     gen(node->expr1);
     popPrint("  pop rax\n");
-    asmPrint("  mov %s, [rax]\n",  getRegNameFromSize(sizeofType(node->type)));
+    asmPrint("  mov %s, [rax]\n",  getRegNameFromSize(node->type));
     // asmPrint("  mov rax, [rax]\n");
     asmPrint("  push rax\n");
     return;
