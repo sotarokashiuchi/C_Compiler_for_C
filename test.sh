@@ -33,34 +33,52 @@ sub_assert() {
   
 }
 assert() {
-  sub_assert "0" "$1" "$2"
+  simple_test "0" "$1" "$2"
+  # sub_assert "-g" "$1" "$2"
 }
 
-debug_assert() {
-  sub_assert "-g" "$1" "$2"
+simple_test() {
+  option="$1"
+  expected="$2"
+  input="$3"
+
+  CC_DEBUG=0 ./9cc "$input" > tmp.s 2> /dev/null
+  cc -o link.o -c ./src/link.c 2> /dev/null
+  cc -o tmp.o -c tmp.s 2> /dev/null
+  cc -o tmp link.o tmp.o 2> /dev/null
+  ./tmp 2> /dev/null
+  actual="$?"
+
+  if [ "$actual" = "$expected" ]; then
+    echo -e "\e[42mOK \e[0m $(echo $input | sed 's/\n\s//g') => \e[32m$actual\e[0m" 
+  else
+    echo -e "\e[41mERR\e[0m $(echo $input | sed 's/\n\s//g') => \e[31m$actual\e[0m" 
+  fi
+  
+  
 }
 
 # assert 理想の実行結果 入力データ
-# debug_assert "5" "
+# assert "5" "
 # int main(){
 #   int x;
 #   int *y;
 #   return x;
 # }
 # "
-debug_assert "5" "
+assert "5" "
 int main(){
   int x;
   int *y;
   int z;
-  y = &x;
+  y# = &x;
   *y = 5;
   z = *y;
   return z;
 }
 "
 
-debug_assert "5" "
+assert "5" "
 int main(){
   int x;
   int *y;
@@ -70,7 +88,7 @@ int main(){
 }
 "
 
-debug_assert "5" "
+assert "5" "
 int main(){
   int x;
   int *y;
@@ -82,7 +100,7 @@ int main(){
 }
 "
 
-debug_assert "3" "
+assert "3" "
 int main(){
   int x;
   int y;
@@ -92,7 +110,7 @@ int main(){
 }
 "
 
-debug_assert "44" "
+assert "44" "
 int main(){
   int x;
   int *y;
@@ -112,7 +130,7 @@ int main(){
 "
 
 
-debug_assert "3" "
+assert "3" "
 int add(int x, int y){
   x = x+y;
   return x;
@@ -130,7 +148,7 @@ int main(){
 "
 
 
-# debug_assert "5" "
+# assert "5" "
 # int inc(int x){
 #   x=x+1;
 #   return x;
@@ -143,7 +161,7 @@ int main(){
 # }
 # "
 
-debug_assert "4" "
+assert "4" "
 int main(){
   int *p;
   int *q;
@@ -156,7 +174,7 @@ int main(){
 "
 
 
-debug_assert "3" "
+assert "3" "
 int main(){
   int x[10];
   *x = 1;
