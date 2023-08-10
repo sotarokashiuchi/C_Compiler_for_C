@@ -333,20 +333,10 @@ void gen(Node_t *node) {
   switch (node->kind) {
   case ND_ADD:{
     if(node->type->dataType == DT_PTR){
-      if(node->type->inner->dataType == DT_INT){
-        if(node->expr1->type->dataType == DT_PTR){
-          asmPrint("  imul rdi, 4\n");
-        } else {
-          asmPrint("  imul rax, 4\n");
-        }
+      if(node->expr1->type->dataType == DT_PTR){
+        asmPrint("  imul rdi, %d\n", sizeofType(node->type->inner));
       } else {
-        assert(node->type->inner->dataType == DT_PTR &&
-          "must be pointer or integer");
-        if(node->expr1->type->dataType == DT_PTR){
-          asmPrint("  imul rdi, 8\n");
-        } else {
-          asmPrint("  imul rax, 8\n");
-        }
+        asmPrint("  imul rax, %d\n", sizeofType(node->type->inner));
       }
     }
     asmPrint("  add rax, rdi\n");
