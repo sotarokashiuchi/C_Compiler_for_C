@@ -15,18 +15,20 @@ void codegenError(char *fmt, ...){
 	exit(1);
 }
 
-void popPrint(char *fmt, ...){
-  va_list ap;
-  va_start(ap, fmt);
+void popPrint(const char *p){
+  // va_list ap;
+  // va_start(ap, fmt);
   alignmentCount -= 8;
-  vprintf(fmt, ap);
+  // vprintf(fmt, ap);
+  printf("  pop %s\n", p);
 }
 
-void pushPrint(char *fmt, ...){
-  va_list ap;
-  va_start(ap, fmt);
+void pushPrint(const char *p){
+  // va_list ap;
+  // va_start(ap, fmt);
   alignmentCount += 8;
-  vprintf(fmt, ap);
+  // vprintf(fmt, ap);
+  printf("  push %s\n", p);
 }
 
 void asmPrint(char *fmt, ...){
@@ -57,13 +59,13 @@ const char* getRegNameFromSize(Types_t *type){
 void popSizePrint(int size){
   alignmentCount -= size;
   // printf("  pop %s", getRegNameFromSize(size));
-  popPrint("  pop rax\n");
+  popPrint("rax");
 }
 
 void pushSizePrint(int size){
   alignmentCount += size;
   // printf("  push %s", getRegNameFromSize(size));
-  popPrint("  push rax\n");
+  pushPrint("  push rax\n");
 }
 
 
@@ -73,7 +75,7 @@ void gen_lval(Node_t *node){
   if(node->kind == ND_LVAR){
     asmPrint("  mov rax, rbp\n");
     asmPrint("  sub rax, %d\n", node->identifier->offset);
-    pushPrint("  push rax\n");
+    pushPrint("rax");
   } else if(node->kind == ND_DEREF){
     gen(node->expr1);
   } else if(node->kind != ND_LVAR){
@@ -130,23 +132,23 @@ void gen(Node_t *node) {
       for(int i=1 ; i<=numOfArgu; i++){
         switch (i){
           case 1:
-            popPrint("  pop rdi\n");
+            popPrint("rdi");
             break;
           case 2:
-            popPrint("  pop rsi\n");
+            popPrint("rsi");
             break;
             break;
           case 3:
-            popPrint("  pop rdx\n");
+            popPrint("rdx");
             break;
           case 4:
-            popPrint("  pop rcx\n");
+            popPrint("rcx");
             break;
           case 5:
-            popPrint("  pop r8\n");
+            popPrint("r8");
             break;
           case 6:
-            popPrint("  pop r9\n");
+            popPrint("r9");
             break;
           default:
             break;
@@ -158,17 +160,17 @@ void gen(Node_t *node) {
     asmPrint("  add rsp, %d\n", displacement);
     alignmentCount -= displacement;
     for(int i=7; i<=numOfArgu; i++){
-      popPrint("  pop rdi\n");
+      popPrint("rdi");
     }
     asmPrint("  #戻り値をpush\n");
-    pushPrint("  push rax\n");
+    pushPrint("rax");
     return;
   }
   case ND_FUNCDEFINE:{
     alignmentCount = 8;
     asmPrint("%s:\n", gen_lval_name(node));
     asmPrint("  #プロローグ\n");
-    pushPrint("  push rbp\n");
+    pushPrint("rbp\n");
     asmPrint("  mov rbp, rsp\n");
     asmPrint("  sub rsp, %d\n", local_variable_stack);
     if(node->vector != NULL){
@@ -178,7 +180,7 @@ void gen(Node_t *node) {
       Vector_t *vector = node->vector;
       for(i=1; ; i++){
         gen_lval(vector->node);
-        popPrint("  pop rax\n");
+        popPrint("rax");
         switch (i){
           case 1:
             asmPrint("  mov [rax], rdi\n");
@@ -218,7 +220,7 @@ void gen(Node_t *node) {
     Vector_t *vector = node->vector;
     for( ; ; ){
       gen(vector->node);
-      popPrint("  pop rax\n");
+      popPrint("rax");
       if(vector->next == NULL){
         break;
       }
@@ -228,7 +230,7 @@ void gen(Node_t *node) {
   }
   case ND_ELSE:{
     gen(node->expr1->expr1);
-    popPrint("  pop rax\n");
+    popPrint("rax");
     asmPrint("  cmp rax, 0\n");
     asmPrint("  je .else_%03d\n", lavelIndexLocal);
     gen(node->expr1->expr2);
@@ -241,7 +243,7 @@ void gen(Node_t *node) {
   }
   case ND_IF:{
     gen(node->expr1);
-    popPrint("  pop rax\n");
+    popPrint("rax");
     asmPrint("  cmp rax, 0\n");
     asmPrint("  je  .ifend_%03d\n", lavelIndexLocal);    // ifの条件式が偽の場合jmp
     gen(node->expr2);
@@ -252,7 +254,7 @@ void gen(Node_t *node) {
   case ND_WHILE:{
     asmPrint(".while_%03d:\n", lavelIndexLocal);
     gen(node->expr1);
-    popPrint("  pop rax\n");
+    popPrint("rax");
     asmPrint("  cmp rax, 0\n");
     asmPrint("  je  .whileend_%03d\n", lavelIndexLocal);    // whileの条件式が偽の場合jmp
     gen(node->expr2);
@@ -269,7 +271,7 @@ void gen(Node_t *node) {
     if(node->expr2 != NULL){
       gen(node->expr2);
     }
-    popPrint("  pop rax\n");
+    popPrint("rax");
     asmPrint("  cmp rax, 0\n");
     asmPrint("  je  .forend_%03d\n", lavelIndexLocal);    // forの条件式が偽の場合jmp
     
@@ -285,22 +287,24 @@ void gen(Node_t *node) {
   case ND_RETURN:{
     // returnは右方方向の木構造しかない
     gen(node->expr2);
-    popPrint("  pop rax\n");
+    popPrint("rax");
     asmPrint("  #エピローグ\n");
     asmPrint("  mov rsp, rbp\n");
-    popPrint("  pop rbp\n");
+    popPrint("rbp");
     asmPrint("  ret\n");
     return;
   }
   case ND_NUM:{
-    pushPrint("  push %d\n", node->val);
+    char buf[8];
+    snprintf(buf, 8, "%d", node->val);
+    pushPrint(buf);
     return;
   }
   case ND_LVAR:{
     gen_lval(node);
-    popPrint("  pop rax\n");
+    popPrint("rax");
     asmPrint("  mov %s, [rax]\n", getRegNameFromSize(node->type));
-    pushPrint("  push rax\n");
+    pushPrint("rax");
     return;
   }
   case ND_ADDR:{
@@ -311,7 +315,7 @@ void gen(Node_t *node) {
   case ND_DEREF:{
     asmPrint("  #ND_DEREF\n");
     gen(node->expr1);
-    popPrint("  pop rax\n");
+    popPrint("rax");
     asmPrint("  mov %s, [rax]\n",  getRegNameFromSize(node->type));
     // asmPrint("  mov rax, [rax]\n");
     asmPrint("  push rax\n");
@@ -323,11 +327,11 @@ void gen(Node_t *node) {
     // 右辺の評価
     gen(node->expr2);
 
-    popPrint("  pop rdi\n");
-    popPrint("  pop rax\n");
+    popPrint("rdi");
+    popPrint("rax");
     // 変数への代入
     asmPrint("  mov [rax], rdi\n");
-    pushPrint("  push rdi\n");
+    pushPrint("rdi");
     return;
   }
   }
@@ -335,8 +339,8 @@ void gen(Node_t *node) {
   gen(node->expr1);
   gen(node->expr2);
 
-  popPrint("  pop rdi\n");  // 右辺
-  popPrint("  pop rax\n");  // 左辺
+  popPrint("rdi");  // 右辺
+  popPrint("rax");  // 左辺
 
   switch (node->kind) {
   case ND_ADD:{
@@ -395,5 +399,5 @@ void gen(Node_t *node) {
   }
   }
 
-  pushPrint("  push rax\n");
+  pushPrint("rax");
 }
