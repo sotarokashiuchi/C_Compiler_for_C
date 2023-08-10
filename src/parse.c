@@ -26,13 +26,14 @@ Identifier_t *identHead = NULL;
  * relational = add ("<" add | "<=" add | ">" add | ">=" add)*
  * add        = mul ("+" mul | "-" mul)*
  * mul        = unary ("*" unary | "/" unary)*
- * unary      = "+"? primary
-							| "-"? primary
+ * unary      = "+"? postfix
+							| "-"? postfix
 							| "*" unary
 							| "&" unary
 							| "sizeof" unary
- * primary    = num | ident | funcCall | "(" expr ")"
- * funcCall 	= ident ("(" expr? | expr ("," expr)* ")")
+ * postfix 		= primary ( "[" expr "]" | "(" argument ")" )*
+ * primary    = num | ident | "(" expr ")"
+ * argument 	= expr? | expr ("," expr)*
  */
 
 // program    = funcDefine*
@@ -59,16 +60,18 @@ Node_t* relational(void);
 Node_t* add(void);
 // mul        = unary ("*" unary | "/" unary)*
 Node_t* mul(void);
-// unary      = "+"? primary
-// 						| "-"? primary
+// unary      = "+"? postfix
+// 						| "-"? postfiz
 // 						| "*" unary
 // 						| "&" unary
 //						| "sizeof" unary
 Node_t* unary();
-// primary    = num | ident | funcCall | "(" expr ")"
+// postfix 		= primary ( "[" expr "]" | "(" argument ")" )*
+Node_t* postfix(void);
+// primary    = num | ident | "(" expr ")"
 Node_t* primary();
-// funcCall 	= ident ("(" expr? | expr ("," expr)* ")")
-Node_t *funcCall(void);
+// argument 	= "(" expr? | expr ("," expr)* ")"
+Node_t *argument(void);
 
 /// @brief 新しいType_tを作成する
 /// @param dataType 
@@ -528,10 +531,10 @@ Node_t *mul(void){
 Node_t* unary(){
   DEBUG_WRITE("\n");
 	if(consume(TK_RESERVED, "+")){
-		return primary();
+		return postfix();
 	}
 	if(consume(TK_RESERVED, "-")){
-		return new_node(ND_SUB, new_node_num(0), primary(), NULL, NULL, NULL, NULL);
+		return new_node(ND_SUB, new_node_num(0), postfix(), NULL, NULL, NULL, NULL);
 	}
 	if(consume(TK_RESERVED, "&")){
 		return new_node(ND_ADDR, unary(), NULL, NULL, NULL, NULL, NULL);
