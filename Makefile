@@ -20,7 +20,10 @@ codegen.o: ./src/codegen.c $(INCLUDEOBJ)
 test: 9cc
 	./test.sh
 
+debug: 9cc
+	DEBUG=1 ./test.sh
+
 clean:
 	rm -f 9cc *.o *~ tmp*
 
-.PHONY: test clean
+.PHONY: test clean debug

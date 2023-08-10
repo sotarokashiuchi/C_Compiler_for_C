@@ -1,18 +1,14 @@
 #!/bin/bash
 sub_assert() {
-  option="$1"
-  expected="$2"
-  input="$3"
+  expected="$1"
+  input="$2"
 
-  if [ "$option" = "0" ]; then
-    ./9cc "$input" > tmp.s
-  else
-    echo "******************************** [information] ********************************"
-    echo "Input:$input"
-    echo "********************************** [compile] **********************************"
-      CC_DEBUG=1 ./9cc "$input" > tmp.s
-    echo "********************************* [assemble] **********************************"
-  fi
+  ./9cc "$input" > tmp.s
+  echo "******************************** [information] ********************************"
+  echo "Input:$input"
+  echo "********************************** [compile] **********************************"
+    CC_DEBUG=1 ./9cc "$input" > tmp.s
+  echo "********************************* [assemble] **********************************"
   cc -o link.o -c ./src/link.c
   cc -o tmp.o -c tmp.s
   cc -o tmp link.o tmp.o
@@ -33,14 +29,16 @@ sub_assert() {
   
 }
 assert() {
-  simple_test "0" "$1" "$2"
-  # sub_assert "-g" "$1" "$2"
+  if [ "$DEBUG" == "1" ]; then
+    sub_assert "$1" "$2"
+  else
+    simple_test "$1" "$2"
+  fi
 }
 
 simple_test() {
-  option="$1"
-  expected="$2"
-  input="$3"
+  expected="$1"
+  input="$2"
 
   CC_DEBUG=0 ./9cc "$input" > tmp.s 2> /dev/null
   cc -o link.o -c ./src/link.c 2> /dev/null
@@ -54,8 +52,6 @@ simple_test() {
   else
     echo -e "\e[41mERR\e[0m $(echo $input | sed 's/\n\s//g') => \e[31m$actual\e[0m" 
   fi
-  
-  
 }
 
 # assert 理想の実行結果 入力データ
@@ -71,7 +67,7 @@ int main(){
   int x;
   int *y;
   int z;
-  y# = &x;
+  y = &x;
   *y = 5;
   z = *y;
   return z;
@@ -148,18 +144,18 @@ int main(){
 "
 
 
-# assert "5" "
-# int inc(int x){
-#   x=x+1;
-#   return x;
-# }
+assert "5" "
+int inc(int x){
+  x=x+1;
+  return x;
+}
 
-# int main(){
-#   int x;
-#   x=4;
-#   return inc(x);
-# }
-# "
+int main(){
+  int x;
+  x=4;
+  return inc(x);
+}
+"
 
 assert "4" "
 int main(){
