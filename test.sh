@@ -26,7 +26,7 @@ sub_assert() {
   else
     echo "12345678901234567890"
     echo "$input => $expected expected, but got $actual"
-    # exit 1
+    exit 1
   fi
   
   echo ""
