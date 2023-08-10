@@ -20,6 +20,7 @@ void popPrint(const char *p){
   // va_start(ap, fmt);
   alignmentCount -= 8;
   // vprintf(fmt, ap);
+  printf("  add rsp, 8\n");
   printf("  pop %s\n", p);
 }
 
@@ -29,6 +30,7 @@ void pushPrint(const char *p){
   alignmentCount += 8;
   // vprintf(fmt, ap);
   printf("  push %s\n", p);
+  printf("  sub rsp, 8\n");
 }
 
 void asmPrint(char *fmt, ...){
@@ -101,9 +103,9 @@ char* gen_lval_name(Node_t *node){
 /// @param byte 揃えたいアライメントの境界を指定
 int setAlignment(int byte){
   int displacement = alignmentCount%byte;
-  // printf("#alignmentCount = %d\n", alignmentCount);
   alignmentCount += displacement;
-  asmPrint("  sub rsp, %d\n", displacement);
+  // asmPrint("  sub rsp, %d\n", displacement);
+  return 0;
   return displacement;
 }
 
@@ -170,7 +172,8 @@ void gen(Node_t *node) {
     alignmentCount = 8;
     asmPrint("%s:\n", gen_lval_name(node));
     asmPrint("  #プロローグ\n");
-    pushPrint("rbp\n");
+    // pushPrint("rbp\n");
+    printf("  push rbp\n");
     asmPrint("  mov rbp, rsp\n");
     asmPrint("  sub rsp, %d\n", local_variable_stack);
     if(node->vector != NULL){
@@ -290,7 +293,8 @@ void gen(Node_t *node) {
     popPrint("rax");
     asmPrint("  #エピローグ\n");
     asmPrint("  mov rsp, rbp\n");
-    popPrint("rbp");
+    // popPrint("rbp");
+    printf("  pop rbp\n");
     asmPrint("  ret\n");
     return;
   }

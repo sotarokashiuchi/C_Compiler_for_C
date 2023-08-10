@@ -20,7 +20,7 @@ sub_assert() {
     echo "$input => $actual"
     echo "successful!!"
   else
-    echo "12345678901234567890"
+    # echo "12345678901234567890"
     echo "$input => $expected expected, but got $actual"
     exit 1
   fi
@@ -214,5 +214,70 @@ int main(){
 }
 "
 
+assert "1" "
+int main(){
+  int x;
+  x = 8;
+  return x%7;
+}
+"
+
+assert "55" "
+int main(){
+  int i;
+  int x;
+  x=0;
+  for(i=0; i<11; i=i+1){
+    x = x+i;
+  }
+  return x;
+}
+"
+
+assert "4" "
+int main(){
+  int x[3];
+  int i;
+  i = 0;
+  x[i] = 4;
+  return x[i];
+}
+"
+
+assert "0" " 
+int main() {
+  intPrint(1);
+  int base;     
+  base = 10000;
+  int n;         
+  n = 100;
+  int i;                
+  int temp;             
+  int out;              
+  int denom;            
+  int numerator[8401];  
+  intPrint(2);
+
+  for (i = 0; i < n; i=i+1) {
+    numerator[i] = base / 5;
+    intPrint(i);
+  }
+  out = 0;
+  for (n = 100; n > 0; n = n-14) {
+    temp = 0;
+    for (i = n - 1; i > 0; i=i-1) {
+      intPrint(i);
+      denom = 2 * i - 1;
+      temp = temp * i + numerator[i] * base;
+      numerator[i] = temp % denom;
+      temp = temp / denom;
+    }
+    intPrint(out + temp / base);
+    out = temp % base;
+  }
+  return 0;
+}
+"
+ 
 
 echo All finished
