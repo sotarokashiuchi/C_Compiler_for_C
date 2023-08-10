@@ -552,29 +552,54 @@ Node_t* unary(){
 			return new_node_num(8);
 		}
 	}
-	return primary();
+	return postfix();
+}
+
+Node_t* postfix(void){
+	Node_t* node = primary();
+	Types_t* type;
+
+
+	for( ; ; ){
+		if(consume(TK_RESERVED, "[")){
+			// 配列
+			// node->type = ND_LVAR;
+			// expect_number();
+			// expect(TK_RESERVED, "]");
+			// continue;
+		} else if(consume(TK_RESERVED, "(")){
+			// 関数呼び出し
+			node->kind = ND_FUNCCALL;
+			node->vector = parmlist();
+			expect(TK_RESERVED, ")");
+			// 複数回呼べない()
+			continue;
+		}
+		return node;
+	}
 }
 
 Node_t *primary() {
   DEBUG_WRITE("\n");
 	Token_t *tok = consume_ident();
 	if(tok != NULL){
-		if(consume(TK_RESERVED, "(")){
-			// function
-			back_token(tok);
-			return funcCall();
+		// 識別子の読み込み
+		Node_t *node = new_node(ND_LVAR, NULL, NULL, NULL, NULL, NULL, NULL);
+		Identifier_t *identifier = find_lvar(tok);
+		if(identifier){
+			// 既に識別子が存在する
+			node->identifier = identifier;
+			node->type = identifier->type;
+			return node;
 		}else{
-			// 変数
-			Node_t *node = new_node(ND_LVAR, NULL, NULL, NULL, NULL, NULL, NULL);
-			Identifier_t *identifier = find_lvar(tok);
-			if(identifier){
-				// 既に識別子が存在する
-				node->identifier = identifier;
-				node->type = identifier->type;
+			if(peek(TK_RESERVED, "(")){
+				// プロトタイプ宣言が実装されると必要ない
+				
+				node->identifier = new_identifier(ND_FUNCCALL, tok, new_type(DT_FUNC, NULL))->identifier;
+				node->type = node->identifier->type;
 				return node;
-			}else{
-				parseError("宣言されていない変数です\n");
 			}
+			parseError("%*s 宣言されていない変数です\n", tok->len, tok->str);
 		}
 	}
 	
@@ -616,25 +641,15 @@ Types_t* typeSpec(void){
 	return type;
 }
 
-Node_t *funcCall(void){
+Node_t *argument(void){
 	DEBUG_WRITE("\n");
 	Node_t *node;
 	Token_t *tok;
-	
-  if((tok = consume_ident()) != NULL){
-		Vector_t *vector;
-		if(consume(TK_RESERVED, "(")){
-			node = new_identifier(ND_FUNCCALL, tok, NULL);
 
-			if(!consume(TK_RESERVED, ")")){
-				node->vector = parmlist();
-				expect(TK_RESERVED, ")");
-			}
-			
-			return node;
-		}else{
-			back_token(tok);
-			return NULL;
-		}
+	if(!consume(TK_RESERVED, ")")){
+		node->vector = parmlist();
+		expect(TK_RESERVED, ")");
 	}
+	
+	return node;
 }
