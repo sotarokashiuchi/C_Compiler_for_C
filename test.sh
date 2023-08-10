@@ -170,17 +170,15 @@ int main(){
 "
 
 
-assert "3" "
+assert "5" "
 int main(){
   int x[10];
   *x = 1;
-  *(x+1) = 3;
-  return *(x+1);
+  *(x+1) = 2;
+  int *p;
+  p = x;
+  return *(x+1) + *p + *(p+1);
 }
 "
-
-  # *(x+1) = 2;
-  # p = x;
-  # return *p + *(p+1);
 
 echo All finished
