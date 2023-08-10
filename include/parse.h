@@ -9,6 +9,7 @@ typedef enum{
   ND_SUB, 				// -
   ND_MUL, 				// *
   ND_DIV, 				// /
+  ND_MOD,         // %
   ND_ASSIGN,      // =
   ND_LVAR,        // ローカル変数
   ND_EQUALTO,     // ==

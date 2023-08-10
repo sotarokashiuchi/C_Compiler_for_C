@@ -363,6 +363,12 @@ void gen(Node_t *node) {
     asmPrint("  idiv rdi\n");
     break;
   }
+  case ND_MOD:{
+    asmPrint("  cqo\n");
+    asmPrint("  idiv rdi\n");
+    asmPrint("  mov rax, rdx\n");
+    break;
+  }
   case ND_EQUALTO:{
     asmPrint("  cmp rax, rdi\n");
     asmPrint("  sete al\n");

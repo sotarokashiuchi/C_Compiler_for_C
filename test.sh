@@ -189,4 +189,30 @@ int main(){
 }
 "
 
+
+assert "3" "
+int main(){
+  int x[10][3];
+  x[0][2] = 3;
+  return x[0][2];
+}
+"
+
+assert "5" "
+int main(){
+  int x;
+  x = 12;
+  return x%7;
+}
+"
+
+assert "1" "
+int main(){
+  int x;
+  x = 8;
+  return x%7;
+}
+"
+
+
 echo All finished

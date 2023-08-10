@@ -25,7 +25,7 @@ Identifier_t *identHead = NULL;
  * equality   = relational ("==" relational | "!=" relational)*
  * relational = add ("<" add | "<=" add | ">" add | ">=" add)*
  * add        = mul ("+" mul | "-" mul)*
- * mul        = unary ("*" unary | "/" unary)*
+ * mul        = unary ("*" unary | "/" unary | "%" unary)*
  * unary      = "+"? postfix
 							| "-"? postfix
 							| "*" unary
@@ -522,7 +522,9 @@ Node_t *mul(void){
 			node = new_node(ND_MUL, node, unary(), NULL, NULL, NULL, NULL);
 		} else if(consume(TK_RESERVED, "/")){
 			node = new_node(ND_DIV, node, unary(), NULL, NULL, NULL, NULL);
-		} else{
+		} else if(consume(TK_RESERVED, "%")){
+			node = new_node(ND_MOD, node, unary(), NULL, NULL, NULL, NULL);
+		} else {
 			return node;
 		}
 	}
@@ -562,8 +564,6 @@ Node_t* postfix(void){
 	for( ; ; ){
 		if(consume(TK_RESERVED, "[")){
 			// 配列
-			// type = new_type(DT_ARRAY, type);
-			// node->type = type;
 			node = new_node(ND_ADD, node, expr(), NULL, NULL, NULL, NULL);
 			node = new_node(ND_DEREF, node, NULL, NULL, NULL, NULL, NULL);
 			expect(TK_RESERVED, "]");
