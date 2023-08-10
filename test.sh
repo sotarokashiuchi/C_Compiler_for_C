@@ -111,14 +111,6 @@ int main(){
 }
 "
 
-# debug_assert "0" "
-# int main(){
-#   int x[10];
-#   int *p;
-#   *x = 1;
-#   return 0;
-# }
-# "
 
 debug_assert "3" "
 int add(int x, int y){
@@ -151,17 +143,27 @@ int main(){
 # }
 # "
 
-# debug_assert "4" "
-# int main(){
-#   int *p;
-#   int *q;
-#   int x;
-#   getAlloc(&p, 1, 2, 4, 8);
-#   q = p+2;
-#   x = *q;
-#   return *q;
-# }
-# "
+debug_assert "4" "
+int main(){
+  int *p;
+  int *q;
+  int x;
+  getAlloc(&p, 1, 2, 4, 8);
+  q = p+2;
+  x = *q;
+  return *q;
+}
+"
+
+
+debug_assert "0" "
+int main(){
+  int x[10];
+  int *p;
+  *x = 1;
+  return 0;
+}
+"
 
   # *(x+1) = 2;
   # p = x;

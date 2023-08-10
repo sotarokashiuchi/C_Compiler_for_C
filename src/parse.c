@@ -227,7 +227,6 @@ Node_t* new_identifier(NodeKind kind, Token_t *tok, Types_t *type){
 		DEBUG_WRITE("sizeofType = %d\n", sizeofType(type));
 		int size = sizeofType(type);
 		identifier->offset = identHead->offset + (size>=8 ? size : 8);
-		// identifier->offset = identHead->offset + 8;
 	}
 	if(kind==ND_FUNCDEFINE || kind==ND_FUNCCALL){
 		identifier->offset = 0;
@@ -294,6 +293,51 @@ Node_t* funcDefine(){
 	}
 }
 
+Node_t* varDefine(void){
+	Types_t* type;
+	Token_t* tok;
+	Token_t* startToken = token;
+	Node_t* node;
+
+	
+	if(consume(TK_KEYWORD, "int")){
+		type = new_type(DT_INT, NULL);
+	} else {
+		todoError("まだ実装していない基本型です\n");
+	}
+	
+	// アスタリスクをパース
+	while(consume(TK_RESERVED, "*")){
+		type = new_type(DT_PTR, type);
+	}
+	
+	tok = consume_ident();
+	assert(tok!=NULL && "変数名がない");
+
+	// 配列をパース
+	while(consume(TK_RESERVED, "[")){
+		type = new_type(DT_ARRAY, type);
+		type->array_size = expect_number();
+		expect(TK_RESERVED, "]");
+	}
+	
+	expect(TK_RESERVED, ";");
+
+	return new_identifier(ND_LVAR, tok, type);
+
+	// // 識別子を検索する
+	// if(consume(TK_RESERVED, "*")){
+	// 	// ポインタ派生
+	// 	if((tok = consume_ident()) != NULL){
+	// 		return new_type(DT_PTR, varDefine());
+	// 	} else {
+	// 		type = new_type(DT_PTR, varDefine());
+	// 	}
+	// } else if(consume(TK_RESERVED, "(")){
+	// 	// 優先度 (未実装)
+	// }
+}
+
 Node_t* stmt(void){
   DEBUG_WRITE("\n");
 	Node_t *node;
@@ -303,22 +347,26 @@ Node_t* stmt(void){
 
 	// 変数宣言 (int *a[5] などは非対応)
 	if(peek(TK_KEYWORD, "int")){
-		type = typeSpec();
-  	if((tok = consume_ident()) != NULL){
-			node = new_identifier(ND_LVAR, tok, type);
+		return varDefine();
+		// type = typeSpec();
+  	// if((tok = consume_ident()) != NULL){
+		// 	node = new_identifier(ND_LVAR, tok, NULL);
 			
-			if(consume(TK_RESERVED, "[")){
-				// 配列の宣言
-				node->type->array_size = expect_number();
-				expect(TK_RESERVED, "]");
-			}
+		// 	if(consume(TK_RESERVED, "[")){
+		// 		// 配列の宣言
+		// 		new_type(DT_ARRAY, type);
+		// 		type->array_size = expect_number();
+		// 		expect(TK_RESERVED, "]");
+		// 	}
+			
+		// 	node->type = node->identifier->type = type;
 
-			expect(TK_RESERVED, ";");
-			return node;
-		}else{
-			fprintf(stderr, "パーサできません\n");
-			exit(1);
-		}
+		// 	expect(TK_RESERVED, ";");
+		// 	return node;
+		// }else{
+		// 	fprintf(stderr, "パーサできません\n");
+		// 	exit(1);
+		// }
 	}
 	
 	if (consume(TK_KEYWORD, "return")) {
