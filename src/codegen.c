@@ -101,6 +101,10 @@ void gen(Node_t *node) {
   // ローカル変数にアセンブリのラベル識別用の変数を定義することで、
   // 再帰的に読み込んでも値を保持できる
   int lavelIndexLocal = labelIndex++;
+  if(node->type != NULL && node->type->dataType == DT_ARRAY){
+    gen_lval(node);
+    return;
+  }
   switch (node->kind){
   case ND_FUNCCALL:{
     int numOfArgu = 0;

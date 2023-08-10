@@ -159,11 +159,10 @@ int main(){
 debug_assert "1" "
 int main(){
   int x[10];
+  *x = 1;
   return 1;
 }
 "
-  # *x = 1;
-  # return *x;
 
   # *(x+1) = 2;
   # p = x;
