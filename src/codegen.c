@@ -7,6 +7,14 @@ static int labelIndex = 0;
 // popとpushの回数を数える
 static int alignmentCount = 0;
 
+void codegenError(char *fmt, ...){
+	va_list ap;
+	va_start(ap, fmt);
+	fprintf(stderr, "\x1b[31mParse Error:\x1b[0m");
+	vfprintf(stderr, fmt, ap);
+	exit(1);
+}
+
 void popPrint(char *fmt, ...){
   va_list ap;
   va_start(ap, fmt);
@@ -69,7 +77,7 @@ void gen_lval(Node_t *node){
   } else if(node->kind == ND_DEREF){
     gen(node->expr1);
   } else if(node->kind != ND_LVAR){
-    fprintf(stderr, "代入の左辺値が変数ではありません\n");
+    codegenError("代入の左辺値が変数ではありません\n");
     return;
   }
 }

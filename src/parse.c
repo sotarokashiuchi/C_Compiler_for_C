@@ -557,16 +557,17 @@ Node_t* unary(){
 
 Node_t* postfix(void){
 	Node_t* node = primary();
-	Types_t* type;
-
+	Types_t* type = NULL;
 
 	for( ; ; ){
 		if(consume(TK_RESERVED, "[")){
 			// 配列
-			// node->type = ND_LVAR;
-			// expect_number();
-			// expect(TK_RESERVED, "]");
-			// continue;
+			// type = new_type(DT_ARRAY, type);
+			// node->type = type;
+			node = new_node(ND_ADD, node, expr(), NULL, NULL, NULL, NULL);
+			node = new_node(ND_DEREF, node, NULL, NULL, NULL, NULL, NULL);
+			expect(TK_RESERVED, "]");
+			continue;
 		} else if(consume(TK_RESERVED, "(")){
 			// 関数呼び出し
 			node->kind = ND_FUNCCALL;
@@ -594,7 +595,6 @@ Node_t *primary() {
 		}else{
 			if(peek(TK_RESERVED, "(")){
 				// プロトタイプ宣言が実装されると必要ない
-				
 				node->identifier = new_identifier(ND_FUNCCALL, tok, new_type(DT_FUNC, NULL))->identifier;
 				node->type = node->identifier->type;
 				return node;
