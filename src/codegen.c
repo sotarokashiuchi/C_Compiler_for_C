@@ -18,7 +18,7 @@ void codegenError(char *fmt, ...){
 void popPrint(const char *p){
   // va_list ap;
   // va_start(ap, fmt);
-  alignmentCount -= 8;
+  alignmentCount += 8;
   // vprintf(fmt, ap);
   printf("  pop %s\n", p);
 }
@@ -26,7 +26,7 @@ void popPrint(const char *p){
 void pushPrint(const char *p){
   // va_list ap;
   // va_start(ap, fmt);
-  alignmentCount += 8;
+  alignmentCount -= 8;
   // vprintf(fmt, ap);
   printf("  push %s\n", p);
 }
@@ -100,6 +100,7 @@ char* gen_lval_name(Node_t *node){
 /// @brief アライメントを正しくする
 /// @param byte 揃えたいアライメントの境界を指定
 int setAlignment(int byte){
+  assert(alignmentCount>=0 && "over the aligmentCount buf\n");
   int displacement = alignmentCount%byte;
   alignmentCount += displacement;
   asmPrint("  sub rsp, %d\n", displacement);
@@ -166,7 +167,7 @@ void gen(Node_t *node) {
     return;
   }
   case ND_FUNCDEFINE:{
-    alignmentCount = 8;
+    alignmentCount = local_variable_stack+8;
     asmPrint("%s:\n", gen_lval_name(node));
     asmPrint("  #プロローグ\n");
     pushPrint("rbp\n");
