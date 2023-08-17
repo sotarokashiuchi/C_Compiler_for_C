@@ -264,18 +264,22 @@ void gen(Node_t *node) {
   }
   case ND_FOR:{
     if(node->expr1 != NULL){
+      asmPrint("  # for(A; B; C;) {D} :A\n");
       gen(node->expr1);
     }
     asmPrint(".for_%03d:\n", lavelIndexLocal);
     if(node->expr2 != NULL){
+      asmPrint("  # for(A; B; C;) {D} :B\n");
       gen(node->expr2);
     }
     popPrint("rax");
     asmPrint("  cmp rax, 0\n");
     asmPrint("  je  .forend_%03d\n", lavelIndexLocal);    // forの条件式が偽の場合jmp
     
+    asmPrint(  "  # for(A; B; C;) {D} :D\n");
     gen(node->expr4);
     if(node->expr3 != NULL){
+      asmPrint("  # for(A; B; C;) {D} :C\n");
       gen(node->expr3);
     }
     asmPrint("  jmp .for_%03d\n", lavelIndexLocal);
