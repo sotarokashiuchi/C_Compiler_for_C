@@ -209,6 +209,7 @@ void gen(Node_t *node) {
     for( ; ; ){
       gen(vector->node);
       popPrint("rax");
+      asmPrint("###\n");
       if(vector->next == NULL){
         break;
       }
@@ -239,6 +240,8 @@ void gen(Node_t *node) {
     gen(node->expr2);
 
     asmPrint(".ifend_%03d:\n", lavelIndexLocal);
+    // if文は文だから値を返す必要がある？
+    pushPrint("rax");
     return;
   }
   case ND_WHILE:{
@@ -253,12 +256,15 @@ void gen(Node_t *node) {
     asmPrint("  jmp .while_%03d\n", lavelIndexLocal);
 
     asmPrint(".whileend_%03d:\n", lavelIndexLocal);
+    // while文は文だから値を返す必要がある？
+    pushPrint("rax");
     return;
   }
   case ND_FOR:{
     if(node->expr1 != NULL){
       asmPrint("  # for(A; B; C;) {D} :A\n");
       gen(node->expr1);
+      popPrint("rax");
     }
     asmPrint(".for_%03d:\n", lavelIndexLocal);
     if(node->expr2 != NULL){
@@ -274,10 +280,13 @@ void gen(Node_t *node) {
     if(node->expr3 != NULL){
       asmPrint("  # for(A; B; C;) {D} :C\n");
       gen(node->expr3);
+      popPrint("rax");
     }
     asmPrint("  jmp .for_%03d\n", lavelIndexLocal);
 
     asmPrint(".forend_%03d:\n", lavelIndexLocal);
+    // for文は文だから値を返す必要がある？
+    pushPrint("rax");
     return;
   }
   case ND_RETURN:{

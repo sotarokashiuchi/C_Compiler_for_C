@@ -8,7 +8,7 @@
 #include <assert.h>
 
 /* マクロ定義 */
-// ローカル変数用のスタックサイズ 26文字 * 8byte
+// ローカル変数用のスタックサイズ 26文字 * 8byte (funcCallの都合により16byte倍数でないとだめ)
 // #define local_variable_stack (26*8)
 #define local_variable_stack (208)
 
