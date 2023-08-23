@@ -253,6 +253,31 @@ int main(){
 
 assert "0" "
 int main(){
+	int i;
+	for(i=0; i<10; i=i+1){
+		intPrint(i);
+	}
+	return 0;
+}
+"
+
+assert "9" "
+int main(){
+	int x;
+	int y;
+	int z;
+	x=3;
+	y=5;
+	if(y>x){
+		z=9;
+	}
+	return z;
+}
+"
+
+
+assert "0" "
+int main(){
   int i;
   int j;
   int x[10];
@@ -275,11 +300,54 @@ int main(){
       }
     }
   }
-  x[9] = -1;
+  x[9] = 99;
   sortPrint(x);
+  if(x[0] != 0){
+	  return -1;
+  }
+  if(x[1] != 1){
+	  return -1;
+  }
+  if(x[2] != 2){
+	  return -1;
+  }
+  if(x[3] != 3){
+	  return -1;
+  }
   return 0;
 }
 "
+
+
+assert "0" "
+int main(){
+  int i;
+  int j;
+  int x[10];
+  x[0] = 8;
+  x[1] = 7;
+  x[2] = 6;
+  x[3] = 5;
+  x[4] = 4;
+  x[5] = 3;
+  x[6] = 2;
+  x[7] = 1;
+  x[8] = 0;
+  int tmp;
+  for(i=0; i<8; i=i+1){
+    for(j=i+1; j<9; j=j+1){
+      if(x[i] > x[j]){
+        tmp = x[j];
+        x[j] = x[i];
+        x[i] = tmp;
+      }
+    }
+  }
+  x[9] = 99;
+  return 0;
+}
+"
+
 
 # assert "0" " 
 # int main() {
