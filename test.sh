@@ -326,6 +326,38 @@ int main(){
 }
 "
 
+assert "5" "
+int main(){
+	int i;
+	int j;
+	i = 0;
+	j = 0;
+	if(i==2){
+		return 0;
+	} else if (j==2){
+		return 0;
+	} else {
+		return 5;
+	}
+}
+"
+
+assert "0" "
+int main(){
+	int i;
+	int j;
+	i = 85;
+	j = 0;
+	if(80<=i){
+		j=0;
+	} else if (60<=i){
+		j=1;
+	} else {
+		j=2;
+	}
+	return j;
+}
+"
 
 "0" "
 int main(){

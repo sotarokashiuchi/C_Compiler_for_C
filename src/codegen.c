@@ -218,16 +218,20 @@ void gen(Node_t *node) {
     return;
   }
   case ND_ELSE:{
+    asmPrint("  # if(A) {B} else {C} :A\n");
     gen(node->expr1->expr1);
     popPrint("rax");
     asmPrint("  cmp rax, 0\n");
     asmPrint("  je .else_%03d\n", lavelIndexLocal);
+    asmPrint("  # if(A) {B} else {C} :B\n");
     gen(node->expr1->expr2);
     asmPrint("  jmp .ifelseend_%03d\n",lavelIndexLocal);
-
     asmPrint(".else_%03d:\n", lavelIndexLocal);
+    asmPrint("  # if(A) {B} else {C} :C\n");
     gen(node->expr2);
     asmPrint(".ifelseend_%03d:\n", lavelIndexLocal);
+    // if-else文はセットで文だから値を返す必要がある？
+    pushPrint("rax");
     return;
   }
   case ND_IF:{
