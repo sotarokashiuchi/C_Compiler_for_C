@@ -20,7 +20,7 @@ void popPrint(const char *p){
   // va_start(ap, fmt);
   alignmentCount += 8;
   // vprintf(fmt, ap);
-  printf("  pop %s\n", p);
+  printf("  pop %s	# %d\n", p, alignmentCount-local_variable_stack);
 }
 
 void pushPrint(const char *p){
@@ -28,7 +28,7 @@ void pushPrint(const char *p){
   // va_start(ap, fmt);
   alignmentCount -= 8;
   // vprintf(fmt, ap);
-  printf("  push %s\n", p);
+  printf("  push %s	# %d\n", p, alignmentCount-local_variable_stack);
 }
 
 void asmPrint(char *fmt, ...){
@@ -54,18 +54,6 @@ const char* getRegNameFromSize(Types_t *type){
   if(size==8){
     return "rax";
   }
-}
-
-void popSizePrint(int size){
-  alignmentCount -= size;
-  // printf("  pop %s", getRegNameFromSize(size));
-  popPrint("rax");
-}
-
-void pushSizePrint(int size){
-  alignmentCount += size;
-  // printf("  push %s", getRegNameFromSize(size));
-  pushPrint("  push rax\n");
 }
 
 
@@ -242,10 +230,12 @@ void gen(Node_t *node) {
     return;
   }
   case ND_IF:{
+    asmPrint("  # if(A) {B} :A\n");
     gen(node->expr1);
     popPrint("rax");
     asmPrint("  cmp rax, 0\n");
     asmPrint("  je  .ifend_%03d\n", lavelIndexLocal);    // ifの条件式が偽の場合jmp
+    asmPrint("  # if(A) {B} :B\n");
     gen(node->expr2);
 
     asmPrint(".ifend_%03d:\n", lavelIndexLocal);
@@ -253,10 +243,12 @@ void gen(Node_t *node) {
   }
   case ND_WHILE:{
     asmPrint(".while_%03d:\n", lavelIndexLocal);
+    asmPrint("  # while(A) {B} :A\n");
     gen(node->expr1);
     popPrint("rax");
     asmPrint("  cmp rax, 0\n");
     asmPrint("  je  .whileend_%03d\n", lavelIndexLocal);    // whileの条件式が偽の場合jmp
+    asmPrint("  # while(A) {B} :B\n");
     gen(node->expr2);
     asmPrint("  jmp .while_%03d\n", lavelIndexLocal);
 
@@ -322,7 +314,8 @@ void gen(Node_t *node) {
     popPrint("rax");
     asmPrint("  mov %s, [rax]\n",  getRegNameFromSize(node->type));
     // asmPrint("  mov rax, [rax]\n");
-    asmPrint("  push rax\n");
+    // asmPrint("  push rax\n");
+    pushPrint("rax");
     return;
   }
   case ND_ASSIGN:{

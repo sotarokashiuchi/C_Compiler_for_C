@@ -39,7 +39,7 @@ void intPrint(int x){
 }
 
 void sortPrint(int *x){
-  for(int i=0; x[i]!=-1; i++){
+  for(int i=0; x[i]!=99; i++){
     printf("%d ", x[i]);
   }
 }

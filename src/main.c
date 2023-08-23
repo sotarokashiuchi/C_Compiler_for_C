@@ -23,7 +23,7 @@ int main(int argc, char **argv){
   identHead = &dummy;
 
   /* トークナイズ */
-	token = tokenize();
+  token = tokenize();
 
   /* パーサ */
 	program();

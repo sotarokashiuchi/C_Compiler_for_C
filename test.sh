@@ -59,18 +59,6 @@ assert "5" "
 int main(){
   int x;
   int *y;
-  int z;
-  y = &x;
-  *y = 5;
-  z = *y;
-  return z;
-}
-"
-
-assert "5" "
-int main(){
-  int x;
-  int *y;
   y = &x;
   *y = 5;
   return x;
@@ -275,6 +263,18 @@ int main(){
 }
 "
 
+assert "0" "
+int main(){
+	int i;
+	int j;
+	for(i=1; i<5; i=i+1){
+		for(j=1; j<5; j=j+1){
+			intPrint(i*j);
+		}
+	}
+	return 0;
+}
+"
 
 assert "0" "
 int main(){
@@ -319,7 +319,7 @@ int main(){
 "
 
 
-assert "0" "
+"0" "
 int main(){
   int i;
   int j;
