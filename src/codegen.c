@@ -59,7 +59,7 @@ const char* getRegNameFromSize(Types_t *type){
 
 /// @brief 左辺値の評価(アドレス計算)
 /// @param node 評価対象のノード
-void gen_lval(Node_t *node){
+void gen_address(Node_t *node){
   if(node->kind == ND_LVAR){
     asmPrint("  mov rax, rbp\n");
     asmPrint("  sub rax, %d\n", node->identifier->offset);
@@ -100,7 +100,7 @@ void gen(Node_t *node) {
   // 再帰的に読み込んでも値を保持できる
   int lavelIndexLocal = labelIndex++;
   if(node->type != NULL && node->type->dataType == DT_ARRAY){
-    gen_lval(node);
+    gen_address(node);
     return;
   }
   switch (node->kind){
@@ -158,7 +158,7 @@ void gen(Node_t *node) {
     alignmentCount = local_variable_stack+8;
     asmPrint("%s:\n", gen_lval_name(node));
     asmPrint("  #プロローグ\n");
-    pushPrint("rbp\n");
+    pushPrint("rbp");
     asmPrint("  mov rbp, rsp\n");
     asmPrint("  sub rsp, %d\n", local_variable_stack);
     if(node->vector != NULL){
@@ -167,7 +167,7 @@ void gen(Node_t *node) {
       int i;
       Vector_t *vector = node->vector;
       for(i=1; ; i++){
-        gen_lval(vector->node);
+	gen_address(vector->node);
         popPrint("rax");
         switch (i){
           case 1:
@@ -310,7 +310,7 @@ void gen(Node_t *node) {
     return;
   }
   case ND_LVAR:{
-    gen_lval(node);
+    gen_address(node);
     popPrint("rax");
     asmPrint("  mov %s, [rax]\n", getRegNameFromSize(node->type));
     pushPrint("rax");
@@ -318,7 +318,7 @@ void gen(Node_t *node) {
   }
   case ND_ADDR:{
     asmPrint("  #ND_ADDR\n");
-    gen_lval(node->expr1);
+    gen_address(node->expr1);
     return;
   }
   case ND_DEREF:{
@@ -333,7 +333,7 @@ void gen(Node_t *node) {
   }
   case ND_ASSIGN:{
     // 左辺の評価
-    gen_lval(node->expr1);
+    gen_address(node->expr1);
     // 右辺の評価
     gen(node->expr2);
 
