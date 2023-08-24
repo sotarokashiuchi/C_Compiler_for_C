@@ -55,6 +55,14 @@ simple_test() {
 }
 
 # assert 理想の実行結果 入力データ
+assert "3" "
+int main(){
+  int x;
+  x = 2*10+3-4*(3+2);
+  return x;
+}
+"
+
 assert "5" "
 int main(){
   int x;
@@ -359,21 +367,40 @@ int main(){
 }
 "
 
-"0" "
+assert "5" "
+int main(){
+	int tmp;
+	int x[5];
+	x[1] = 5;
+	tmp = x[1];
+	return tmp;
+}
+"
+
+assert "5" "
+int main(){
+	int tmp;
+	int i;
+	int x[5];
+	i = 1;
+	x[i] = 5;
+	tmp = x[i];
+	return tmp;
+}
+"
+
+assert "0" "
 int main(){
   int i;
   int j;
   int x[10];
-  x[0] = 8;
-  x[1] = 7;
-  x[2] = 6;
-  x[3] = 5;
-  x[4] = 4;
-  x[5] = 3;
-  x[6] = 2;
-  x[7] = 1;
-  x[8] = 0;
+  for(i=0; i<9; i=i+1){
+	  x[i] = 8-i;
+  }
+
   int tmp;
+  int flags;
+  flags = 0;
   for(i=0; i<8; i=i+1){
     for(j=i+1; j<9; j=j+1){
       if(x[i] > x[j]){
@@ -386,86 +413,45 @@ int main(){
   x[9] = 99;
   sortPrint(x);
   if(x[0] != 0){
-	  return -1;
+	  flags = 1;
   }
   if(x[1] != 1){
-	  return -1;
+	  flags = 1;
   }
   if(x[2] != 2){
-	  return -1;
+	  flags = 1;
   }
   if(x[3] != 3){
-	  return -1;
+	  flags = 1;
   }
-  return 0;
+  return flags;
 }
 "
 
-
-"0" "
+assert "1" "
 int main(){
-  int i;
-  int j;
-  int x[10];
-  x[0] = 8;
-  x[1] = 7;
-  x[2] = 6;
-  x[3] = 5;
-  x[4] = 4;
-  x[5] = 3;
-  x[6] = 2;
-  x[7] = 1;
-  x[8] = 0;
-  int tmp;
-  for(i=0; i<8; i=i+1){
-    for(j=i+1; j<9; j=j+1){
-      if(x[i] > x[j]){
-        tmp = x[j];
-        x[j] = x[i];
-        x[i] = tmp;
-      }
-    }
-  }
-  x[9] = 99;
-  return 0;
+	int x[10];
+	x[0] = 5;
+	x[1] = 8;
+	int i;
+	i = 0;
+	if(x[i] < x[i+1]){
+		x[i] = 1;
+	}
+	return x[0];
 }
 "
 
+assert "6" "
+int main(){
+	int x;
+	{
+		x = 3;
+		x = 2*x;
+	}
+	return x;
+}
+"
 
-# assert "0" " 
-# int main() {
-#   intPrint(1);
-#   int base;     
-#   base = 10000;
-#   int n;         
-#   n = 100;
-#   int i;                
-#   int temp;             
-#   int out;              
-#   int denom;            
-#   int numerator[8401];  
-#   intPrint(2);
-
-#   for (i = 0; i < n; i=i+1) {
-#     numerator[i] = base / 5;
-#     intPrint(i);
-#   }
-#   out = 0;
-#   for (n = 100; n > 0; n = n-14) {
-#     temp = 0;
-#     for (i = n - 1; i > 0; i=i-1) {
-#       intPrint(i);
-#       denom = 2 * i - 1;
-#       temp = temp * i + numerator[i] * base;
-#       numerator[i] = temp % denom;
-#       temp = temp / denom;
-#     }
-#     intPrint(out + temp / base);
-#     out = temp % base;
-#   }
-#   return 0;
-# }
-# "
- 
 
 echo All finished
