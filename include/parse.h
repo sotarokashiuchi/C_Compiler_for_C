@@ -29,6 +29,7 @@ typedef enum{
   ND_ADDR,        // アドレス演算子
   ND_DEREF,       // 関節演算子
   ND_NUM, 				// 整数
+  ND_STMT,	  // 文
 } NodeKind;
 
 typedef enum {

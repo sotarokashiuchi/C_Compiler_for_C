@@ -434,6 +434,7 @@ Node_t* stmt(void){
 		while(!consume(TK_RESERVED, "}")){
 			vector = new_vector(stmt(), vector);
 		}
+		node = new_node(ND_STMT, node, NULL, NULL, NULL, NULL, NULL);
 		return node;
 	}
 
@@ -582,26 +583,26 @@ Node_t* postfix(void){
 
 Node_t *primary() {
   DEBUG_WRITE("\n");
-	Token_t *tok = consume_ident();
-	if(tok != NULL){
-		// 識別子の読み込み
-		Node_t *node = new_node(ND_LVAR, NULL, NULL, NULL, NULL, NULL, NULL);
-		Identifier_t *identifier = find_lvar(tok);
-		if(identifier){
-			// 既に識別子が存在する
-			node->identifier = identifier;
-			node->type = identifier->type;
+  Token_t *tok = consume_ident();
+  if(tok != NULL){
+	  // 識別子の読み込み
+	  Node_t *node = new_node(ND_LVAR, NULL, NULL, NULL, NULL, NULL, NULL);
+	  Identifier_t *identifier = find_lvar(tok);
+	  if(identifier){
+		// 既に識別子が存在する
+		node->identifier = identifier;
+		node->type = identifier->type;
+		return node;
+	  }else{
+		if(peek(TK_RESERVED, "(")){
+			// プロトタイプ宣言が実装されると必要ない
+			node->identifier = new_identifier(ND_FUNCCALL, tok, new_type(DT_FUNC, NULL))->identifier;
+			node->type = node->identifier->type;
 			return node;
-		}else{
-			if(peek(TK_RESERVED, "(")){
-				// プロトタイプ宣言が実装されると必要ない
-				node->identifier = new_identifier(ND_FUNCCALL, tok, new_type(DT_FUNC, NULL))->identifier;
-				node->type = node->identifier->type;
-				return node;
-			}
-			parseError("%*s 宣言されていない変数です\n", tok->len, tok->str);
 		}
-	}
+		parseError("%*s 宣言されていない変数です\n", tok->len, tok->str);
+	  }
+  }
 	
   // 次のトークンが"("なら、"(" expr ")"のはず
   if (consume(TK_RESERVED, "(")) {
