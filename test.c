@@ -1,6 +1,8 @@
 #include <stdio.h>
 #include <assert.h>
 #include <stdlib.h>
+#include <dirent.h>
+#include <string.h>
 
 #define TESTCODE_BUF 10000
 #define TESTLINE_BUF 1000
@@ -28,7 +30,7 @@ int code_info(char* buf, int* expect_status, char* file_name){
 	for(p = file_name; *p != '_' && *p != '\0'; p++);
 	assert(*p == '_' && "filed to catch expect status");
 	*expect_status = atoi(++p);
-	printf("expect status = %d\n", *expect_status);
+	// printf("expect status = %d\n", *expect_status);
 	return 0;
 }
 
@@ -58,6 +60,51 @@ int main(int argc, char **argv){
 	// switch test mode
   if(argc == 1){
 		// list mode
+		DIR *dir = NULL;
+		struct dirent *dp =NULL;
+		int case_index = 0;
+
+		for(case_index=1 ; ; case_index++){
+			dir = opendir("./testcase");
+			assert(dir != NULL && "failed to open dir");
+			sprintf(file_name, "case%03d", case_index);
+
+			while((dp = readdir(dir)) != NULL){
+				if(strncmp(dp->d_name, file_name, 7)){
+					continue;
+				}
+
+				printf("%s\t:", dp->d_name);
+
+				code_info(file_name, &expect_status, dp->d_name);
+				fp = fopen(file_name, "r");
+				assert(fp != NULL && "failed to open file");
+
+				read_file(test_code, fp);
+				sprintf(command, "CC_DEBUG=0 ./9cc \"%s\" > tmp.s", test_code);
+				system(command);
+				system("cc -o link.o -c ./src/link.c");
+				system("cc -o tmp.o -c tmp.s");
+				system("cc -o tmp tmp.o link.o");
+				system("./tmp ; echo $? > tmp_status");
+
+				if(is_successful(expect_status) == 0){
+					printf("\e[42mOK \e[0m");
+				} else {
+					printf("\e[41mERR\e[0m");
+				}
+
+				printf("\n");
+				//printf("%s", test_code);
+
+				break;
+			}
+			if(dp == NULL){
+				// not find out the file
+				break;
+			}
+		}
+
 		return 0;
 	} else if(argc == 2){
 		// debug mode
