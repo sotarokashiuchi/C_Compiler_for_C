@@ -104,6 +104,11 @@ void gen(Node_t *node) {
     return;
   }
   switch (node->kind){
+  case ND_SINGLESTMT:{
+    gen(node->expr1);
+    popPrint("rax");
+    return;
+  }
   case ND_FUNCCALL:{
     int numOfArgu = 0;
     if(node->vector != NULL){
@@ -208,7 +213,6 @@ void gen(Node_t *node) {
     Vector_t *vector = node->vector;
     for( ; ; ){
       gen(vector->node);
-      popPrint("rax");
       asmPrint("###\n");
       if(vector->next == NULL){
         break;
@@ -230,8 +234,6 @@ void gen(Node_t *node) {
     asmPrint("  # if(A) {B} else {C} :C\n");
     gen(node->expr2);
     asmPrint(".ifelseend_%03d:\n", lavelIndexLocal);
-    // if-else文はセットで文だから値を返す必要がある？
-    pushPrint("rax");
     return;
   }
   case ND_IF:{
@@ -244,8 +246,6 @@ void gen(Node_t *node) {
     gen(node->expr2);
 
     asmPrint(".ifend_%03d:\n", lavelIndexLocal);
-    // if文は文だから値を返す必要がある？
-    pushPrint("rax");
     return;
   }
   case ND_WHILE:{
@@ -260,8 +260,6 @@ void gen(Node_t *node) {
     asmPrint("  jmp .while_%03d\n", lavelIndexLocal);
 
     asmPrint(".whileend_%03d:\n", lavelIndexLocal);
-    // while文は文だから値を返す必要がある？
-    pushPrint("rax");
     return;
   }
   case ND_FOR:{
@@ -289,8 +287,6 @@ void gen(Node_t *node) {
     asmPrint("  jmp .for_%03d\n", lavelIndexLocal);
 
     asmPrint(".forend_%03d:\n", lavelIndexLocal);
-    // for文は文だから値を返す必要がある？
-    pushPrint("rax");
     return;
   }
   case ND_RETURN:{
@@ -301,6 +297,8 @@ void gen(Node_t *node) {
     asmPrint("  mov rsp, rbp\n");
     popPrint("rbp");
     asmPrint("  ret\n");
+    // return文は文だから値を返す必要がある？
+    pushPrint("rax");
     return;
   }
   case ND_NUM:{

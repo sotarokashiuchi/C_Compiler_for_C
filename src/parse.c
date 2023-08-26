@@ -439,6 +439,7 @@ Node_t* stmt(void){
 
 	node = expr();
 	expect(TK_RESERVED, ";");
+	node = new_node(ND_SINGLESTMT, node, NULL, NULL, NULL, NULL, NULL);
 	return node;
 }
 
