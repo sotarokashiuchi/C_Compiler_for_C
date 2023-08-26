@@ -4,6 +4,20 @@
 #define TESTCODE_BUF 10000
 #define TESTLINE_BUF 1000
 
+int read_file(char* buf, FILE *fp){
+	char test_line[TESTCODE_BUF];
+	char *buf_ptr = buf;
+	char *test_line_ptr = NULL;
+	while(fgets(test_line, TESTLINE_BUF, fp)){
+		printf("test_line = %s\n", test_line);
+		for(test_line_ptr=test_line; *test_line_ptr != '\0'; buf_ptr++, test_line_ptr++){
+			*buf_ptr = *test_line_ptr;
+		}
+		printf("buf = %s\n", buf);
+	}
+	*buf_ptr = '\0';
+	return 0;
+}
 
 
 int main(int argc, char **argv){
@@ -20,6 +34,13 @@ int main(int argc, char **argv){
 		// debug mode
 
 		printf("******************************** [information] ********************************\n");
+		printf("FileName:%s\n", file_name);
+		fp = fopen(file_name, "r");
+		assert(fp != NULL && "failed to open file");
+		printf("FieOpen:OK\n");
+
+		printf("Input:");
+		read_file(test_code, fp);
 
 		printf("********************************** [compile] **********************************\n");
 
