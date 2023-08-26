@@ -297,8 +297,6 @@ void gen(Node_t *node) {
     asmPrint("  mov rsp, rbp\n");
     popPrint("rbp");
     asmPrint("  ret\n");
-    // return文は文だから値を返す必要がある？
-    pushPrint("rax");
     return;
   }
   case ND_NUM:{
