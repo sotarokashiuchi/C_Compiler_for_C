@@ -17,13 +17,16 @@ parse.o: ./src/parse.c $(INCLUDEOBJ)
 codegen.o: ./src/codegen.c $(INCLUDEOBJ)
 	cc  $(COPTION) -c -o codegen.o ./src/codegen.c
 
-test: 9cc
-	./test/test
+test: test.c
+	gcc test.c -o test
 
-debug: 9cc
-	DEBUG=1 ./test/test $(FN)
+alltest: 9cc test
+	./test
+
+debug: 9cc test
+	DEBUG=1 ./test $(FN)
 
 clean:
 	rm -f 9cc *.o *~ tmp*
 
-.PHONY: test clean debug
+.PHONY: alltest clean debug
