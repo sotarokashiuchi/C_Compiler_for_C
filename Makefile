@@ -18,10 +18,10 @@ codegen.o: ./src/codegen.c $(INCLUDEOBJ)
 	cc  $(COPTION) -c -o codegen.o ./src/codegen.c
 
 test: 9cc
-	./test.sh
+	./test/test
 
 debug: 9cc
-	DEBUG=1 ./test.sh
+	DEBUG=1 ./test/test $(FN)
 
 clean:
 	rm -f 9cc *.o *~ tmp*
