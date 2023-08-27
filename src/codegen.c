@@ -1,5 +1,6 @@
 #include "common.h"
 #include "codegen.h"
+#include <assert.h>
 #include <string.h>
 
 /* グローバル変数 */
@@ -349,11 +350,7 @@ void gen(Node_t *node) {
     popPrint("rdi");
     popPrint("rax");
     // 変数への代入
-		if(node->type != NULL){
-			asmPrint("	mov [rax], %s\n", getRegNameFromSize(node->type, "rdi"));
-		} else {
-			asmPrint("	mov [rax], rdi\n");
-		}
+		asmPrint("	mov [rax], %s\n", getRegNameFromSize(node->type, "rdi"));
 
     pushPrint("rdi");
     return;
