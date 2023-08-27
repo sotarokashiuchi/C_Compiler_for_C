@@ -1,5 +1,6 @@
 #include "common.h"
 #include "codegen.h"
+#include <string.h>
 
 /* グローバル変数 */
 /// 一意のラベル生成用変数:
@@ -37,7 +38,7 @@ void asmPrint(char *fmt, ...){
   vprintf(fmt, ap);
 }
 
-const char* getRegNameFromSize(Types_t *type){
+const char* getRegNameFromSize(Types_t *type, const char *register_name){
   int size;
   switch (type->dataType){
     case DT_INT:
@@ -48,12 +49,24 @@ const char* getRegNameFromSize(Types_t *type){
       size = 8;
   }
 
-  if(size==4){
-    return "eax";
-  }
-  if(size==8){
-    return "rax";
-  }
+	if(!strncmp(register_name, "rax", 3)){
+		// rax
+		if(size==4){
+			return "eax";
+		}
+		if(size==8){
+			return "rax";
+		}
+	} else if(!strncmp(register_name, "rdi", 3)){
+		// rdi
+		if(size==4){
+			return "edi";
+		}
+		if(size==8){
+			return "rdi";
+		}
+	}
+
 }
 
 
@@ -308,7 +321,7 @@ void gen(Node_t *node) {
   case ND_LVAR:{
     gen_address(node);
     popPrint("rax");
-    asmPrint("  mov %s, [rax]\n", getRegNameFromSize(node->type));
+    asmPrint("  mov %s, [rax]\n", getRegNameFromSize(node->type, "rax"));
     pushPrint("rax");
     return;
   }
@@ -321,7 +334,7 @@ void gen(Node_t *node) {
     asmPrint("  #ND_DEREF\n");
     gen(node->expr1);
     popPrint("rax");
-    asmPrint("  mov %s, [rax]\n",  getRegNameFromSize(node->type));
+    asmPrint("  mov %s, [rax]\n",  getRegNameFromSize(node->type, "rax"));
     // asmPrint("  mov rax, [rax]\n");
     // asmPrint("  push rax\n");
     pushPrint("rax");
@@ -336,7 +349,12 @@ void gen(Node_t *node) {
     popPrint("rdi");
     popPrint("rax");
     // 変数への代入
-    asmPrint("  mov [rax], rdi\n");
+		if(node->type != NULL){
+			asmPrint("	mov [rax], %s\n", getRegNameFromSize(node->type, "rdi"));
+		} else {
+			asmPrint("	mov [rax], rdi\n");
+		}
+
     pushPrint("rdi");
     return;
   }

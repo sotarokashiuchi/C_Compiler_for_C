@@ -147,16 +147,19 @@ Node_t *new_node(NodeKind kind, Node_t *expr1, Node_t *expr2, Node_t *expr3, Nod
 	// typeリストの最後のリストを確認する
 	if(kind == ND_ADD || kind == ND_SUB || kind == ND_MUL || kind == ND_DIV ){
 		if(expr1->type->dataType == DT_PTR){
+			// ポインタ
 			node->type = expr1->type;
 		}else if(expr2->type->dataType == DT_PTR){
+			// ポインタ
 			node->type = expr2->type;
 		}else if(expr1->type->dataType == DT_ARRAY){
-			// 
+			// 配列
 			node->type = new_type(DT_PTR, expr1->type->inner);
 		}else if(expr2->type->dataType == DT_ARRAY){
-			// 
+			// 配列
 			node->type = new_type(DT_PTR, expr2->type->inner);
 		}else{
+			// 整数？
 			// expr1, 2 どちらでもよい?
 			node->type =  expr1->type;
 		}
@@ -169,7 +172,12 @@ Node_t *new_node(NodeKind kind, Node_t *expr1, Node_t *expr2, Node_t *expr3, Nod
 	if(kind == ND_ADDR){
 		node->type = new_type(DT_PTR, expr1->type);
 	}
-  // ND_ASSIGN,      // =
+
+	if(kind == ND_ASSIGN){
+		// 左辺値の型を代入
+		node->type = expr1->type;
+	}
+
   // ND_LVAR,        // ローカル変数
   // ND_EQUALTO,     // ==
   // ND_NOT_EQUAL_TO,// !=
