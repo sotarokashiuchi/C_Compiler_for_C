@@ -107,6 +107,7 @@ void gen(Node_t *node) {
   case ND_SINGLESTMT:{
     gen(node->expr1);
     popPrint("rax");
+  	asmPrint("	#end ND_SINGLESTMT\n");
     return;
   }
   case ND_FUNCCALL:{
@@ -155,7 +156,7 @@ void gen(Node_t *node) {
     for(int i=7; i<=numOfArgu; i++){
       popPrint("rdi");
     }
-    asmPrint("  #戻り値をpush\n");
+    asmPrint("  #戻り値をスタックに積む\n");
     pushPrint("rax");
     return;
   }
@@ -213,7 +214,6 @@ void gen(Node_t *node) {
     Vector_t *vector = node->vector;
     for( ; ; ){
       gen(vector->node);
-      asmPrint("###\n");
       if(vector->next == NULL){
         break;
       }

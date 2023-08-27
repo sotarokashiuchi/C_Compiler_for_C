@@ -356,7 +356,9 @@ Node_t* stmt(void){
 
 	// 変数宣言 (int *a[5] などは非対応)
 	if(peek(TK_KEYWORD, "int")){
-		return varDefine();
+		node = varDefine();
+		node = new_node(ND_SINGLESTMT, node, NULL, NULL, NULL, NULL, NULL);
+		return node;
 	}
 	
 	if (consume(TK_KEYWORD, "return")) {
