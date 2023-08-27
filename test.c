@@ -131,6 +131,9 @@ int main(int argc, char **argv){
 		printf("********************************* [execution] *********************************\n");
 		system("./tmp ; echo $? > tmp_status");
 
+		printf("Input:\n%s\n", test_code);
+		printf("expect status:%d\n", expect_status);
+
 		is_successful(expect_status);
 		return 0;
 	} else {
