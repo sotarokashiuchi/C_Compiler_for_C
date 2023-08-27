@@ -20,9 +20,6 @@ codegen.o: ./src/codegen.c $(INCLUDEOBJ)
 test: test.c
 	gcc test.c -o test
 
-alltest: 9cc test
-	./test
-
 debug: 9cc test
 	DEBUG=1 ./test $(FN)
 
