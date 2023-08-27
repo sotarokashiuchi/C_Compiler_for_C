@@ -1,4 +1,12 @@
 # C_Compiler_for_C
+## プログラム実行方法
+```shell
+// 全てのテストケースを実行
+make debug
+
+// 特定のテストケースを実行
+make debug "FN=<file name>"
+```
 
 ### compilerbook:[低レイヤを知りたい人のためのCコンパイラ作成入門](https://www.sigbus.info/compilerbook)
 - [x] (2023/06/22)1：整数1個をコンパイルする言語の作成
