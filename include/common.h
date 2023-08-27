@@ -10,7 +10,7 @@
 /* マクロ定義 */
 // ローカル変数用のスタックサイズ 26文字 * 8byte (funcCallの都合により16byte倍数でないとだめ)
 // #define local_variable_stack (26*8)
-#define local_variable_stack (208)
+#define local_variable_stack (33808)
 
 // デバッグモードの切り替えマクロ
 #define DEBUG_WRITE(...) debug_write("[%s:%s:%d]", __FILE__, __func__, __LINE__);debug_write(__VA_ARGS__)

@@ -34,7 +34,7 @@ void getAlloc(int **p, int w, int x, int y, int z){
 }
 
 void intPrint(int x){
-  printf("%d\n", x);
+  printf("%d", x);
   fflush(stdout);
 }
 
