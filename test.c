@@ -83,7 +83,7 @@ int main(int argc, char **argv){
 				read_file(test_code, fp);
 				sprintf(command, "CC_DEBUG=0 ./9cc \"%s\" > tmp.s", test_code);
 				system(command);
-				system("cc -o link.o -c ./src/link.c");
+				system("cc -o link.o -c ./testcase/link.c");
 				system("cc -o tmp.o -c tmp.s");
 				system("cc -o tmp tmp.o link.o");
 				system("./tmp ; echo $? > tmp_status");
@@ -124,7 +124,7 @@ int main(int argc, char **argv){
 		system(command);
 
 		printf("********************************* [assemble] **********************************\n");
-		system("cc -o link.o -c ./src/link.c");
+		system("cc -o link.o -c ./testcase/link.c");
 		system("cc -o tmp.o -c tmp.s");
 		system("cc -o tmp tmp.o link.o");
 
