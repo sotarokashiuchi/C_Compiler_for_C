@@ -115,6 +115,9 @@ int sizeofType(Types_t *type){
 		case DT_INT:
 			size = 4;
 			break;
+		case DT_CHAR:
+			size = 1;
+			break;
 		case DT_ARRAY:
 			// if(type->inner)
 			size = type->array_size * sizeofType(type->inner);
@@ -204,7 +207,7 @@ Node_t *new_node_num(int val){
 	Node_t *node = calloc(1, sizeof(Node_t));
 	node->kind = ND_NUM;
 	node->val = val;
-	node->type = new_type(DT_INT, NULL);
+	node->type = new_type(DT_INT, NULL); // INT型を使用する理由は整数拡張を行うため
 	return node;
 }
 
@@ -243,6 +246,7 @@ Node_t* new_identifier(NodeKind kind, Token_t *tok, Types_t *type){
 	if(kind==ND_LVAR){
 		DEBUG_WRITE("sizeofType = %d\n", sizeofType(type));
 		int size = sizeofType(type);
+		// char型に対応できていない？
 		identifier->offset = identHead->offset + (size>=8 ? size : 8);
 	}
 	if(kind==ND_FUNCDEFINE || kind==ND_FUNCCALL){
@@ -319,6 +323,8 @@ Node_t* varDefine(void){
 	
 	if(consume(TK_KEYWORD, "int")){
 		type = new_type(DT_INT, NULL);
+	} else if(consume(TK_KEYWORD, "char")){
+		type = new_type(DT_CHAR, NULL);
 	} else {
 		todoError("まだ実装していない基本型です\n");
 	}
@@ -363,7 +369,7 @@ Node_t* stmt(void){
 	Types_t *type;
 
 	// 変数宣言 (int *a[5] などは非対応)
-	if(peek(TK_KEYWORD, "int")){
+	if(peek(TK_KEYWORD, "int") || peek(TK_KEYWORD, "char")){
 		node = varDefine();
 		node = new_node(ND_SINGLESTMT, node, NULL, NULL, NULL, NULL, NULL);
 		return node;
@@ -557,6 +563,7 @@ Node_t* unary(){
 	}
 	if(consume(TK_KEYWORD, "sizeof")){
 		Node_t *node = unary();
+		// 配列 CHAR型に対応できていない？
 		if(node->type->dataType == DT_INT){
 			return new_node_num(4);
 		} else {
