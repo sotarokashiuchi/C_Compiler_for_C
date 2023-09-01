@@ -68,6 +68,11 @@ Token_t* tokenize(void){
 			continue;
 		}
 
+		if(!strncmp(p, "char", 4) && !is_alnum(p[4])){
+			cur = new_token(TK_KEYWORD, cur, &p, 4);
+			continue;
+		}
+
 		if(!strncmp(p, "if", 2) && !is_alnum(p[2])){
 			cur = new_token(TK_KEYWORD, cur, &p, 2);
 			continue;
