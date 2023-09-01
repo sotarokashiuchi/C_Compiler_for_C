@@ -314,53 +314,6 @@ Node_t* funcDefine(){
 	}
 }
 
-Node_t* varDefine(void){
-	Types_t* type;
-	Token_t* tok;
-	Token_t* startToken = token;
-	Node_t* node;
-
-	
-	if(consume(TK_KEYWORD, "int")){
-		type = new_type(DT_INT, NULL);
-	} else if(consume(TK_KEYWORD, "char")){
-		type = new_type(DT_CHAR, NULL);
-	} else {
-		todoError("まだ実装していない基本型です\n");
-	}
-	
-	// アスタリスクをパース
-	while(consume(TK_RESERVED, "*")){
-		type = new_type(DT_PTR, type);
-	}
-	
-	tok = consume_ident();
-	assert(tok!=NULL && "変数名がない");
-
-	// 配列をパース
-	while(consume(TK_RESERVED, "[")){
-		type = new_type(DT_ARRAY, type);
-		type->array_size = expect_number();
-		expect(TK_RESERVED, "]");
-	}
-	
-	expect(TK_RESERVED, ";");
-
-	return new_identifier(ND_LVAR, tok, type);
-
-	// // 識別子を検索する
-	// if(consume(TK_RESERVED, "*")){
-	// 	// ポインタ派生
-	// 	if((tok = consume_ident()) != NULL){
-	// 		return new_type(DT_PTR, varDefine());
-	// 	} else {
-	// 		type = new_type(DT_PTR, varDefine());
-	// 	}
-	// } else if(consume(TK_RESERVED, "(")){
-	// 	// 優先度 (未実装)
-	// }
-}
-
 Node_t* stmt(void){
   DEBUG_WRITE("\n");
 	Node_t *node;
@@ -370,7 +323,20 @@ Node_t* stmt(void){
 
 	// 変数宣言 (int *a[5] などは非対応)
 	if(peek(TK_KEYWORD, "int") || peek(TK_KEYWORD, "char")){
-		node = varDefine();
+		type = typeSpec();
+		
+		tok = consume_ident();
+		assert(tok!=NULL && "変数名がない");
+
+		// 配列をパース
+		while(consume(TK_RESERVED, "[")){
+			type = new_type(DT_ARRAY, type);
+			type->array_size = expect_number();
+			expect(TK_RESERVED, "]");
+		}
+		
+		node = new_identifier(ND_LVAR, tok, type);
+		expect(TK_RESERVED, ";");
 		node = new_node(ND_SINGLESTMT, node, NULL, NULL, NULL, NULL, NULL);
 		return node;
 	}
@@ -647,14 +613,21 @@ Types_t* new_type(DataType dataType, Types_t* inner){
 
 Types_t* typeSpec(void){
 	Types_t *type;
+
+	// 基本型の読み込み
 	if(consume(TK_KEYWORD, "int")){
 		type = new_type(DT_INT, NULL);
+	} else if(consume(TK_KEYWORD, "char")){
+		type = new_type(DT_CHAR, NULL);
 	} else {
-		todoError("データ型がありません\n");
+		todoError("まだ実装していない基本型です\n");
 	}
+
+	// アスタリスクをパース
 	while(consume(TK_RESERVED, "*")){
 		type = new_type(DT_PTR, type);
 	}
+	
 	// int*** -> int** -> int* -> int の順に並ぶ
 	return type;
 }
