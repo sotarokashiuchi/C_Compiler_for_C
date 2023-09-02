@@ -7,7 +7,7 @@
 char *user_input;
 int debugEnabled;
 
-int main(int argc, char **argv){####
+int main(int argc, char **argv){
   DEBUG_WRITE("\n");
 	// 入力データの確認
   if(argc != 2){
