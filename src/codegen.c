@@ -1,6 +1,7 @@
 #include "common.h"
 #include "codegen.h"
 #include <assert.h>
+#include <stdlib.h>
 #include <string.h>
 
 /* グローバル変数 */
@@ -43,6 +44,7 @@ const char* getRegNameFromSize(Types_t *type, const char *register_name){
   int size;
   switch (type->dataType){
     case DT_INT:
+    case DT_CHAR:
     case DT_PTR:
       size = sizeofType(type);
       break;
@@ -52,6 +54,9 @@ const char* getRegNameFromSize(Types_t *type, const char *register_name){
 
 	if(!strncmp(register_name, "rax", 3)){
 		// rax
+		if(size==1){
+			return "al";
+		}
 		if(size==4){
 			return "eax";
 		}
@@ -60,6 +65,9 @@ const char* getRegNameFromSize(Types_t *type, const char *register_name){
 		}
 	} else if(!strncmp(register_name, "rdi", 3)){
 		// rdi
+		if(size==1){
+			return "dil";
+		}
 		if(size==4){
 			return "edi";
 		}
@@ -67,7 +75,7 @@ const char* getRegNameFromSize(Types_t *type, const char *register_name){
 			return "rdi";
 		}
 	}
-
+	assert((size==4 || size==8) && "failed serch data size");
 }
 
 
