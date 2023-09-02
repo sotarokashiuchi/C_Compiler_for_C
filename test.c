@@ -34,14 +34,13 @@ int code_info(char* buf, int* expect_status, char* file_name){
 	return 0;
 }
 
-int is_successful(int expect_statas){
-	int status;
+int is_successful(int expect_statas, int *status){
 	FILE *fp = fopen("tmp_status", "r");
 	if(fp==NULL){
 		return 1;
 	}
-	fscanf(fp, "%d", &status);
-	if(status == expect_statas){
+	fscanf(fp, "%d", status);
+	if(*status == expect_statas){
 		system("rm tmp_status");
 		return 0;
 	} else {
@@ -56,6 +55,7 @@ int main(int argc, char **argv){
 	char command[TESTCODE_BUF+255];
 	char file_name[255];
 	int expect_status;
+	int status;
 
 	// switch test mode
   if(argc == 1){
@@ -88,7 +88,7 @@ int main(int argc, char **argv){
 				system("cc -o tmp tmp.o link.o");
 				system("./tmp ; echo $? > tmp_status");
 
-				if(is_successful(expect_status) == 0){
+				if(is_successful(expect_status, &status) == 0){
 					printf("\e[42mOK \e[0m");
 				} else {
 					printf("\e[41mERR\e[0m");
@@ -134,10 +134,11 @@ int main(int argc, char **argv){
 		printf("Input:\n%s\n", test_code);
 		printf("expect status:%d\n", expect_status);
 
-		if(is_successful(expect_status) == 0){
+		if(is_successful(expect_status, &status) == 0){
 			printf("\e[42mSUCCESS \e[0m");
 		} else {
 			printf("\e[41mERROR \e[0m");
+			printf("expect %d but -> %d\n", expect_status, status);
 		}
 
 		return 0;
