@@ -335,7 +335,7 @@ void gen(Node_t *node) {
 		if(size == 1){
     	asmPrint("  movzx rax, BYTE PTR [rax]\n");
 		} else if (size == 4 || size == 8){
-    	asmPrint("  mov %s, [rax]\n", getRegNameFromSize(size, "rax"));
+    	asmPrint("  mov %s, [rax]\n", getRegNameFromSize(size, "rax")); // 32bitレジスタでも自動的に拡張が行われる
 		}
 
     pushPrint("rax");

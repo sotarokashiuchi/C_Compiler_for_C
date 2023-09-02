@@ -50,6 +50,7 @@ Node_t* funcDefine();
 // 						| typeSpec ident ("[" num "]")? ";"
 Node_t* stmt(void);
 // expr       = assign
+Node_t* declaration(void);
 Node_t* expr(void);
 // assign     = equality ("=" assign)?
 Node_t* assign(void);
@@ -322,25 +323,11 @@ Node_t* stmt(void){
 	Token_t *tok;
 	Types_t *type;
 
-	// 変数宣言 (int *a[5] などは非対応)
 	if(peek(TK_KEYWORD, "int") || peek(TK_KEYWORD, "char")){
-		type = typeSpec();
-		
-		tok = consume_ident();
-		assert(tok!=NULL && "変数名がない");
-
-		// 配列をパース
-		while(consume(TK_RESERVED, "[")){
-			type = new_type(DT_ARRAY, type);
-			type->array_size = expect_number();
-			expect(TK_RESERVED, "]");
-		}
-		
-		node = new_identifier(ND_LVAR, tok, type);
-		expect(TK_RESERVED, ";");
-		node = new_node(ND_SINGLESTMT, node, NULL, NULL, NULL, NULL, NULL);
+		node = declaration();
 		return node;
 	}
+		
 	
 	if (consume(TK_KEYWORD, "return")) {
 		// "return" expr ";"
@@ -424,6 +411,30 @@ Node_t* stmt(void){
 	expect(TK_RESERVED, ";");
 	node = new_node(ND_SINGLESTMT, node, NULL, NULL, NULL, NULL, NULL);
 	return node;
+}
+
+Node_t* declaration(void){
+	Node_t *node;
+	Token_t *tok;
+	Types_t *type;
+
+	// 変数宣言 (int *a[5] などは非対応)
+		type = typeSpec();
+		
+		tok = consume_ident();
+		assert(tok!=NULL && "変数名がない");
+
+		// 配列をパース
+		while(consume(TK_RESERVED, "[")){
+			type = new_type(DT_ARRAY, type);
+			type->array_size = expect_number();
+			expect(TK_RESERVED, "]");
+		}
+		
+		node = new_identifier(ND_LVAR, tok, type);
+		expect(TK_RESERVED, ";");
+		node = new_node(ND_SINGLESTMT, node, NULL, NULL, NULL, NULL, NULL);
+		return node;
 }
 
 Node_t *expr(void) {
