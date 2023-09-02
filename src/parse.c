@@ -419,22 +419,22 @@ Node_t* declaration(void){
 	Types_t *type;
 
 	// 変数宣言 (int *a[5] などは非対応)
-		type = typeSpec();
-		
-		tok = consume_ident();
-		assert(tok!=NULL && "変数名がない");
+	type = typeSpec();
+	
+	tok = consume_ident();
+	assert(tok!=NULL && "変数名がない");
 
-		// 配列をパース
-		while(consume(TK_RESERVED, "[")){
-			type = new_type(DT_ARRAY, type);
-			type->array_size = expect_number();
-			expect(TK_RESERVED, "]");
-		}
-		
-		node = new_identifier(ND_LVAR, tok, type);
-		expect(TK_RESERVED, ";");
-		node = new_node(ND_SINGLESTMT, node, NULL, NULL, NULL, NULL, NULL);
-		return node;
+	// 配列をパース
+	while(consume(TK_RESERVED, "[")){
+		type = new_type(DT_ARRAY, type);
+		type->array_size = expect_number();
+		expect(TK_RESERVED, "]");
+	}
+	
+	node = new_identifier(ND_LVAR, tok, type);
+	expect(TK_RESERVED, ";");
+	node = new_node(ND_SINGLESTMT, node, NULL, NULL, NULL, NULL, NULL);
+	return node;
 }
 
 Node_t *expr(void) {
