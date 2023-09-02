@@ -40,18 +40,18 @@ void asmPrint(char *fmt, ...){
   vprintf(fmt, ap);
 }
 
-const char* getRegNameFromSize(Types_t *type, const char *register_name){
-  int size;
+int getRegNameFromType(Types_t *type){
   switch (type->dataType){
     case DT_INT:
     case DT_CHAR:
     case DT_PTR:
-      size = sizeofType(type);
-      break;
+    	return sizeofType(type);
     case DT_ARRAY:
-      size = 8;
+      return 8;
   }
+}
 
+char* getRegNameFromSize(int size, char const *register_name){
 	if(!strncmp(register_name, "rax", 3)){
 		// rax
 		if(size==1){
@@ -77,7 +77,6 @@ const char* getRegNameFromSize(Types_t *type, const char *register_name){
 	}
 	assert((size==4 || size==8) && "failed serch data size");
 }
-
 
 /// @brief 左辺値の評価(アドレス計算)
 /// @param node 評価対象のノード
@@ -121,6 +120,8 @@ void gen(Node_t *node) {
   // ローカル変数にアセンブリのラベル識別用の変数を定義することで、
   // 再帰的に読み込んでも値を保持できる
   int lavelIndexLocal = labelIndex++;
+	int size;
+
   if(node->type != NULL && node->type->dataType == DT_ARRAY){
     gen_address(node);
     return;
@@ -330,7 +331,13 @@ void gen(Node_t *node) {
   case ND_LVAR:{
     gen_address(node);
     popPrint("rax");
-    asmPrint("  mov %s, [rax]\n", getRegNameFromSize(node->type, "rax"));
+		size = getRegNameFromType(node->type);
+		if(size == 1){
+			// 
+		} else if (size == 4 || size == 8){
+    	asmPrint("  mov %s, [rax]\n", getRegNameFromSize(size, "rax"));
+		}
+
     pushPrint("rax");
     return;
   }
@@ -343,9 +350,12 @@ void gen(Node_t *node) {
     asmPrint("  #ND_DEREF\n");
     gen(node->expr1);
     popPrint("rax");
-    asmPrint("  mov %s, [rax]\n",  getRegNameFromSize(node->type, "rax"));
-    // asmPrint("  mov rax, [rax]\n");
-    // asmPrint("  push rax\n");
+		size = getRegNameFromType(node->type);
+		if(size == 1){
+			// 
+		} else if (size == 4 || size == 8){
+    	asmPrint("  mov %s, [rax]\n", getRegNameFromSize(size, "rax"));
+		}
     pushPrint("rax");
     return;
   }
@@ -358,7 +368,12 @@ void gen(Node_t *node) {
     popPrint("rdi");
     popPrint("rax");
     // 変数への代入
-		asmPrint("	mov [rax], %s\n", getRegNameFromSize(node->type, "rdi"));
+		size = getRegNameFromType(node->type);
+		if(size == 1){
+			// 
+		} else if (size == 4 || size == 8){
+    	asmPrint("  mov [rax], %s\n", getRegNameFromSize(size, "rdi"));
+		}
 
     pushPrint("rdi");
     return;
