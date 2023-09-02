@@ -333,7 +333,7 @@ void gen(Node_t *node) {
     popPrint("rax");
 		size = getRegNameFromType(node->type);
 		if(size == 1){
-			// 
+    	asmPrint("  movzx rax, BYTE PTR [rax]\n");
 		} else if (size == 4 || size == 8){
     	asmPrint("  mov %s, [rax]\n", getRegNameFromSize(size, "rax"));
 		}
@@ -352,7 +352,7 @@ void gen(Node_t *node) {
     popPrint("rax");
 		size = getRegNameFromType(node->type);
 		if(size == 1){
-			// 
+    	asmPrint("  movzx rax, BYTE PTR [rax]\n");
 		} else if (size == 4 || size == 8){
     	asmPrint("  mov %s, [rax]\n", getRegNameFromSize(size, "rax"));
 		}
@@ -370,7 +370,7 @@ void gen(Node_t *node) {
     // 変数への代入
 		size = getRegNameFromType(node->type);
 		if(size == 1){
-			// 
+    	asmPrint("  mov [rax], %s\n", getRegNameFromSize(size, "rdi"));
 		} else if (size == 4 || size == 8){
     	asmPrint("  mov [rax], %s\n", getRegNameFromSize(size, "rdi"));
 		}
