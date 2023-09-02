@@ -262,8 +262,20 @@ Node_t* new_identifier(NodeKind kind, Token_t *tok, Types_t *type){
 void program(void){
   DEBUG_WRITE("header node\n");
 	int i = 0;
+	Token_t *tok;
+	int status;
 	while(!at_eof()){
-		code[i++] = funcDefine();
+		tok = token;
+		typeSpec();
+		consume_ident();
+		status = peek(TK_RESERVED, "(");
+
+		back_token(tok);
+		if(status){
+			code[i++] = funcDefine();
+		} else {
+			code[i++] = declaration();
+		}
 	}
 	code[i] = NULL;
 }
