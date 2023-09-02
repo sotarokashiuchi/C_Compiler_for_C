@@ -10,7 +10,7 @@ Identifier_t *identHead = NULL;
 
 /* 関数プロトタイプ宣言 */
 /* EBNF
- * program    = funcDefine*
+ * program    = funcDefine* | declaration
  * funcDefine = ident ("(" ident? | ident ("," ident)* ")"){ stmt* }
  * stmt    		= expr ";"
  * 						| "return" expr ";"
@@ -18,8 +18,9 @@ Identifier_t *identHead = NULL;
  * 						| "while" "(" expr ")" stmt
  * 						| "for" "(" expr? ";" expr? ";" expr? ")" stmt
  *  					| "{" stmt* "}"
- * 						| typeSpec ident ("[" num "]")? ";"
- * typeSpec		= "int" "*"*
+ * 						| declaration
+ * declaration= typeSpec ident ("[" num "]")? ";"
+ * typeSpec		= ("int" | "char") "*"*
  * expr       = assign
  * assign     = equality ("=" assign)?
  * equality   = relational ("==" relational | "!=" relational)*
