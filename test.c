@@ -134,7 +134,12 @@ int main(int argc, char **argv){
 		printf("Input:\n%s\n", test_code);
 		printf("expect status:%d\n", expect_status);
 
-		is_successful(expect_status);
+		if(is_successful(expect_status) == 0){
+			printf("\e[42mSUCCESS \e[0m");
+		} else {
+			printf("\e[41mERROR \e[0m");
+		}
+
 		return 0;
 	} else {
     fprintf(stderr, "エラー:引数の個数が正しくありません\n");
