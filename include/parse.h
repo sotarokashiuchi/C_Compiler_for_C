@@ -12,6 +12,8 @@ typedef enum{
   ND_MOD,         // %
   ND_ASSIGN,      // =
   ND_LVAR,        // ローカル変数
+  ND_GVAR,        // グローバル変数
+  ND_GVARDEFINE,  // グローバル変数定義
   ND_EQUALTO,     // ==
   ND_NOT_EQUAL_TO,// !=
   ND_GREATER_THAN,// >
@@ -40,8 +42,15 @@ typedef enum {
   DT_FUNC,
 } DataType;
 
+typedef enum {
+	IK_LVAR,
+	IK_GVAR,
+	IK_FUNC,
+} IdentifierKind;
+
 /// @brief 識別子の型
 typedef struct Identifier_tag {
+	IdentifierKind kind;
 	struct Identifier_tag* next;
 	char *name;
 	int len;

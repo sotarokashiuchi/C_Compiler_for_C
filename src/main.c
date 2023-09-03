@@ -19,7 +19,7 @@ int main(int argc, char **argv){
   char *debug = getenv("CC_DEBUG");
   debugEnabled = debug && !strcmp(debug, "1");
 	user_input = argv[1];
-  Identifier_t dummy = {NULL, NULL, 0, 0};
+  Identifier_t dummy = {0, NULL, NULL, 0, 0};
   identHead = &dummy;
 
   /* トークナイズ */

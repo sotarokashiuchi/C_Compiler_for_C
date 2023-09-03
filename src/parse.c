@@ -230,30 +230,43 @@ Vector_t* new_vector(Node_t *node, Vector_t *current){
 	return vector;
 }
 
-/// @brief 新しいローカル変数を生成する
+/// @brief 新しい識別子を生成する
 /// @param tok 識別子を指すトークン
 /// @param type
 /// @return 生成した識別子
 Node_t* new_identifier(NodeKind kind, Token_t *tok, Types_t *type){
   DEBUG_WRITE("this is identifier.\n");
-	// 新しく変数を定義する	
+	// 新しく識別子を定義する	
 	Node_t *node = new_node(kind, NULL, NULL, NULL, NULL, NULL, NULL);
 	Identifier_t *identifier = calloc(1, sizeof(Identifier_t));
 	identifier->next = identHead;
 	identifier->name = tok->str;
 	identifier->len = tok->len;
 	identifier->type = type;
+	identifier->offset = 0;
 	node->type = type;
 
-	if(kind==ND_LVAR){
-		DEBUG_WRITE("sizeofType = %d\n", sizeofType(type));
-		int size = sizeofType(type);
-		// char型に対応できていない？
-		identifier->offset = identHead->offset + (size>=8 ? size : 8);
+	switch(kind){
+		case ND_LVAR:
+			DEBUG_WRITE("sizeofType = %d\n", sizeofType(type));
+			int size = sizeofType(type);
+			// char型に対応できていない？
+			identifier->offset = identHead->offset + (size>=8 ? size : 8);
+			identifier->kind = IK_LVAR;
+			break;
+		case ND_FUNCDEFINE:
+			identifier->kind = IK_FUNC;
+			break;
+		case ND_FUNCCALL:
+			// FuncCallの時に新しい識別子を作成するのは間違っているのではないか？
+			identifier->kind = IK_FUNC;
+			break;
+		case ND_GVARDEFINE:
+			// FuncCallの時に新しい識別子を作成するのは間違っているのではないか？
+			identifier->kind = IK_GVAR;
+			break;
 	}
-	if(kind==ND_FUNCDEFINE || kind==ND_FUNCCALL){
-		identifier->offset = 0;
-	}
+
 	identHead = identifier;
 	node->identifier = identifier;
 	return node;
