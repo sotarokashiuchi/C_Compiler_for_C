@@ -24,6 +24,6 @@ debug: 9cc test
 	DEBUG=1 ./test $(FN)
 
 clean:
-	rm -f 9cc *.o *~ tmp*
+	rm -f 9cc test *.o *~ tmp*
 
 .PHONY: alltest clean debug

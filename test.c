@@ -56,6 +56,7 @@ int main(int argc, char **argv){
 	char file_name[255];
 	int expect_status;
 	int status;
+	int all_status = 0;
 
 	// switch test mode
   if(argc == 1){
@@ -92,6 +93,7 @@ int main(int argc, char **argv){
 					printf("\e[42mOK \e[0m");
 				} else {
 					printf("\e[41mERR\e[0m");
+					all_status++;
 				}
 
 				printf("\n");
@@ -105,7 +107,8 @@ int main(int argc, char **argv){
 			}
 		}
 
-		return 0;
+		printf("failed : %d\n", all_status);
+		return all_status;
 	} else if(argc == 2){
 		// debug mode
 		printf("******************************** [information] ********************************\n");
@@ -144,7 +147,7 @@ int main(int argc, char **argv){
 		return 0;
 	} else {
     fprintf(stderr, "エラー:引数の個数が正しくありません\n");
-    return 1;
+    return -1;
   }
 }
 
