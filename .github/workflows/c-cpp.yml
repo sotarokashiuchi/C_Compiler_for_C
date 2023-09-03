@@ -17,4 +17,9 @@ jobs:
     - name: Run make
       run: make
 
-  #  test:
+  test:
+    needs: [build]
+    runs-on: ubuntu-latest
+    steps:
+    - name: Run test
+      run: make debug
