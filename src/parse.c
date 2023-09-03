@@ -32,9 +32,9 @@ Identifier_t *identHead = NULL;
 							| "*" unary
 							| "&" unary
 							| "sizeof" unary
- * postfix 		= primary ( "[" expr "]" | "(" argument ")" )*
+ * postfix 		= primary ( "[" expr "]" | "(" ParamList ")" )*
  * primary    = num | ident | "(" expr ")"
- * argument 	= expr? | expr ("," expr)*
+ * ParamList 	= expr? | expr ("," expr)*
  */
 
 // program    = funcDefine*
@@ -68,12 +68,12 @@ Node_t* mul(void);
 // 						| "&" unary
 //						| "sizeof" unary
 Node_t* unary();
-// postfix 		= primary ( "[" expr "]" | "(" argument ")" )*
+// postfix 		= primary ( "[" expr "]" | "(" paramList ")" )*
 Node_t* postfix(void);
 // primary    = num | ident | "(" expr ")"
-Node_t* primary();
-// argument 	= "(" expr? | expr ("," expr)* ")"
-Node_t *argument(void);
+Node_t* primary(void);
+// paramList 	= "(" expr? | expr ("," expr)* ")"
+Vector_t* paramList(void);
 
 /// @brief 新しいType_tを作成する
 /// @param dataType 
@@ -82,7 +82,6 @@ Node_t *argument(void);
 Types_t* new_type(DataType dataType, Types_t* inner);
 Types_t* typeSpec(void);
 
-Vector_t* parmlist(void);
 
 
 Identifier_t* find_lvar(Token_t *tok){
@@ -478,8 +477,17 @@ Node_t* equality(void){
 	}
 }
 
-Vector_t* parmlist(void){
-	Vector_t *vector = new_vector(expr(), NULL);
+Vector_t* paramList(void){
+  DEBUG_WRITE("\n");
+	Vector_t *vector;
+	
+  DEBUG_WRITE("%s\n", token->str);
+	if(peek(TK_RESERVED, ")")){
+		return NULL;
+	} else {
+		vector = new_vector(expr(), NULL);
+	}
+
 	while(consume(TK_RESERVED, ",")){
 		vector = new_vector(expr(), vector);
 	}
@@ -578,8 +586,9 @@ Node_t* postfix(void){
 			continue;
 		} else if(consume(TK_RESERVED, "(")){
 			// 関数呼び出し
+
 			node->kind = ND_FUNCCALL;
-			node->vector = parmlist();
+			node->vector = paramList();
 			expect(TK_RESERVED, ")");
 			// 複数回呼べない()
 			continue;
@@ -588,7 +597,7 @@ Node_t* postfix(void){
 	}
 }
 
-Node_t *primary() {
+Node_t *primary(void) {
   DEBUG_WRITE("\n");
 	Token_t *tok = consume_ident();
 	if(tok != NULL){
@@ -602,7 +611,6 @@ Node_t *primary() {
 			return node;
 		}else{
 			if(peek(TK_RESERVED, "(")){
-				// プロトタイプ宣言が実装されると必要ない
 				node->identifier = new_identifier(ND_FUNCCALL, tok, new_type(DT_FUNC, NULL))->identifier;
 				node->type = node->identifier->type;
 				return node;
@@ -656,15 +664,3 @@ Types_t* typeSpec(void){
 	return type;
 }
 
-Node_t *argument(void){
-	DEBUG_WRITE("\n");
-	Node_t *node;
-	Token_t *tok;
-
-	if(!consume(TK_RESERVED, ")")){
-		node->vector = parmlist();
-		expect(TK_RESERVED, ")");
-	}
-	
-	return node;
-}
