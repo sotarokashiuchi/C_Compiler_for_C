@@ -1,6 +1,6 @@
 *~
 *.o
-.*
+.gdb_history
 peda-session-9cc.txt
 peda-session-tmp.txt
 tmp*
