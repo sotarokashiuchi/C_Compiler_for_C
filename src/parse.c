@@ -1,6 +1,7 @@
 #include "common.h"
 #include "parse.h"
 #include "tokenize.h"
+#include <stdio.h>
 /* グローバル変数 */
 // 文ごとの先頭ノードを格納
 Node_t *code[100];
@@ -481,7 +482,6 @@ Vector_t* paramList(void){
   DEBUG_WRITE("\n");
 	Vector_t *vector;
 	
-  DEBUG_WRITE("%s\n", token->str);
 	if(peek(TK_RESERVED, ")")){
 		return NULL;
 	} else {
@@ -589,6 +589,8 @@ Node_t* postfix(void){
 
 			node->kind = ND_FUNCCALL;
 			node->vector = paramList();
+			// プロトタイプ宣言を利用し、戻り値の型を入れるべき(未実装)
+			node->type = new_type(DT_INT, NULL);
 			expect(TK_RESERVED, ")");
 			// 複数回呼べない()
 			continue;
@@ -636,7 +638,7 @@ Node_t *primary(void) {
 /// @param inner 
 /// @return 
 Types_t* new_type(DataType dataType, Types_t* inner){
-  DEBUG_WRITE("this is typeSpec\n");
+  DEBUG_WRITE("\n");
 	Types_t* type = calloc(1, sizeof(Types_t));
 	type->dataType = dataType;
 	type->inner = inner;
