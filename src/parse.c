@@ -51,7 +51,7 @@ Node_t* funcDefine();
 // 						| typeSpec ident ("[" num "]")? ";"
 Node_t* stmt(void);
 // expr       = assign
-Node_t* declaration(void);
+Node_t* declaration(NodeKind);
 Node_t* expr(void);
 // assign     = equality ("=" assign)?
 Node_t* assign(void);
@@ -287,7 +287,7 @@ void program(void){
 		if(status){
 			code[i++] = funcDefine();
 		} else {
-			code[i++] = declaration();
+			code[i++] = declaration(ND_GVARDEFINE);
 		}
 	}
 	code[i] = NULL;
@@ -349,7 +349,7 @@ Node_t* stmt(void){
 	Types_t *type;
 
 	if(peek(TK_KEYWORD, "int") || peek(TK_KEYWORD, "char")){
-		node = declaration();
+		node = declaration(ND_LVAR);
 		return node;
 	}
 		
@@ -438,7 +438,7 @@ Node_t* stmt(void){
 	return node;
 }
 
-Node_t* declaration(void){
+Node_t* declaration(NodeKind kind){
 	Node_t *node;
 	Token_t *tok;
 	Types_t *type;
@@ -456,9 +456,11 @@ Node_t* declaration(void){
 		expect(TK_RESERVED, "]");
 	}
 	
-	node = new_identifier(ND_LVAR, tok, type);
+	node = new_identifier(kind, tok, type);
 	expect(TK_RESERVED, ";");
-	node = new_node(ND_SINGLESTMT, node, NULL, NULL, NULL, NULL, NULL);
+	if(kind != ND_GVARDEFINE){
+		node = new_node(ND_SINGLESTMT, node, NULL, NULL, NULL, NULL, NULL);
+	}
 	return node;
 }
 

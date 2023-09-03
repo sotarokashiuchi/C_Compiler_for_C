@@ -183,8 +183,14 @@ void gen(Node_t *node) {
     pushPrint("rax");
     return;
   }
+  case ND_GVARDEFINE:{
+    asmPrint("\n.bss\n");
+		asmPrint("%s:\n", gen_lval_name(node));
+		return;
+	}
   case ND_FUNCDEFINE:{
     alignmentCount = local_variable_stack+8;
+    asmPrint("\n.text\n");
     asmPrint("%s:\n", gen_lval_name(node));
     asmPrint("  #プロローグ\n");
     pushPrint("rbp");
