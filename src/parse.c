@@ -85,11 +85,11 @@ Types_t* typeSpec(void);
 
 
 
-Identifier_t* find_lvar(Token_t *tok){
-	for(Identifier_t *var = identHead; var; var = var->next){
-		if(var->len == tok->len && !memcmp(tok->str, var->name, var->len)){
+Identifier_t* find_identifier(Token_t *tok){
+	for(Identifier_t *identifier = identHead; identifier; identifier = identifier->next){
+		if(identifier->len == tok->len && !memcmp(tok->str, identifier->name, identifier->len)){
 			DEBUG_WRITE("this is identifier.\n");
-			return var;
+			return identifier;
 		}
 	}
 	return NULL;
@@ -618,7 +618,7 @@ Node_t *primary(void) {
 	if(tok != NULL){
 		// 識別子の読み込み
 		Node_t *node = new_node(ND_LVAR, NULL, NULL, NULL, NULL, NULL, NULL);
-		Identifier_t *identifier = find_lvar(tok);
+		Identifier_t *identifier = find_identifier(tok);
 		if(identifier){
 			// 既に識別子が存在する
 			node->identifier = identifier;
