@@ -1,6 +1,7 @@
 #include "common.h"
 #include "codegen.h"
 #include <assert.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -334,6 +335,12 @@ void gen(Node_t *node) {
     pushPrint(buf);
     return;
   }
+  case ND_GVAR:{
+		fprintf(stderr, "stop");
+		exit(1);
+		asmPrint("%s:\n", gen_lval_name(node));
+		return;
+	}
   case ND_LVAR:{
     gen_address(node);
     popPrint("rax");

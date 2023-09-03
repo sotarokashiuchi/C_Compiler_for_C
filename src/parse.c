@@ -86,9 +86,24 @@ Types_t* typeSpec(void);
 
 
 Identifier_t* find_identifier(Token_t *tok){
+	// ローカル変数の識別子を検索
 	for(Identifier_t *identifier = identHead; identifier; identifier = identifier->next){
-		if(identifier->len == tok->len && !memcmp(tok->str, identifier->name, identifier->len)){
-			DEBUG_WRITE("this is identifier.\n");
+		if(identifier->len == tok->len && !memcmp(tok->str, identifier->name, identifier->len) && identifier->kind == IK_LVAR){
+			DEBUG_WRITE("this is LVAR.\n");
+			return identifier;
+		}
+	}
+	// グローバル変数の識別子を検索
+	for(Identifier_t *identifier = identHead; identifier; identifier = identifier->next){
+		if(identifier->len == tok->len && !memcmp(tok->str, identifier->name, identifier->len) && identifier->kind == IK_GVAR){
+			DEBUG_WRITE("this is GVAR.\n");
+			return identifier;
+		}
+	}
+	// 関数の識別子を検索
+	for(Identifier_t *identifier = identHead; identifier; identifier = identifier->next){
+		if(identifier->len == tok->len && !memcmp(tok->str, identifier->name, identifier->len) && identifier->kind == IK_FUNC){
+			DEBUG_WRITE("this is FUNC.\n");
 			return identifier;
 		}
 	}
@@ -265,6 +280,8 @@ Node_t* new_identifier(NodeKind kind, Token_t *tok, Types_t *type){
 			// FuncCallの時に新しい識別子を作成するのは間違っているのではないか？
 			identifier->kind = IK_GVAR;
 			break;
+		default:
+			parseError("Not define kind\n");
 	}
 
 	identHead = identifier;
