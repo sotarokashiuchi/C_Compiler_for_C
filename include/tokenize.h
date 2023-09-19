@@ -12,6 +12,7 @@ typedef enum{
 	TK_IDENT,				// 識別子
 	TK_KEYWORD,			// Keyword(予約語)
 	TK_NUM,					// 整数トークン
+	TK_STRING,			// 文字列リテラル
 	TK_EOF,					// 入力の終わりを表すトークン
 	TK_ERROR,				// エラートークン
 } TokenKind;

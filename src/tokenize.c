@@ -110,6 +110,20 @@ Token_t* tokenize(void){
 			continue;
 		}
 		
+		// 文字列リテラル
+		if(*p == '"'){
+			p++;
+			int i;
+			char *tmpp = p;
+			tmpp++;;
+			for(i=1; *tmpp != '"'; i++){
+				tmpp++;
+			}
+			cur = new_token(TK_STRING, cur, &p, i);
+			p++;
+			continue;
+		}
+
 		// 変数(複数文字列)
 		if(isalpha(*p) || *p == '_'){
 			int i;
