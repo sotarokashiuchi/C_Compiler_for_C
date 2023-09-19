@@ -82,7 +82,7 @@ int main(int argc, char **argv){
 				assert(fp != NULL && "failed to open file");
 
 				read_file(test_code, fp);
-				sprintf(command, "CC_DEBUG=0 ./9cc \"%s\" > tmp.s", test_code);
+				sprintf(command, "CC_DEBUG=0 ./9cc \'%s\' > tmp.s", test_code);
 				system(command);
 				system("cc -o link.o -c ./testcase/link.c");
 				system("cc -o tmp.o -c tmp.s");
@@ -123,7 +123,7 @@ int main(int argc, char **argv){
 		printf("expect status:%d\n", expect_status);
 
 		printf("********************************** [compile] **********************************\n");
-		sprintf(command, "CC_DEBUG=1 ./9cc \"%s\" > tmp.s", test_code);
+		sprintf(command, "CC_DEBUG=1 ./9cc \'%s\' > tmp.s", test_code);
 		system(command);
 
 		printf("********************************* [assemble] **********************************\n");
