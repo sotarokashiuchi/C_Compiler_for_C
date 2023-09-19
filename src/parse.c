@@ -277,7 +277,6 @@ Node_t* new_identifier(NodeKind kind, Token_t *tok, Types_t *type){
 			identifier->kind = IK_FUNC;
 			break;
 		case ND_GVARDEFINE:
-			// FuncCallの時に新しい識別子を作成するのは間違っているのではないか？
 			identifier->kind = IK_GVAR;
 			break;
 		default:
@@ -618,7 +617,6 @@ Node_t* postfix(void){
 			continue;
 		} else if(consume(TK_RESERVED, "(")){
 			// 関数呼び出し
-
 			node->kind = ND_FUNCCALL;
 			node->vector = paramList();
 			// プロトタイプ宣言を利用し、戻り値の型を入れるべき(未実装)
@@ -642,9 +640,20 @@ Node_t *primary(void) {
 			// 既に識別子が存在する
 			node->identifier = identifier;
 			node->type = identifier->type;
+			if(identifier->kind == IK_LVAR){
+				node->kind = ND_LVAR;
+			} else if (identifier->kind == IK_GVAR){
+				node->kind = ND_GVAR;
+			} else if (identifier->kind == IK_FUNC){
+				// 同じファイルで宣言されている関数の場合
+				node->kind = ND_FUNCCALL;
+			} else {
+				parseError("存在しない識別子の種類です\n");
+			}
 			return node;
 		}else{
 			if(peek(TK_RESERVED, "(")){
+				// 外部のファイルから呼び出した関数の場合
 				node->identifier = new_identifier(ND_FUNCCALL, tok, new_type(DT_FUNC, NULL))->identifier;
 				node->type = node->identifier->type;
 				return node;

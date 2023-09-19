@@ -14,7 +14,7 @@ static int alignmentCount = 0;
 void codegenError(char *fmt, ...){
 	va_list ap;
 	va_start(ap, fmt);
-	fprintf(stderr, "\x1b[31mParse Error:\x1b[0m");
+	fprintf(stderr, "\x1b[31mCodeGen Error:\x1b[0m");
 	vfprintf(stderr, fmt, ap);
 	exit(1);
 }
@@ -79,25 +79,11 @@ char* getRegNameFromSize(int size, char const *register_name){
 	assert((size==4 || size==8) && "failed serch data size");
 }
 
-/// @brief 左辺値の評価(アドレス計算)
-/// @param node 評価対象のノード
-void gen_address(Node_t *node){
-  if(node->kind == ND_LVAR){
-    asmPrint("  mov rax, rbp\n");
-    asmPrint("  sub rax, %d\n", node->identifier->offset);
-    pushPrint("rax");
-  } else if(node->kind == ND_DEREF){
-    gen(node->expr1);
-  } else if(node->kind != ND_LVAR){
-    codegenError("代入の左辺値が変数ではありません\n");
-    return;
-  }
-}
 
 /// @brief lvalの名前の文字列を取得
 /// @param node lvar名を求めたいノード
 /// @return 取得した文字列の先頭ポインタ(文字列の末尾には'\0'が格納されている)
-char* gen_lval_name(Node_t *node){
+char* gen_identifier_name(Node_t *node){
   int i;
   char *ident_name = calloc(node->identifier->len+1, sizeof(char));
   for(i=0; i < node->identifier->len; i++){
@@ -105,6 +91,28 @@ char* gen_lval_name(Node_t *node){
   }
   ident_name[i] = '\0';
   return ident_name;
+}
+
+
+/// @brief 左辺値の評価(アドレス計算)
+/// @param node 評価対象のノード
+void gen_address(Node_t *node){
+  if(node->kind == ND_LVAR){
+		// ローカル変数
+    asmPrint("  mov rax, rbp\n");
+    asmPrint("  sub rax, %d\n", node->identifier->offset);
+    pushPrint("rax");
+  } else if(node->kind == ND_GVAR){
+		// グローバル変数
+		asmPrint("	lea rax, [rip+%s]\n", gen_identifier_name(node));
+		// asmPrint("	mov rax, DWORD PTR %s[rip]\n", gen_identifier_name(node));
+		pushPrint("rax");
+  } else if(node->kind == ND_DEREF){
+    gen(node->expr1);
+  } else {
+    codegenError("代入の左辺値が変数ではありません\n");
+    return;
+  }
 }
 
 /// @brief アライメントを正しくする
@@ -174,7 +182,7 @@ void gen(Node_t *node) {
       }
     }
     int displacement = setAlignment(16);
-    asmPrint("  call %s\n", gen_lval_name(node));
+    asmPrint("  call %s\n", gen_identifier_name(node));
     asmPrint("  add rsp, %d\n", displacement);
     alignmentCount -= displacement;
     for(int i=7; i<=numOfArgu; i++){
@@ -185,14 +193,15 @@ void gen(Node_t *node) {
     return;
   }
   case ND_GVARDEFINE:{
-    asmPrint("\n.bss\n");
-		asmPrint("%s:\n", gen_lval_name(node));
+    asmPrint("\n.data\n");
+		asmPrint("%s:\n", gen_identifier_name(node));
+    asmPrint("	.zero %d\n", getRegNameFromType(node->type));
 		return;
 	}
   case ND_FUNCDEFINE:{
     alignmentCount = local_variable_stack+8;
     asmPrint("\n.text\n");
-    asmPrint("%s:\n", gen_lval_name(node));
+    asmPrint("%s:\n", gen_identifier_name(node));
     asmPrint("  #プロローグ\n");
     pushPrint("rbp");
     asmPrint("  mov rbp, rsp\n");
@@ -336,10 +345,17 @@ void gen(Node_t *node) {
     return;
   }
   case ND_GVAR:{
-		fprintf(stderr, "stop");
-		exit(1);
-		asmPrint("%s:\n", gen_lval_name(node));
-		return;
+    gen_address(node);
+    popPrint("rax");
+		size = getRegNameFromType(node->type);
+		if(size == 1){
+    	asmPrint("  movzx rax, BYTE PTR [rax]\n");
+		} else if (size == 4 || size == 8){
+			asmPrint("	mov %s, %s[rip]\n", getRegNameFromSize(size, "rax"), gen_identifier_name(node));
+		}
+
+    pushPrint("rax");
+    return;
 	}
   case ND_LVAR:{
     gen_address(node);
