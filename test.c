@@ -111,7 +111,7 @@ int main(int argc, char **argv){
 		return all_status;
 	} else if(argc == 2){
 		// debug mode
-		printf("******************************** [information] ********************************\n");
+		printf("\e[36m******************************** [information] ********************************\e[39m\n");
 		code_info(file_name, &expect_status, argv[1]);
 		printf("FileName:%s\n", file_name);
 		fp = fopen(file_name, "r");
@@ -122,16 +122,16 @@ int main(int argc, char **argv){
 		printf("Input:\n%s\n", test_code);
 		printf("expect status:%d\n", expect_status);
 
-		printf("********************************** [compile] **********************************\n");
+		printf("\e[36m********************************** [compile] **********************************\e[39m\n");
 		sprintf(command, "CC_DEBUG=1 ./9cc \'%s\' > tmp.s", test_code);
 		system(command);
 
-		printf("********************************* [assemble] **********************************\n");
+		printf("\e[36m********************************* [assemble] **********************************\e[39m\n");
 		system("cc -o link.o -c ./testcase/link.c");
 		system("cc -o tmp.o -c tmp.s");
 		system("cc -o tmp tmp.o link.o");
 
-		printf("********************************* [execution] *********************************\n");
+		printf("\e[36m********************************* [execution] *********************************\e[39m\n");
 		system("./tmp ; echo $? > tmp_status");
 
 		printf("Input:\n%s\n", test_code);

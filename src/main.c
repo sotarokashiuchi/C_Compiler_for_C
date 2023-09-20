@@ -24,9 +24,11 @@ int main(int argc, char **argv){
 
   /* トークナイズ */
   token = tokenize();
+	DEBUG_WRITE("\033[35mcompleted tokenize\033[39m\n\n");
 
   /* パーサ */
 	program();
+	DEBUG_WRITE("\033[35mcompleted parse\033[39m\n\n");
 
   /* コード生成 */
   // 前半部分のコード生成
@@ -36,6 +38,7 @@ int main(int argc, char **argv){
   for(int i=0; code[i] != NULL; i++){
     gen(code[i]);
   }
+	DEBUG_WRITE("\033[35mcompleted codegen\033[39m\n\n");
 
   return 0;
 }
