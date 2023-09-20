@@ -19,8 +19,10 @@ int main(int argc, char **argv){
   char *debug = getenv("CC_DEBUG");
   debugEnabled = debug && !strcmp(debug, "1");
 	user_input = argv[1];
-  Identifier_t dummy = {0, NULL, NULL, 0, 0};
-  identHead = &dummy;
+  Identifier_t dummyIdentifier = {0, NULL, NULL, 0, 0};
+  identHead = &dummyIdentifier;
+	StringVector_t dummyStringVecotr = {NULL, 0, 0, NULL};
+  stringHead = &dummyStringVecotr;
 
   /* トークナイズ */
   token = tokenize();

@@ -31,7 +31,8 @@ typedef enum{
   ND_ADDR,        // アドレス演算子
   ND_DEREF,       // 関節演算子
   ND_NUM, 				// 整数
-	ND_SINGLESTMT,				// 式
+	ND_STRING, 			// 文字列リテラル
+	ND_SINGLESTMT,	// 式
 } NodeKind;
 
 typedef enum {
@@ -58,6 +59,13 @@ typedef struct Identifier_tag {
   struct Types_tag *type;
 } Identifier_t;
 
+/// @brief 文字列リテラルのベクタリスト
+typedef struct StringVector_tag {
+	char *string;
+	int len;
+	int labelID;
+	struct StringVector_tag *next;
+} StringVector_t;
 
 typedef struct Node_tag Node_t;
 typedef struct Vector_tag Vector_t;
@@ -80,7 +88,8 @@ struct Node_tag {
   Vector_t *vector;
   struct Types_tag *type;
 	int val;			  // kindがND_NUMの場合のみ使う
-  Identifier_t *identifier;   // ラベル用
+  Identifier_t *identifier;   // 識別子用
+	StringVector_t *string;
 };
 
 typedef struct Types_tag {
@@ -95,6 +104,8 @@ typedef struct Types_tag {
 extern Node_t *code[100];
 /// @brief Lvar_t構造体のリストの先頭
 extern Identifier_t *identHead;
+/// @brief Lvar_t構造体のリストの先頭
+extern StringVector_t *stringHead;
 
 /* 関数プロトタイプ宣言 */
 /// @brief パースプログラム

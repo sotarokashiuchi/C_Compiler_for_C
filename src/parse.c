@@ -7,6 +7,8 @@
 Node_t *code[100];
 // lvarのリストの先頭ポインタ
 Identifier_t *identHead = NULL;
+// stringのリストの先頭ポインタ
+StringVector_t *stringHead = NULL;
 
 
 /* 関数プロトタイプ宣言 */
@@ -34,7 +36,7 @@ Identifier_t *identHead = NULL;
 							| "&" unary
 							| "sizeof" unary
  * postfix 		= primary ( "[" expr "]" | "(" ParamList ")" )*
- * primary    = num | ident | "(" expr ")"
+ * primary    = num | string | ident | "(" expr ")"
  * ParamList 	= expr? | expr ("," expr)*
  */
 
@@ -244,6 +246,23 @@ Vector_t* new_vector(Node_t *node, Vector_t *current){
 	vector->next = NULL;
 	return vector;
 }
+
+/// @brief 新しいStringベクタを生成する
+/// @param node ベクタに登録するノード
+Node_t* new_string_vector(Token_t *tok){
+	static int labelID;
+  DEBUG_WRITE("this is string, labelID %d\n", labelID);
+	Node_t *node = new_node(ND_STRING, NULL, NULL, NULL, NULL, NULL, NULL);
+	StringVector_t *stringVector = calloc(1, sizeof(StringVector_t));
+	stringVector->string = tok->str;
+	stringVector->len = tok->len;
+	stringVector->labelID = labelID++;
+	stringVector->next = stringHead;
+	node->string = stringVector;
+	stringHead = stringVector;
+	return node;
+}
+
 
 /// @brief 新しい識別子を生成する
 /// @param tok 識別子を指すトークン
@@ -662,14 +681,19 @@ Node_t *primary(void) {
 		}
 	}
 	
-  // 次のトークンが"("なら、"(" expr ")"のはず
+  // "(" expr ")"
   if (consume(TK_RESERVED, "(")) {
   	Node_t *node = expr();
     expect(TK_RESERVED, ")");
     return node;
   }
 
-  // そうでなければ数値のはず
+	if ((tok = consume_string()) != NULL) {
+		DEBUG_WRITE("consume_string\n");
+		return new_string_vector(tok);
+	}
+
+  // 数値
   DEBUG_WRITE("this is number.\n");
   return new_node_num(expect_number());
 }

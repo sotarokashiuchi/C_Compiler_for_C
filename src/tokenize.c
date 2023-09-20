@@ -218,6 +218,15 @@ void back_token(Token_t *tok){
 	return;
 }
 
+Token_t* consume_string(void){
+	if(token->kind != TK_STRING){
+		return NULL;
+	}
+	Token_t *tok = token;
+	token = token->next;
+	return tok;
+}
+
 Token_t* consume_ident(void){
 	if(token->kind != TK_IDENT){
 		return NULL;
