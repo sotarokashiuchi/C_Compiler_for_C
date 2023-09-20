@@ -11,6 +11,9 @@ static int labelIndex = 0;
 // popとpushの回数を数える
 static int alignmentCount = 0;
 
+/* プロトタイプ宣言 */
+void gen(Node_t *node);
+
 void codegenError(char *fmt, ...){
 	va_list ap;
 	va_start(ap, fmt);
@@ -123,6 +126,20 @@ int setAlignment(int byte){
   alignmentCount += displacement;
   asmPrint("  sub rsp, %d\n", displacement);
   return displacement;
+}
+
+void gens(void) {
+	// 初期化処理
+  // 前半部分のコード生成
+  printf(".intel_syntax noprefix\n");
+  printf(".globl main\n");
+
+
+  for(int i=0; code[i] != NULL; i++){
+    gen(code[i]);
+  }
+
+	return;
 }
 
 void gen(Node_t *node) {

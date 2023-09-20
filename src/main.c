@@ -33,13 +33,7 @@ int main(int argc, char **argv){
 	DEBUG_WRITE("\033[35mcompleted parse\033[39m\n\n");
 
   /* コード生成 */
-  // 前半部分のコード生成
-  printf(".intel_syntax noprefix\n");
-  printf(".globl main\n");
-
-  for(int i=0; code[i] != NULL; i++){
-    gen(code[i]);
-  }
+	gens();
 	DEBUG_WRITE("\033[35mcompleted codegen\033[39m\n\n");
 
   return 0;

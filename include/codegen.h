@@ -5,6 +5,6 @@
 
 /// @brief 抽象構文木からアセンブリコード生成
 /// @param node 抽象構文木の先頭ノード
-extern void gen(Node_t *node);
+extern void gens(void);
 
 #endif
