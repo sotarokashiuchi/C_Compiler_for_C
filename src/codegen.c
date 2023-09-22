@@ -134,6 +134,12 @@ void gens(void) {
   printf(".intel_syntax noprefix\n");
   printf(".globl main\n");
 
+	asmPrint(".data\n");
+	for(StringVector_t *string=stringHead; string->next; string = string->next){
+		asmPrint(".LC%d:\n", string->labelID);
+		asmPrint("	.string \"%.*s\"\n", string->len, string->string);
+	}
+	fflush(stdout);
 
   for(int i=0; code[i] != NULL; i++){
     gen(code[i]);
@@ -359,6 +365,11 @@ void gen(Node_t *node) {
     char buf[8];
     snprintf(buf, 8, "%d", node->val);
     pushPrint(buf);
+    return;
+  }
+  case ND_STRING:{
+		asmPrint("	lea rax, [rip+ .LC%d]\n", node->string->labelID);
+    pushPrint("rax");
     return;
   }
   case ND_GVAR:{
