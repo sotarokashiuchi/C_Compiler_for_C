@@ -25,7 +25,7 @@ StringVector_t *stringHead = NULL;
  * declaration= typeSpec ident ("[" num "]")? ";"
  * typeSpec		= ("int" | "char") "*"*
  * expr       = assign
- * assign     = equality ("=" assign)?
+ * assign     = equality (("=" | "*=" | "/=" | "%=" | "+=" | "-=") assign)?
  * equality   = relational ("==" relational | "!=" relational)*
  * relational = add ("<" add | "<=" add | ">" add | ">=" add)*
  * add        = mul ("+" mul | "-" mul)*
@@ -40,42 +40,19 @@ StringVector_t *stringHead = NULL;
  * ParamList 	= expr? | expr ("," expr)*
  */
 
-// program    = funcDefine*
 void program(void);
-// funcDefine = ident ("(" ident? | ident ("," ident)* ")"){ stmt* }
 Node_t* funcDefine();
-// stmt    		= expr ";"
-// 						| "return" expr ";"
-// 						| "if" "(" expr ")" stmt ("else" stmt)?
-// 						| "while" "(" expr ")" stmt
-// 						| "for" "(" expr? ";" expr? ";" expr? ")" stmt
-//  					| "{" stmt* "}"
-// 						| typeSpec ident ("[" num "]")? ";"
 Node_t* stmt(void);
-// expr       = assign
 Node_t* declaration(NodeKind);
 Node_t* expr(void);
-// assign     = equality ("=" assign)?
 Node_t* assign(void);
-// equality   = relational ("==" relational | "!=" relational)*
 Node_t* equality(void);
-// relational = add ("<" add | "<=" add | ">" add | ">=" add)*
 Node_t* relational(void);
-// add        = mul ("+" mul | "-" mul)*
 Node_t* add(void);
-// mul        = unary ("*" unary | "/" unary)*
 Node_t* mul(void);
-// unary      = "+"? postfix
-// 						| "-"? postfiz
-// 						| "*" unary
-// 						| "&" unary
-//						| "sizeof" unary
 Node_t* unary();
-// postfix 		= primary ( "[" expr "]" | "(" paramList ")" )*
 Node_t* postfix(void);
-// primary    = num | ident | "(" expr ")"
 Node_t* primary(void);
-// paramList 	= "(" expr? | expr ("," expr)* ")"
 Vector_t* paramList(void);
 
 /// @brief 新しいType_tを作成する
@@ -195,7 +172,7 @@ Node_t *new_node(NodeKind kind, Node_t *expr1, Node_t *expr2, Node_t *expr3, Nod
 		node->type = new_type(DT_PTR, expr1->type);
 	}
 
-	if(kind == ND_ASSIGN){
+	if(kind == ND_ASSIGN_EQ){
 		// 左辺値の型を代入
 		node->type = expr1->type;
 	}
@@ -508,7 +485,22 @@ Node_t* assign(void){
   DEBUG_WRITE("\n");
 	Node_t *node = equality();
 	if(TK_RESERVED, consume(TK_RESERVED, "=")){
-		node = new_node(ND_ASSIGN, node, assign(), NULL, NULL, NULL, NULL);
+		node = new_node(ND_ASSIGN_EQ, node, assign(), NULL, NULL, NULL, NULL);
+	}
+	if(TK_RESERVED, consume(TK_RESERVED, "*=")){
+		node = new_node(ND_ASSIGN_MUL, node, assign(), NULL, NULL, NULL, NULL);
+	}
+	if(TK_RESERVED, consume(TK_RESERVED, "/=")){
+		node = new_node(ND_ASSIGN_DIV, node, assign(), NULL, NULL, NULL, NULL);
+	}
+	if(TK_RESERVED, consume(TK_RESERVED, "%=")){
+		node = new_node(ND_ASSIGN_SUR, node, assign(), NULL, NULL, NULL, NULL);
+	}
+	if(TK_RESERVED, consume(TK_RESERVED, "+=")){
+		node = new_node(ND_ASSIGN_ADD, node, assign(), NULL, NULL, NULL, NULL);
+	}
+	if(TK_RESERVED, consume(TK_RESERVED, "-=")){
+		node = new_node(ND_ASSIGN_SUB, node, assign(), NULL, NULL, NULL, NULL);
 	}
 	return node;
 }

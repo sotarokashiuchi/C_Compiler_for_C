@@ -416,7 +416,7 @@ void gen(Node_t *node) {
     pushPrint("rax");
     return;
   }
-  case ND_ASSIGN:{
+  case ND_ASSIGN_EQ:{
     // 左辺の評価
     gen_address(node->expr1);
     // 右辺の評価
