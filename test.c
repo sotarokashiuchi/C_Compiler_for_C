@@ -30,7 +30,6 @@ int code_info(char* buf, int* expect_status, char* file_name){
 	for(p = file_name; *p != '_' && *p != '\0'; p++);
 	assert(*p == '_' && "filed to catch expect status");
 	*expect_status = atoi(++p);
-	// printf("expect status = %d\n", *expect_status);
 	return 0;
 }
 
@@ -78,11 +77,7 @@ int main(int argc, char **argv){
 				printf("%s\t:", dp->d_name);
 
 				code_info(file_name, &expect_status, dp->d_name);
-				fp = fopen(file_name, "r");
-				assert(fp != NULL && "failed to open file");
-
-				read_file(test_code, fp);
-				sprintf(command, "CC_DEBUG=0 ./9cc \'%s\' > tmp.s", test_code);
+				sprintf(command, "CC_DEBUG=0 ./9cc %s > tmp.s", file_name);
 				system(command);
 				system("cc -o link.o -c ./testcase/link.c");
 				system("cc -o tmp.o -c tmp.s");
@@ -123,7 +118,7 @@ int main(int argc, char **argv){
 		printf("expect status:%d\n", expect_status);
 
 		printf("\e[36m********************************** [compile] **********************************\e[39m\n");
-		sprintf(command, "CC_DEBUG=1 ./9cc \'%s\' > tmp.s", test_code);
+		sprintf(command, "CC_DEBUG=0 ./9cc %s > tmp.s", file_name);
 		system(command);
 
 		printf("\e[36m********************************* [assemble] **********************************\e[39m\n");
