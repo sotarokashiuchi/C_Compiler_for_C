@@ -118,7 +118,7 @@ int main(int argc, char **argv){
 		printf("expect status:%d\n", expect_status);
 
 		printf("\e[36m********************************** [compile] **********************************\e[39m\n");
-		sprintf(command, "CC_DEBUG=0 ./9cc %s > tmp.s", file_name);
+		sprintf(command, "CC_DEBUG=1 ./9cc %s > tmp.s", file_name);
 		system(command);
 
 		printf("\e[36m********************************* [assemble] **********************************\e[39m\n");
