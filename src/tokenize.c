@@ -57,6 +57,25 @@ Token_t* tokenize(void){
 			continue;
 		}
 
+		// 行コメントをスキップ
+		if(strncmp(p, "//", 2) == 0){
+			p += 2;
+			while(*p != '\n'){
+				p++;
+			}
+			continue;
+		}
+
+		// ブロックコメントをスキップ
+		if(strncmp(p, "/*", 2) == 0){
+			char *q = strstr(p + 2, "*/");
+			if(!q){
+				error_at(new_token(TK_ERROR, cur, &p, 1), "コメントが閉じられていません。");
+			}
+			p = q + 2;
+			continue;
+		}
+
 		// keyword
 		if(!strncmp(p, "return", 6) && !is_alnum(p[6])){
 			cur = new_token(TK_KEYWORD, cur, &p, 6);
