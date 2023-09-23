@@ -435,7 +435,69 @@ void gen(Node_t *node) {
     pushPrint("rdi");
     return;
   }
+  case ND_ASSIGN_MUL:
+  case ND_ASSIGN_DIV:
+  case ND_ASSIGN_MOD:
+  case ND_ASSIGN_ADD:
+  case ND_ASSIGN_SUB:{
+		// a += b
+    // aのアドレス(aのアドレスは一度しか計算してはならないa = *f()の時に値がかわる)
+    gen_address(node->expr1);
+
+		// aの値を評価 // raxにaのアドレスが格納されている想定 // sizeを考慮していない
+		asmPrint("  mov rax, [rax]\n");
+		pushPrint("rax");
+
+    // bの値を評価
+    gen(node->expr2);
+
+		// a + bを評価
+		popPrint("rdi");  // 右辺
+		popPrint("rax");  // 左辺
+
+		switch(node->kind){
+			case ND_ASSIGN_MUL:
+				asmPrint("  imul rax, rdi\n");
+				break;
+			case ND_ASSIGN_DIV:
+				asmPrint("  cqo\n");
+				asmPrint("  idiv rdi\n");
+				break;
+			case ND_ASSIGN_MOD:
+				asmPrint("  cqo\n");
+				asmPrint("  idiv rdi\n");
+				asmPrint("  mov rax, rdx\n");
+				break;
+			case ND_ASSIGN_ADD:
+				if(node->type->dataType == DT_PTR || node->type->dataType == DT_ARRAY){
+					if(node->expr1->type->dataType == DT_INT){
+						asmPrint("  imul rax, %d\n", sizeofType(node->type->inner));
+					} else {
+						asmPrint("  imul rdi, %d\n", sizeofType(node->type->inner));
+					}
+				}
+				asmPrint("  add rax, rdi\n");
+				break;
+			case ND_ASSIGN_SUB:
+				asmPrint("  sub rax, rdi\n");
+				break;
+		}
+		pushPrint("rax");
+
+		// aのアドレスにa+bを代入
+    popPrint("rdi");
+    popPrint("rax");
+		size = getRegNameFromType(node->type);
+		if(size == 1){
+    	asmPrint("  mov [rax], %s\n", getRegNameFromSize(size, "rdi"));
+		} else if (size == 4 || size == 8){
+    	asmPrint("  mov [rax], %s\n", getRegNameFromSize(size, "rdi"));
+		}
+
+    pushPrint("rdi");
+    return;
   }
+	}
 
   gen(node->expr1);
   gen(node->expr2);

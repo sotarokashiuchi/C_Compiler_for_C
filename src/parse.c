@@ -144,7 +144,7 @@ Node_t *new_node(NodeKind kind, Node_t *expr1, Node_t *expr2, Node_t *expr3, Nod
 	node->expr5 = expr5;
 	node->vector = vector;
 	// typeリストの最後のリストを確認する
-	if(kind == ND_ADD || kind == ND_SUB || kind == ND_MUL || kind == ND_DIV ){
+	if(kind == ND_ADD || kind == ND_SUB || kind == ND_MUL || kind == ND_DIV || kind == ND_MOD || kind == ND_ASSIGN_MUL || kind == ND_ASSIGN_DIV || kind == ND_ASSIGN_ADD || kind == ND_ASSIGN_SUB || kind == ND_ASSIGN_MOD){
 		if(expr1->type->dataType == DT_PTR){
 			// ポインタ
 			node->type = expr1->type;
@@ -494,7 +494,7 @@ Node_t* assign(void){
 		node = new_node(ND_ASSIGN_DIV, node, assign(), NULL, NULL, NULL, NULL);
 	}
 	if(TK_RESERVED, consume(TK_RESERVED, "%=")){
-		node = new_node(ND_ASSIGN_SUR, node, assign(), NULL, NULL, NULL, NULL);
+		node = new_node(ND_ASSIGN_MOD, node, assign(), NULL, NULL, NULL, NULL);
 	}
 	if(TK_RESERVED, consume(TK_RESERVED, "+=")){
 		node = new_node(ND_ASSIGN_ADD, node, assign(), NULL, NULL, NULL, NULL);

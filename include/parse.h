@@ -15,7 +15,7 @@ typedef enum{
   ND_ASSIGN_SUB,  // -=
   ND_ASSIGN_MUL,  // *=
   ND_ASSIGN_DIV,  // /=
-  ND_ASSIGN_SUR,  // %=
+  ND_ASSIGN_MOD,  // %=
   ND_LVAR,        // ローカル変数
   ND_GVAR,        // グローバル変数
   ND_GVARDEFINE,  // グローバル変数定義
