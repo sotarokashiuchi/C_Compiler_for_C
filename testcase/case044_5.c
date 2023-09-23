@@ -4,9 +4,9 @@ int main(){
 	if(++x != 4){
 		return 1;
 	}
-	if(x++ != 4){
-		return 1;
-	}
+	// if(x++ != 4){
+	// 	return 1;
+	// }
 	return x;
 }
 

@@ -34,8 +34,12 @@ StringVector_t *stringHead = NULL;
 							| "-"? postfix
 							| "*" unary
 							| "&" unary
+							| "++" unary
+							| "--" unary
 							| "sizeof" unary
  * postfix 		= primary ( "[" expr "]" | "(" ParamList ")" )*
+ * 						| postfix "++"
+ * 						| postfix "--"
  * primary    = num | string | ident | "(" expr ")"
  * ParamList 	= expr? | expr ("," expr)*
  */
@@ -611,6 +615,14 @@ Node_t* unary(){
 						"must be integer or pointer");
 			return new_node_num(8);
 		}
+	}
+	if(consume(TK_RESERVED, "++")){
+		// ++iは(i += 1)と解釈する
+		return new_node(ND_ASSIGN_ADD, unary(), new_node_num(1), NULL, NULL, NULL, NULL);
+	}
+	if(consume(TK_RESERVED, "--")){
+		// --iは(i -= 1)と解釈する
+		return new_node(ND_ASSIGN_SUB, unary(), new_node_num(1), NULL, NULL, NULL, NULL);
 	}
 	return postfix();
 }
