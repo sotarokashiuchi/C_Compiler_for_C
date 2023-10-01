@@ -445,15 +445,20 @@ void gen(Node_t *node) {
     gen_address(node->expr1);
 
 		// aの値を評価 // raxにaのアドレスが格納されている想定 // sizeを考慮していない
-		asmPrint("  mov rax, [rax]\n");
+		size = getRegNameFromType(node->expr1->type);
+		if(size == 1){
+    	asmPrint("  movzx rax, BYTE PTR [rax]\n");
+		} else if (size == 4 || size == 8){
+    	asmPrint("  mov %s, [rax]\n", getRegNameFromSize(size, "rax")); // 32bitレジスタでも自動的に拡張が行われる
+		}
 		pushPrint("rax");
 
     // bの値を評価
     gen(node->expr2);
 
 		// a + bを評価
-		popPrint("rdi");  // 右辺
-		popPrint("rax");  // 左辺
+		popPrint("rdi");  // b
+		popPrint("rax");  // a
 
 		switch(node->kind){
 			case ND_ASSIGN_MUL:
