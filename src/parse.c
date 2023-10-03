@@ -627,9 +627,31 @@ Node_t* unary(){
 	return postfix();
 }
 
+ /* 正しい
+ * postfix 		= primary 
+ * 						| postfix ( "[" expr "]" | "(" ParamList ")" )*
+ * 						| postfix "++"
+ * 						| postfix "--"
+ /* 現在
+ * postfix 		= primary ( "[" expr "]" | "(" ParamList ")" )*
+ * 						| postfix "++"
+ * 						| postfix "--"
+ */
 Node_t* postfix(void){
-	Node_t* node = primary();
+	Node_t* node;
 	Types_t* type = NULL;
+	node = primary();
+
+	if(consume(TK_RESERVED, "++")){
+	// i++は((i += 1) - 1)と解釈する
+		node = new_node(ND_ASSIGN_ADD, node, new_node_num(1), NULL, NULL, NULL, NULL);
+		return new_node(ND_SUB, node, new_node_num(1), NULL, NULL, NULL, NULL);
+	}
+	if(consume(TK_RESERVED, "--")){
+	// i--は((i -= 1) + 1)と解釈する
+		node = new_node(ND_ASSIGN_SUB, node, new_node_num(1), NULL, NULL, NULL, NULL);
+		return new_node(ND_ADD, node, new_node_num(1), NULL, NULL, NULL, NULL);
+	}
 
 	for( ; ; ){
 		if(consume(TK_RESERVED, "[")){
