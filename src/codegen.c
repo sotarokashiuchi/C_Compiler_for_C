@@ -357,7 +357,7 @@ void gen(Node_t *node) {
     popPrint("rax");
     asmPrint("  #エピローグ\n");
     asmPrint("  mov rsp, rbp\n");
-    popPrint("rbp");
+    asmPrint("	pop rbp\n");
     asmPrint("  ret\n");
     return;
   }
