@@ -610,6 +610,8 @@ Node_t* unary(){
 		// 配列 CHAR型に対応できていない？
 		if(node->type->dataType == DT_INT){
 			return new_node_num(4);
+		} else if(node->type->dataType == DT_CHAR) {
+			return new_node_num(1);
 		} else {
 			assert(node->type->dataType == DT_PTR &&
 						"must be integer or pointer");
