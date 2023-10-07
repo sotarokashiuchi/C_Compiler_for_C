@@ -37,6 +37,7 @@ StringVector_t *stringHead = NULL;
 							| "++" unary
 							| "--" unary
 							| "sizeof" unary
+							| "sizeof" (typeSpec)
  * postfix 		= primary ( "[" expr "]" | "(" ParamList ")" )*
  * 						| postfix "++"
  * 						| postfix "--"
@@ -619,19 +620,29 @@ Node_t* unary(){
 	if(consume(TK_RESERVED, "*")){
 		return new_node(ND_DEREF, unary(), NULL, NULL, NULL, NULL, NULL);
 	}
+
 	if(consume(TK_KEYWORD, "sizeof")){
-		Node_t *node = unary();
-		// 配列 CHAR型に対応できていない？
-		if(node->type->dataType == DT_INT){
-			return new_node_num(4);
-		} else if(node->type->dataType == DT_CHAR) {
-			return new_node_num(1);
-		} else {
-			assert(node->type->dataType == DT_PTR &&
-						"must be integer or pointer");
-			return new_node_num(8);
+		Types_t* type;
+		Token_t* tok;
+		tok = peek(TK_RESERVED, "(");
+		if (tok) {
+			// sizeof ( typeSpec )
+			token = tok->next;
+			type = typeSpec();
+			if(type != NULL){
+				expect(TK_RESERVED, ")");
+				return new_node_num(sizeofType(type));
+			}
 		}
+
+		// sizeof unary
+		if (tok != NULL){
+			token = tok;
+		}
+		Node_t *node = unary();
+		return new_node_num(sizeofType(node->type));
 	}
+
 	if(consume(TK_RESERVED, "++")){
 		// ++iは(i += 1)と解釈する
 		return new_node(ND_ASSIGN_ADD, unary(), new_node_num(1), NULL, NULL, NULL, NULL);
@@ -769,6 +780,9 @@ Types_t* typeSpec(void){
 	while(consume(TK_RESERVED, "*")){
 		type = new_type(DT_PTR, type);
 	}
+
+	// 配列を再帰的にパース
+	type  = declaration_array(type);
 	
 	// int*** -> int** -> int* -> int の順に並ぶ
 	return type;
