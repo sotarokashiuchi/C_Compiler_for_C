@@ -1,8 +1,10 @@
 *~
 *.o
+_*
 .gdb_history
-peda-session-9cc.txt
-peda-session-tmp.txt
+compile_commands.json
+compile_flags.txt
+peda-session-*.txt
 tmp*
 a.out
 9cc
