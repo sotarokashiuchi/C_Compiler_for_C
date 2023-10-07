@@ -118,13 +118,13 @@ Token_t* tokenize(void){
 		}
 
 		// 2文字
-		if(!strncmp(p, "<=", 2) || !strncmp(p, ">=", 2) || !strncmp(p, "==", 2) || !strncmp(p, "!=", 2) || !strncmp(p, "+=", 2) || !strncmp(p, "-=", 2) || !strncmp(p, "*=", 2) || !strncmp(p, "/=", 2) || !strncmp(p, "%=", 2) || !strncmp(p, "++", 2) || !strncmp(p, "--", 2)){
+		if(!strncmp(p, "<=", 2) || !strncmp(p, ">=", 2) || !strncmp(p, "==", 2) || !strncmp(p, "!=", 2) || !strncmp(p, "+=", 2) || !strncmp(p, "-=", 2) || !strncmp(p, "*=", 2) || !strncmp(p, "/=", 2) || !strncmp(p, "%=", 2) || !strncmp(p, "++", 2) || !strncmp(p, "--", 2) || !strncmp(p, "&&", 2) || !strncmp(p, "||", 2)){
 			cur = new_token(TK_RESERVED, cur, &p, 2);
 			continue;
 		}
 
 		// 1文字
-		if(*p == '+' || *p == '-' || *p == '*' || *p == '/' || *p == '(' || *p == ')' || *p == '<' || *p == '>' || *p == ';' || *p == '=' || *p == '{' || *p == '}' || *p == ',' || *p == '&' || *p == '[' || *p == ']' || *p == '%'){
+		if(*p == '+' || *p == '-' || *p == '*' || *p == '/' || *p == '(' || *p == ')' || *p == '<' || *p == '>' || *p == ';' || *p == '=' || *p == '{' || *p == '}' || *p == ',' || *p == '&' || *p == '[' || *p == ']' || *p == '%' || *p == '!'){
 			cur = new_token(TK_RESERVED, cur, &p, 1);
 			continue;
 		}
