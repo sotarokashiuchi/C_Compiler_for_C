@@ -218,11 +218,11 @@ bool consume(TokenKind kind, char *op){
 	return true;
 }
 
-bool peek(TokenKind kind, char *op){
+Token_t* peek(TokenKind kind, char *op){
 	if(token->kind != kind || token->len != strlen(op) || memcmp(token->str, op, token->len)){
-		return false;
+		return NULL;
 	}
-	return true;
+	return token;
 }
 
 void expect(TokenKind kind, char *op) {

@@ -292,7 +292,7 @@ void program(void){
   DEBUG_WRITE("header node\n");
 	int i = 0;
 	Token_t *tok;
-	int status;
+	void* status;
 	while(!at_eof()){
 		tok = token;
 		typeSpec();

@@ -53,7 +53,7 @@ extern int expect_number();
 /// @return true:次のトークンが期待通り. false:それ以外の場合
 extern bool consume(TokenKind kind, char *op);
 
-bool peek(TokenKind kind, char *op);
+Token_t* peek(TokenKind kind, char *op);
 
 /// @brief 次のトークンが期待している文字列の場合、トークンを1つ読み進める。
 ///				 それ以外の場合にはエラーを報告する。
