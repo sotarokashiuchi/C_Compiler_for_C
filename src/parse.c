@@ -422,7 +422,7 @@ Node_t* stmt(void){
 		}
 
 		if(consume(TK_RESERVED, ";")){
-			expr2 = NULL;
+			expr2 = new_node_num(1);
 		}else{
 			// Bの読み込み
 			expr2 = expr();
