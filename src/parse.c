@@ -454,6 +454,23 @@ Node_t* stmt(void){
 	return node;
 }
 
+/// @brief 配列をパースしtypeリストを作成する
+/// @param types 基本型と、ポインタが格納されたtypeリスト
+/// @return typeリスト
+Types_t* declaration_array(Types_t* types){
+	Types_t* type;
+	int size;
+	if(consume(TK_RESERVED, "[")){
+		size = expect_number();
+		expect(TK_RESERVED, "]");
+		type = new_type(DT_ARRAY, declaration_array(types));
+		type->array_size = size;
+		return type;
+	} else {
+		return types;
+	}
+}
+
 Node_t* declaration(NodeKind kind){
 	Node_t *node;
 	Token_t *tok;
@@ -465,12 +482,9 @@ Node_t* declaration(NodeKind kind){
 	tok = consume_ident();
 	assert(tok!=NULL && "変数名がない");
 
-	// 配列をパース
-	while(consume(TK_RESERVED, "[")){
-		type = new_type(DT_ARRAY, type);
-		type->array_size = expect_number();
-		expect(TK_RESERVED, "]");
-	}
+	// 配列を再帰的にパース
+	type  = declaration_array(type);
+
 	
 	node = new_identifier(kind, tok, type);
 	expect(TK_RESERVED, ";");
@@ -747,6 +761,7 @@ Types_t* typeSpec(void){
 	} else if(consume(TK_KEYWORD, "char")){
 		type = new_type(DT_CHAR, NULL);
 	} else {
+		return NULL;
 		todoError("まだ実装していない基本型です\n");
 	}
 
