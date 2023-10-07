@@ -19,7 +19,7 @@ StringVector_t *stringHead = NULL;
  * 						| "return" expr ";"
  * 						| "if" "(" expr ")" stmt ("else" stmt)?
  * 						| "while" "(" expr ")" stmt
- * 						| "for" "(" expr? ";" expr? ";" expr? ")" stmt
+ * 						| "for" "(" (expr | declaration)? ";" expr? ";" expr? ")" stmt
  *  					| "{" stmt* "}"
  * 						| declaration ";"
  * declaration= declarator
@@ -63,6 +63,7 @@ Node_t* unary();
 Node_t* postfix(void);
 Node_t* primary(void);
 Vector_t* paramList(void);
+Node_t* declaration(NodeKind kind);
 
 /// @brief 新しいType_tを作成する
 /// @param dataType 
@@ -412,14 +413,24 @@ Node_t* stmt(void){
 	}
 	
 	if(consume(TK_KEYWORD, "for")){
-		// "for" "(" expr? ";" expr? ";" expr? ")" stmt
+ 		// "for" "(" (expr | declaration)? ";" expr? ";" expr? ")" stmt
 		// for(A; B; C)D
+		Node_t *node_declaration = NULL;
 		expect(TK_RESERVED, "(");
 		if(consume(TK_RESERVED, ";")){
 			expr1 = NULL;
 		}else{
 			// Aの読み込み
-			expr1 = expr();
+			if(peek(TK_KEYWORD, "int") || peek(TK_KEYWORD, "char")){
+				/* for (int i = 0; i < n; i++) { ... } を
+				 * {
+				 * 	int i = 0;
+				 * 	for (; i < n; i++) { ... }
+				 * }  */
+				node_declaration = declaration(ND_LVAR);
+			} else {
+				expr1 = expr();
+			}
 			expect(TK_RESERVED, ";");
 		}
 
@@ -440,7 +451,14 @@ Node_t* stmt(void){
 		}
 		
 		expr4 = stmt();
-		node = new_node(ND_FOR, expr1, expr2, expr3, expr4, NULL, NULL);
+		if(node_declaration != NULL){
+			Vector_t *vector;
+			vector = new_vector(node_declaration, NULL);
+			node = new_node(ND_BLOCK, NULL, NULL, NULL, NULL, NULL, vector);
+			vector = new_vector(new_node(ND_FOR, NULL, expr2, expr3, expr4, NULL, NULL), vector);
+		} else {
+			node = new_node(ND_FOR, expr1, expr2, expr3, expr4, NULL, NULL);
+		}
 		return node;
 	}
 	
