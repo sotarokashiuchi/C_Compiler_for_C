@@ -21,9 +21,9 @@ StringVector_t *stringHead = NULL;
  * 						| "while" "(" expr ")" stmt
  * 						| "for" "(" expr? ";" expr? ";" expr? ")" stmt
  *  					| "{" stmt* "}"
- * 						| declaration
- * declaration= declarator ";"
- * 						| declarator "=" initializer ";"
+ * 						| declaration ";"
+ * declaration= declarator
+ * 						| declarator "=" initializer
  * initializer= expr
  * 						| "{" expr? | ("," expr)* "}"
  * declarator = typeSpec ident ("[" num "]")?
@@ -309,6 +309,7 @@ void program(void){
 			code[i++] = funcDefine();
 		} else {
 			code[i++] = declaration(ND_GVARDEFINE);
+			expect(TK_RESERVED, ";");
 		}
 	}
 	code[i] = NULL;
@@ -371,6 +372,7 @@ Node_t* stmt(void){
 
 	if(peek(TK_KEYWORD, "int") || peek(TK_KEYWORD, "char")){
 		node = declaration(ND_LVAR);
+		expect(TK_RESERVED, ";");
 		return node;
 	}
 		
@@ -536,9 +538,8 @@ Node_t* declaration(NodeKind kind){
 		node = new_node(ND_SINGLESTMT, node, NULL, NULL, NULL, NULL, NULL);
 	}
 	
-	if(!consume(TK_RESERVED, ";")){
+	if(!peek(TK_RESERVED, ";")){
 		node = initializer(node);
-		expect(TK_RESERVED, ";");
 	}
 	return node;
 }
