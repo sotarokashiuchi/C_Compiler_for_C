@@ -1,5 +1,6 @@
 #include "common.h"
 #include "codegen.h"
+#include "parse.h"
 #include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -272,7 +273,8 @@ void gen(Node_t *node) {
     gen(node->expr1);
     return;
   }
-  case ND_BLOCK:{
+	case ND_BLOCK:
+  case ND_DOUBLESTMT:{
     Vector_t *vector = node->vector;
     for( ; ; ){
       gen(vector->node);

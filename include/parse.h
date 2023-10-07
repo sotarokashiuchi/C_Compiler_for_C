@@ -37,7 +37,8 @@ typedef enum{
   ND_DEREF,       // 関節演算子
   ND_NUM, 				// 整数
 	ND_STRING, 			// 文字列リテラル
-	ND_SINGLESTMT,	// 式
+	ND_SINGLESTMT,	// 文
+	ND_DOUBLESTMT,	// 複文
 } NodeKind;
 
 typedef enum {

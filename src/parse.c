@@ -22,7 +22,11 @@ StringVector_t *stringHead = NULL;
  * 						| "for" "(" expr? ";" expr? ";" expr? ")" stmt
  *  					| "{" stmt* "}"
  * 						| declaration
- * declaration= typeSpec ident ("[" num "]")? ";"
+ * declaration= declarator ";"
+ * 						| declarator "=" initializer ";"
+ * initializer= expr
+ * 						| "{" expr? | ("," expr)* "}"
+ * declarator = typeSpec ident ("[" num "]")?
  * typeSpec		= ("int" | "char") "*"*
  * expr       = assign
  * assign     = equality (("=" | "*=" | "/=" | "%=" | "+=" | "-=") assign)?
@@ -472,8 +476,7 @@ Types_t* declaration_array(Types_t* types){
 	}
 }
 
-Node_t* declaration(NodeKind kind){
-	Node_t *node;
+Node_t* declarator(NodeKind kind){
 	Token_t *tok;
 	Types_t *type;
 
@@ -486,11 +489,56 @@ Node_t* declaration(NodeKind kind){
 	// 配列を再帰的にパース
 	type  = declaration_array(type);
 
-	
-	node = new_identifier(kind, tok, type);
-	expect(TK_RESERVED, ";");
+	return new_identifier(kind, tok, type);
+}
+
+Node_t* initializer(Node_t *node_declarator){
+	Node_t *node;
+	if(consume(TK_RESERVED, "{")){
+		expect(TK_RESERVED, "=");
+		// list
+	} else {
+		Vector_t* vector;
+		vector = new_vector(node_declarator, NULL); // ex)int x;
+		// 左辺
+		node = new_node(ND_LVAR, NULL, NULL, NULL, NULL, NULL, NULL);
+		node->identifier = node_declarator->expr1->identifier;
+		node->type = node_declarator->expr1->identifier->type;
+		if(node->identifier->kind == IK_LVAR){
+			node->kind = ND_LVAR;
+		} else if (node->identifier->kind == IK_GVAR){
+			node->kind = ND_GVAR;
+		} else {
+			parseError("存在しない識別子の種類です\n");
+		}
+
+		// 右辺
+		expect(TK_RESERVED, "=");
+		node = new_node(ND_ASSIGN_EQ, node, assign(), NULL, NULL, NULL, NULL); 
+		node = new_node(ND_SINGLESTMT, node, NULL, NULL, NULL, NULL, NULL);
+		vector = new_vector(node, vector);
+		node = new_node(ND_DOUBLESTMT, NULL, NULL, NULL, NULL, NULL, vector);
+	}
+	return node;
+}
+
+ /* declaration= declarator ";"
+ * 						| declarator "=" initializer ";"
+ * initializer= expr
+ * 						| "{" expr? | ("," expr)* "}"
+ * declarator = typeSpec ident ("[" num "]")?
+ */
+Node_t* declaration(NodeKind kind){
+	Node_t *node;
+	node = declarator(kind);
+
 	if(kind != ND_GVARDEFINE){
 		node = new_node(ND_SINGLESTMT, node, NULL, NULL, NULL, NULL, NULL);
+	}
+	
+	if(!consume(TK_RESERVED, ";")){
+		node = initializer(node);
+		expect(TK_RESERVED, ";");
 	}
 	return node;
 }
