@@ -36,6 +36,7 @@ StringVector_t *stringHead = NULL;
  * mul        = unary ("*" unary | "/" unary | "%" unary)*
  * unary      = "+"? postfix
 							| "-"? postfix
+							| "!" unary
 							| "*" unary
 							| "&" unary
 							| "++" unary
@@ -680,6 +681,9 @@ Node_t* unary(){
 	}
 	if(consume(TK_RESERVED, "-")){
 		return new_node(ND_SUB, new_node_num(0), postfix(), NULL, NULL, NULL, NULL);
+	}
+	if(consume(TK_RESERVED, "!")){
+		return new_node(ND_EQUALTO, new_node_num(0), unary(), NULL, NULL, NULL, NULL);
 	}
 	if(consume(TK_RESERVED, "&")){
 		return new_node(ND_ADDR, unary(), NULL, NULL, NULL, NULL, NULL);
