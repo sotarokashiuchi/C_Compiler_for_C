@@ -76,7 +76,7 @@ StringVector_t *stringHead = NULL;
  */
 
 /* _expr
- * expr       			= assign_expr	(assign_expr)*
+ * expr       			= assign_expr '| expr "," assign_expr'
  * assign_expr 			= conditional_expr (("=" | "*=" | "/=" | "%=" | "+=" | "-=" '| "<<=" | ">>=" | "&=" | "^=" | "|=" ') assign_expr)?
  * conditional_expr = logicalOr_expr '("?" expr ":" conditional_expr)?'
  * logicalOr_expr 	= logicalAnd_expr '("||" logicalAnd_expr )*'
@@ -96,6 +96,14 @@ StringVector_t *stringHead = NULL;
 										| ( & | * | + | - | ~ | ! ) cast_expr
 										| sizeof unary_expr
 										| sizeof typeName
+ * postfix-expr 		= primary-expr
+                    | postfix-expr "[" expr "]"
+                    | postfix-expr "(" {<assignment-expression>}* ")" # 不明
+                    '| postfix-expr "." identifier'
+                    '| postfix-expr "->" identifier'
+                    | postfix-expr "++"
+                    | postfix-expr "--"
+ * primary-expr 		= identifier | constant | string | "(" expr ")"  # constant にnumが入る
  */
 
 void program(void);
