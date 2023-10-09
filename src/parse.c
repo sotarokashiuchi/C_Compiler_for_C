@@ -50,6 +50,31 @@ StringVector_t *stringHead = NULL;
  * ParamList 	= expr? | expr ("," expr)*
  */
 
+/* _stmt
+ * stmt 			= 
+		expression_stmt
+							| {<expression>}? ;
+		selection_stmt
+							| if ( <expression> ) <statement>
+							| if ( <expression> ) <statement> else <statement>
+							| switch ( <expression> ) <statement>
+		iteration_stmt
+							| while ( <expression> ) <statement>
+							| do <statement> while ( <expression> ) ;
+							| for ( {<expression>}? ; {<expression>}? ; {<expression>}? ) <statement>
+		compound_stmt
+							| { {<declaration>}* {<statement>}* }
+		labeled_stmt
+							| <identifier> : <statement>
+							| case <constant-expression> : <statement>
+							| default : <statement>
+		jump_stmt
+							| goto <identifier> ;
+							| continue ;
+							| break ;
+							| return {<expression>}? ;
+ */
+
 void program(void);
 Node_t* funcDefine();
 Node_t* stmt(void);
