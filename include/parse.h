@@ -10,6 +10,8 @@ typedef enum{
   ND_MUL, 				// *
   ND_DIV, 				// /
   ND_MOD,         // %
+  ND_LOGICAL_AND,	// &&
+  ND_LOGICAL_OR,	// ||
   ND_ASSIGN_EQ,   // =
   ND_ASSIGN_ADD,  // +=
   ND_ASSIGN_SUB,  // -=

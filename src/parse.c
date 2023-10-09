@@ -674,7 +674,12 @@ Node_t* logicalOr_expr(void){
 }
 
 Node_t* logicalAnd_expr(void){
-	return inclusiveOr_expr();
+ 	// logicalAnd_expr 	= inclusiveOr_expr '("&&" inclusiveOr_expr)*'
+	Node_t *node = inclusiveOr_expr();
+	if(consume(TK_RESERVED, "&&")){
+		node = new_node(ND_LOGICAL_AND, node, inclusiveOr_expr(), NULL, NULL, NULL, NULL);
+	}
+	return node;
 }
 
 Node_t* inclusiveOr_expr(void){

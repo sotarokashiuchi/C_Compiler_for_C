@@ -506,6 +506,32 @@ void gen(Node_t *node) {
     pushPrint("rdi");
     return;
   }
+  case ND_LOGICAL_AND:{
+		// A && B
+		// Aの評価
+    asmPrint("# LOGICAL_AND A\n");
+		gen(node->expr1);
+    popPrint("rax");
+    asmPrint("  cmp rax, 0\n");
+    asmPrint("  je .logicalAndFalse_%03d\n", lavelIndexLocal);
+
+		// Bの評価
+    asmPrint("# LOGICAL_AND B\n");
+		gen(node->expr2);
+    popPrint("rax");
+    asmPrint("  cmp rax, 0\n");
+    asmPrint("  je .logicalAndFalse_%03d\n", lavelIndexLocal);
+		asmPrint("	mov rax, 1\n");
+    asmPrint("  jmp .logicalAndEnd_%03d\n", lavelIndexLocal);
+
+		// False
+    asmPrint(".logicalAndFalse_%03d:\n", lavelIndexLocal);
+		asmPrint("	mov rax, 0\n");
+		// End
+    asmPrint(".logicalAndEnd_%03d:\n", lavelIndexLocal);
+		pushPrint("rax");
+		return;
+  }
 	}
 
   gen(node->expr1);
