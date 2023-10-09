@@ -670,7 +670,12 @@ Node_t* conditional_expr(void){
 }
 
 Node_t* logicalOr_expr(void){
-	return logicalAnd_expr();
+ 	// logicalOr_expr 	= logicalAnd_expr '("||" logicalAnd_expr )*'
+	Node_t *node = logicalAnd_expr();
+	if(consume(TK_RESERVED, "||")){
+		node = new_node(ND_LOGICAL_OR, node, logicalAnd_expr(), NULL, NULL, NULL, NULL);
+	}
+	return node;
 }
 
 Node_t* logicalAnd_expr(void){
