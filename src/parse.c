@@ -90,26 +90,12 @@ StringVector_t *stringHead = NULL;
  * additive_expr 		= multiplicative_expr (( "+" | "-" ) multiplicative_expr)*
  * multiplicative_expr= cast_expr (( "*" | "/" | "%" ) cast_expr)*
  * cast_expr 				= unary_expr '| (typeName) cast_expr'
- *
- * equality  	= relational ("==" relational | "!=" relational)*
- * relational = add ("<" add | "<=" add | ">" add | ">=" add)*
- * add        = mul ("+" mul | "-" mul)*
- * mul        = unary_expr ("*" unary_expr | "/" unary_expr | "%" unary_expr)*
- *
- * unary_expr 			= "+"? postfix_expr
-										| "-"? postfix_expr
-										| "!" unary_expr
-										| "*" unary_expr
-										| "&" unary_expr
-										| "++" unary_expr
-										| "--" unary_expr
-										| "sizeof" unary_expr
-										| "sizeof" (typeSpec)
- * postfix_expr 		= primary ( "[" expr "]" | "(" ParamList ")" )*
- * 						| postfix_expr "++"
- * 						| postfix_expr "--"
- * primary    = num | string | ident | "(" expr ")"
- * ParamList 	= expr? | expr ("," expr)*
+ * unary_expr 			= postfix-expr
+										| ++ unary_expr
+										| -- unary-expr
+										| ( & | * | + | - | ~ | ! ) cast_expr
+										| sizeof unary_expr
+										| sizeof typeName
  */
 
 void program(void);
