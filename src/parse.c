@@ -643,7 +643,7 @@ Node_t *expr(void) {
 
 Node_t* assign_expr(void){
   DEBUG_WRITE("\n");
-	Node_t *node = equality_expr();
+	Node_t *node = conditional_expr();
 	if(TK_RESERVED, consume(TK_RESERVED, "=")){
 		node = new_node(ND_ASSIGN_EQ, node, assign_expr(), NULL, NULL, NULL, NULL);
 	}
@@ -663,6 +663,22 @@ Node_t* assign_expr(void){
 		node = new_node(ND_ASSIGN_SUB, node, assign_expr(), NULL, NULL, NULL, NULL);
 	}
 	return node;
+}
+
+Node_t* conditional_expr(void){
+	return logicalOr_expr();
+}
+
+Node_t* logicalOr_expr(void){
+	return logicalAnd_expr();
+}
+
+Node_t* logicalAnd_expr(void){
+	return inclusiveOr_expr();
+}
+
+Node_t* inclusiveOr_expr(void){
+	return equality_expr();
 }
 
 Node_t* equality_expr(void){
@@ -698,22 +714,27 @@ Vector_t* paramList(void){
 
 Node_t* relational_expr(void){
   DEBUG_WRITE("\n");
-	Node_t *node = additive_expr();
+	Node_t *node = shift_expr();
 
 	for(;;){
 		if(consume(TK_RESERVED, "<")){
-			node = new_node(ND_LESS_THAN, node, additive_expr(), NULL, NULL, NULL, NULL);
+			node = new_node(ND_LESS_THAN, node, shift_expr(), NULL, NULL, NULL, NULL);
 		} else if(consume(TK_RESERVED, "<=")){
-			node = new_node(ND_LESS_THAN_OR_EQUALT_TO, node, additive_expr(), NULL, NULL, NULL, NULL);
+			node = new_node(ND_LESS_THAN_OR_EQUALT_TO, node, shift_expr(), NULL, NULL, NULL, NULL);
 		} else if(consume(TK_RESERVED, ">")){
-			node = new_node(ND_LESS_THAN, additive_expr(), node, NULL, NULL, NULL, NULL);
+			node = new_node(ND_LESS_THAN, shift_expr(), node, NULL, NULL, NULL, NULL);
 		} else if(consume(TK_RESERVED, ">=")){
-			node = new_node(ND_LESS_THAN_OR_EQUALT_TO, additive_expr(), node, NULL, NULL, NULL, NULL);
+			node = new_node(ND_LESS_THAN_OR_EQUALT_TO, shift_expr(), node, NULL, NULL, NULL, NULL);
 		} else {
 			return node;
 		}
 	}
 }
+
+Node_t* shift_expr(void){
+	return additive_expr();
+}
+
 
 Node_t* additive_expr(void) {
   DEBUG_WRITE("\n");
@@ -732,19 +753,23 @@ Node_t* additive_expr(void) {
 
 Node_t *multiplicative_expr(void){
   DEBUG_WRITE("\n");
-	Node_t *node = unary_expr();
+	Node_t *node = cast_expr();
 	
 	for(;;){
 		if(consume(TK_RESERVED, "*")){
-			node = new_node(ND_MUL, node, unary_expr(), NULL, NULL, NULL, NULL);
+			node = new_node(ND_MUL, node, cast_expr(), NULL, NULL, NULL, NULL);
 		} else if(consume(TK_RESERVED, "/")){
-			node = new_node(ND_DIV, node, unary_expr(), NULL, NULL, NULL, NULL);
+			node = new_node(ND_DIV, node, cast_expr(), NULL, NULL, NULL, NULL);
 		} else if(consume(TK_RESERVED, "%")){
-			node = new_node(ND_MOD, node, unary_expr(), NULL, NULL, NULL, NULL);
+			node = new_node(ND_MOD, node, cast_expr(), NULL, NULL, NULL, NULL);
 		} else {
 			return node;
 		}
 	}
+}
+
+Node_t* cast_expr(void){
+	return unary_expr();
 }
 
 Node_t* unary_expr(){
