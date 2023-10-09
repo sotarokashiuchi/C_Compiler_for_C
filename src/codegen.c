@@ -355,8 +355,10 @@ void gen(Node_t *node) {
   }
   case ND_RETURN:{
     // returnは右方方向の木構造しかない
-    gen(node->expr2);
-    popPrint("rax");
+		if(node->expr2 != NULL){
+			gen(node->expr2);
+			popPrint("rax");
+		}
     asmPrint("  #エピローグ\n");
     asmPrint("  mov rsp, rbp\n");
     asmPrint("	pop rbp\n");

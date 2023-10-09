@@ -15,8 +15,8 @@ StringVector_t *stringHead = NULL;
 /* EBNF
  * program    = funcDefine* | declaration
  * funcDefine = ident ("(" ident? | ident ("," ident)* ")"){ stmt* }
- * stmt    		= expr ";"
- * 						| "return" expr ";"
+ * stmt    		= expr? ";"
+ * 						| "return" expr? ";"
  * 						| "if" "(" expr ")" stmt ("else" stmt)?
  * 						| "while" "(" expr ")" stmt
  * 						| "for" "(" (expr | declaration)? ";" expr? ";" expr? ")" stmt
@@ -380,9 +380,13 @@ Node_t* stmt(void){
 		
 	
 	if (consume(TK_KEYWORD, "return")) {
-		// "return" expr ";"
-		node = new_node(ND_RETURN, NULL, expr(), NULL, NULL, NULL, NULL);
-		expect(TK_RESERVED, ";");
+		// "return" expr? ";"
+		if(consume(TK_RESERVED, ";")){
+			node = new_node(ND_RETURN, NULL, NULL, NULL, NULL, NULL, NULL);
+		} else {
+			node = new_node(ND_RETURN, NULL, expr(), NULL, NULL, NULL, NULL);
+			expect(TK_RESERVED, ";");
+		}
 		return node;
   }
 	
