@@ -83,7 +83,16 @@ assignmentで大きく異なっている
 		&(アドレス参照とAND演算子) +(単行演算子と四則演算) - *(ポインタと四則演算)
 
 conditional-expr はunaryに持っていかなければいけない。なぜならassigmentのunaryにconditional-exprに置き換えているから
+
+<conditional-expression> ::= <logical-or-expression>
+                           | <logical-or-expression> ? <expression> : <conditional-expression>
+これは以下のように簡略して記述可能
+<conditional-expression> = <logical-or-expression> ( "?" <expression> ":" <conditional-expression> )?
+
 	
+ * equality_expr 		= relational_expr | equality_expr ("==" | "!=") relational_expr
+これは以下のように簡略して記述可能
+ * equality_expr 		= relational_expr (("==" | "!=") relational_expr)*
 ***********************************************************************************************************
 <expression> ::= <assignment-expression>
                | <expression> , <assignment-expression>

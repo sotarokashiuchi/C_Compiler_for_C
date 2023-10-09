@@ -76,20 +76,20 @@ StringVector_t *stringHead = NULL;
  */
 
 /* _expr
- * expr       			= assign_expr	'| expr assign_expr'
+ * expr       			= assign_expr	(assign_expr)*
  * assign_expr 			= conditional_expr (("=" | "*=" | "/=" | "%=" | "+=" | "-=" '| "<<=" | ">>=" | "&=" | "^=" | "|=" ') assign_expr)?
- * conditional_expr = logicalOr_expr | ( 'logicalOr_expr "?" ecpr ":" conditional_expr' )
- * logicalOr_expr 	= logicalAnd_expr | ( logicalOr_expr "||" logicalAnd_expr )
- * logicalAnd_expr 	= inclusiveOr_expr | (logicalAnd_expr "&&" inclusiveOr_expr)
- * inclusiveOr_expr	= exclusiveOr_expr | inclusiveOr_expr "|" exclusiveOr_expr
- * exclusiveOr_expr	= and_expr | exclusiveOr_expr "^" and_expr
- * and_expr 				= equality_expre | and_expr "&" equality_expr
- * equality_expr 		= relational_expr | equality_expr ("==" | "!=") relational_expr
- * relational_expr 	= shift_expr | relational_expr ("<" | ">" | "<=" | ">=" ) shift_expr
- * shift_expr 			= additive_expr | shift_expr ( "<<" | ">>" ) additive_expr
- * additive_expr 		= multiplicative_expr | additive_expr ( "+" | "-" ) multiplicative_expr
- * multiplicative_expr= cast_expr | multiplicative_expr ( "*" | "/" | "%" ) cast_expr
- * cast_expr 				= unary_expr | ( <typeName> ) cast_expr
+ * conditional_expr = logicalOr_expr '("?" expr ":" conditional_expr)?'
+ * logicalOr_expr 	= logicalAnd_expr '("||" logicalAnd_expr )*'
+ * logicalAnd_expr 	= inclusiveOr_expr '("&&" inclusiveOr_expr)*'
+ * inclusiveOr_expr	= exclusiveOr_expr '("|" exclusiveOr_expr)*'
+ * exclusiveOr_expr	= and_expr '("^" and_expr)*'
+ * and_expr 				= equality_expre '("&" equality_expr)*'
+ * equality_expr 		= relational_expr (("==" | "!=") relational_expr)*
+ * relational_expr 	= shift_expr (("<" | ">" | "<=" | ">=" ) shift_expr)*
+ * shift_expr 			= additive_expr '(( "<<" | ">>" ) additive_expr)*
+ * additive_expr 		= multiplicative_expr (( "+" | "-" ) multiplicative_expr)*
+ * multiplicative_expr= cast_expr (( "*" | "/" | "%" ) cast_expr)*
+ * cast_expr 				= unary_expr '| (typeName) cast_expr'
  *
  * equality  	= relational ("==" relational | "!=" relational)*
  * relational = add ("<" add | "<=" add | ">" add | ">=" add)*
