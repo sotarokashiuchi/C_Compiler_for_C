@@ -57,21 +57,21 @@ StringVector_t *stringHead = NULL;
 		selection_stmt
 							| if ( <expression> ) <statement>
 							| if ( <expression> ) <statement> else <statement>
-							| switch ( <expression> ) <statement>
+							'| switch ( <expression> ) <statement>'
 		iteration_stmt
 							| while ( <expression> ) <statement>
-							| do <statement> while ( <expression> ) ;
-							| for ( {<expression>}? ; {<expression>}? ; {<expression>}? ) <statement>
+							'| do <statement> while ( <expression> ) ;'
+							| for ( {<expression>}? ; {<expression>}? ; {<expression>}? ) <statement> # 変数の初期化の場合は？
 		compound_stmt
-							| { {<declaration>}* {<statement>}* }
+							'| { {<declaration>}* {<statement>}* }'
 		labeled_stmt
-							| <identifier> : <statement>
-							| case <constant-expression> : <statement>
-							| default : <statement>
+							'| <identifier> : <statement>'
+							'| case <constant-expression> : <statement>'
+							'| default : <statement>'
 		jump_stmt
-							| goto <identifier> ;
-							| continue ;
-							| break ;
+							'| goto <identifier> ;'
+							'| continue ;'
+							'| break ;'
 							| return {<expression>}? ;
  */
 
