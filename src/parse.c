@@ -28,25 +28,32 @@ StringVector_t *stringHead = NULL;
  * 						| "{" expr? | ("," expr)* "}"
  * declarator = typeSpec ident ("[" num "]")?
  * typeSpec		= ("int" | "char") "*"*
- * expr       = assign
- * assign     = equality (("=" | "*=" | "/=" | "%=" | "+=" | "-=") assign)?
- * equality   = relational ("==" relational | "!=" relational)*
- * relational = add ("<" add | "<=" add | ">" add | ">=" add)*
- * add        = mul ("+" mul | "-" mul)*
- * mul        = unary ("*" unary | "/" unary | "%" unary)*
- * unary      = "+"? postfix
-							| "-"? postfix
-							| "!" unary
-							| "*" unary
-							| "&" unary
-							| "++" unary
-							| "--" unary
-							| "sizeof" unary
-							| "sizeof" (typeSpec)
- * postfix 		= primary ( "[" expr "]" | "(" ParamList ")" )*
- * 						| postfix "++"
- * 						| postfix "--"
- * primary    = num | string | ident | "(" expr ")"
+ * expr       			= assign_expr
+ * assign_expr 			= conditional_expr (("=" | "*=" | "/=" | "%=" | "+=" | "-=") assign_expr)?
+ * conditional_expr = logicalOr_expr '("?" expr ":" conditional_expr)?'
+ * logicalOr_expr 	= logicalAnd_expr '("||" logicalAnd_expr )*'
+ * logicalAnd_expr 	= inclusiveOr_expr '("&&" inclusiveOr_expr)*'
+ * inclusiveOr_expr	= equality_expr
+ * equality_expr 		= relational_expr (("==" | "!=") relational_expr)*
+ * relational_expr 	= shift_expr (("<" | ">" | "<=" | ">=" ) shift_expr)*
+ * shift_expr 			= additive_expr
+ * additive_expr 		= multiplicative_expr (( "+" | "-" ) multiplicative_expr)*
+ * multiplicative_expr= cast_expr (( "*" | "/" | "%" ) cast_expr)*
+ * cast_expr 				= unary_expr '| (typeName) cast_expr'
+ * unary_expr 			= postfix_expr
+										| ++ unary_expr
+										| -- unary_expr
+										| ( & | * | + | - | ! ) cast_expr
+										| sizeof unary_expr
+										| sizeof "(" typeName ")"
+ * postfix_expr 		= primary_expr
+                    | postfix_expr "[" expr "]"
+                    | postfix_expr "(" ParamList ")"
+                    '| postfix_expr "." identifier'
+                    '| postfix_expr "->" identifier'
+                    | postfix_expr "++"
+                    | postfix_expr "--"
+ * primary_expr 		= identifier | num | string | "(" expr ")"
  * ParamList 	= expr? | expr ("," expr)*
  */
 
@@ -90,20 +97,20 @@ StringVector_t *stringHead = NULL;
  * additive_expr 		= multiplicative_expr (( "+" | "-" ) multiplicative_expr)*
  * multiplicative_expr= cast_expr (( "*" | "/" | "%" ) cast_expr)*
  * cast_expr 				= unary_expr '| (typeName) cast_expr'
- * unary_expr 			= postfix-expr
+ * unary_expr 			= postfix_expr
 										| ++ unary_expr
-										| -- unary-expr
+										| -- unary_expr
 										| ( & | * | + | - | ~ | ! ) cast_expr
 										| sizeof unary_expr
 										| sizeof typeName
- * postfix-expr 		= primary-expr
-                    | postfix-expr "[" expr "]"
-                    | postfix-expr "(" {<assignment-expression>}* ")" # 不明
-                    '| postfix-expr "." identifier'
-                    '| postfix-expr "->" identifier'
-                    | postfix-expr "++"
-                    | postfix-expr "--"
- * primary-expr 		= identifier | constant | string | "(" expr ")"  # constant にnumが入る
+ * postfix_expr 		= primary_expr
+                    | postfix_expr "[" expr "]"
+                    | postfix_expr "(" {<assignment-expression>}* ")" # 不明
+                    '| postfix_expr "." identifier'
+                    '| postfix_expr "->" identifier'
+                    | postfix_expr "++"
+                    | postfix_expr "--"
+ * primary_expr 		= identifier | constant | string | "(" expr ")"  # constant にnumが入る
  */
 
 void program(void);
@@ -111,14 +118,20 @@ Node_t* funcDefine();
 Node_t* stmt(void);
 Node_t* declaration(NodeKind);
 Node_t* expr(void);
-Node_t* assign(void);
-Node_t* equality(void);
-Node_t* relational(void);
-Node_t* add(void);
-Node_t* mul(void);
-Node_t* unary();
-Node_t* postfix(void);
-Node_t* primary(void);
+Node_t* assign_expr(void);
+Node_t* conditional_expr(void);
+Node_t* logicalOr_expr(void);
+Node_t* logicalAnd_expr(void);
+Node_t* inclusiveOr_expr(void);
+Node_t* equality_expr(void);
+Node_t* relational_expr(void);
+Node_t* shift_expr(void);
+Node_t* additive_expr(void);
+Node_t* multiplicative_expr(void);
+Node_t* cast_expr();
+Node_t* unary_expr();
+Node_t* postfix_expr(void);
+Node_t* primary_expr(void);
 Vector_t* paramList(void);
 Node_t* declaration(NodeKind kind);
 
@@ -595,7 +608,7 @@ Node_t* initializer(Node_t *node_declarator){
 
 		// 右辺
 		expect(TK_RESERVED, "=");
-		node = new_node(ND_ASSIGN_EQ, node, assign(), NULL, NULL, NULL, NULL); 
+		node = new_node(ND_ASSIGN_EQ, node, assign_expr(), NULL, NULL, NULL, NULL); 
 		node = new_node(ND_SINGLESTMT, node, NULL, NULL, NULL, NULL, NULL);
 		vector = new_vector(node, vector);
 		node = new_node(ND_DOUBLESTMT, NULL, NULL, NULL, NULL, NULL, vector);
@@ -625,42 +638,42 @@ Node_t* declaration(NodeKind kind){
 
 Node_t *expr(void) {
   DEBUG_WRITE("\n");
-	return assign();
+	return assign_expr();
 }
 
-Node_t* assign(void){
+Node_t* assign_expr(void){
   DEBUG_WRITE("\n");
-	Node_t *node = equality();
+	Node_t *node = equality_expr();
 	if(TK_RESERVED, consume(TK_RESERVED, "=")){
-		node = new_node(ND_ASSIGN_EQ, node, assign(), NULL, NULL, NULL, NULL);
+		node = new_node(ND_ASSIGN_EQ, node, assign_expr(), NULL, NULL, NULL, NULL);
 	}
 	if(TK_RESERVED, consume(TK_RESERVED, "*=")){
-		node = new_node(ND_ASSIGN_MUL, node, assign(), NULL, NULL, NULL, NULL);
+		node = new_node(ND_ASSIGN_MUL, node, assign_expr(), NULL, NULL, NULL, NULL);
 	}
 	if(TK_RESERVED, consume(TK_RESERVED, "/=")){
-		node = new_node(ND_ASSIGN_DIV, node, assign(), NULL, NULL, NULL, NULL);
+		node = new_node(ND_ASSIGN_DIV, node, assign_expr(), NULL, NULL, NULL, NULL);
 	}
 	if(TK_RESERVED, consume(TK_RESERVED, "%=")){
-		node = new_node(ND_ASSIGN_MOD, node, assign(), NULL, NULL, NULL, NULL);
+		node = new_node(ND_ASSIGN_MOD, node, assign_expr(), NULL, NULL, NULL, NULL);
 	}
 	if(TK_RESERVED, consume(TK_RESERVED, "+=")){
-		node = new_node(ND_ASSIGN_ADD, node, assign(), NULL, NULL, NULL, NULL);
+		node = new_node(ND_ASSIGN_ADD, node, assign_expr(), NULL, NULL, NULL, NULL);
 	}
 	if(TK_RESERVED, consume(TK_RESERVED, "-=")){
-		node = new_node(ND_ASSIGN_SUB, node, assign(), NULL, NULL, NULL, NULL);
+		node = new_node(ND_ASSIGN_SUB, node, assign_expr(), NULL, NULL, NULL, NULL);
 	}
 	return node;
 }
 
-Node_t* equality(void){
+Node_t* equality_expr(void){
   DEBUG_WRITE("\n");
-	Node_t *node = relational();
+	Node_t *node = relational_expr();
 
 	for(;;){
 		if(consume(TK_RESERVED, "==")){
-			node = new_node(ND_EQUALTO, node, relational(), NULL, NULL, NULL, NULL);
+			node = new_node(ND_EQUALTO, node, relational_expr(), NULL, NULL, NULL, NULL);
 		} else if(consume(TK_RESERVED, "!=")){
-			node = new_node(ND_NOT_EQUAL_TO, node, relational(), NULL, NULL, NULL, NULL);
+			node = new_node(ND_NOT_EQUAL_TO, node, relational_expr(), NULL, NULL, NULL, NULL);
 		} else{
 			return node;
 		}
@@ -683,73 +696,73 @@ Vector_t* paramList(void){
 	return vector;
 }
 
-Node_t* relational(void){
+Node_t* relational_expr(void){
   DEBUG_WRITE("\n");
-	Node_t *node = add();
+	Node_t *node = additive_expr();
 
 	for(;;){
 		if(consume(TK_RESERVED, "<")){
-			node = new_node(ND_LESS_THAN, node, add(), NULL, NULL, NULL, NULL);
+			node = new_node(ND_LESS_THAN, node, additive_expr(), NULL, NULL, NULL, NULL);
 		} else if(consume(TK_RESERVED, "<=")){
-			node = new_node(ND_LESS_THAN_OR_EQUALT_TO, node, add(), NULL, NULL, NULL, NULL);
+			node = new_node(ND_LESS_THAN_OR_EQUALT_TO, node, additive_expr(), NULL, NULL, NULL, NULL);
 		} else if(consume(TK_RESERVED, ">")){
-			node = new_node(ND_LESS_THAN, add(), node, NULL, NULL, NULL, NULL);
+			node = new_node(ND_LESS_THAN, additive_expr(), node, NULL, NULL, NULL, NULL);
 		} else if(consume(TK_RESERVED, ">=")){
-			node = new_node(ND_LESS_THAN_OR_EQUALT_TO, add(), node, NULL, NULL, NULL, NULL);
+			node = new_node(ND_LESS_THAN_OR_EQUALT_TO, additive_expr(), node, NULL, NULL, NULL, NULL);
 		} else {
 			return node;
 		}
 	}
 }
 
-Node_t* add(void) {
+Node_t* additive_expr(void) {
   DEBUG_WRITE("\n");
-	Node_t *node = mul(); 
+	Node_t *node = multiplicative_expr(); 
 
 	for(;;){
 		if(consume(TK_RESERVED, "+")){
-			node = new_node(ND_ADD, node, mul(), NULL, NULL, NULL, NULL);
+			node = new_node(ND_ADD, node, multiplicative_expr(), NULL, NULL, NULL, NULL);
 		} else if(consume(TK_RESERVED, "-")){
-			node = new_node(ND_SUB, node, mul(), NULL, NULL, NULL, NULL);
+			node = new_node(ND_SUB, node, multiplicative_expr(), NULL, NULL, NULL, NULL);
 		} else{
 			return node;
 		}
 	}
 }
 
-Node_t *mul(void){
+Node_t *multiplicative_expr(void){
   DEBUG_WRITE("\n");
-	Node_t *node = unary();
+	Node_t *node = unary_expr();
 	
 	for(;;){
 		if(consume(TK_RESERVED, "*")){
-			node = new_node(ND_MUL, node, unary(), NULL, NULL, NULL, NULL);
+			node = new_node(ND_MUL, node, unary_expr(), NULL, NULL, NULL, NULL);
 		} else if(consume(TK_RESERVED, "/")){
-			node = new_node(ND_DIV, node, unary(), NULL, NULL, NULL, NULL);
+			node = new_node(ND_DIV, node, unary_expr(), NULL, NULL, NULL, NULL);
 		} else if(consume(TK_RESERVED, "%")){
-			node = new_node(ND_MOD, node, unary(), NULL, NULL, NULL, NULL);
+			node = new_node(ND_MOD, node, unary_expr(), NULL, NULL, NULL, NULL);
 		} else {
 			return node;
 		}
 	}
 }
 
-Node_t* unary(){
+Node_t* unary_expr(){
   DEBUG_WRITE("\n");
 	if(consume(TK_RESERVED, "+")){
-		return postfix();
+		return postfix_expr();
 	}
 	if(consume(TK_RESERVED, "-")){
-		return new_node(ND_SUB, new_node_num(0), postfix(), NULL, NULL, NULL, NULL);
+		return new_node(ND_SUB, new_node_num(0), postfix_expr(), NULL, NULL, NULL, NULL);
 	}
 	if(consume(TK_RESERVED, "!")){
-		return new_node(ND_EQUALTO, new_node_num(0), unary(), NULL, NULL, NULL, NULL);
+		return new_node(ND_EQUALTO, new_node_num(0), unary_expr(), NULL, NULL, NULL, NULL);
 	}
 	if(consume(TK_RESERVED, "&")){
-		return new_node(ND_ADDR, unary(), NULL, NULL, NULL, NULL, NULL);
+		return new_node(ND_ADDR, unary_expr(), NULL, NULL, NULL, NULL, NULL);
 	}
 	if(consume(TK_RESERVED, "*")){
-		return new_node(ND_DEREF, unary(), NULL, NULL, NULL, NULL, NULL);
+		return new_node(ND_DEREF, unary_expr(), NULL, NULL, NULL, NULL, NULL);
 	}
 
 	if(consume(TK_KEYWORD, "sizeof")){
@@ -766,39 +779,39 @@ Node_t* unary(){
 			}
 		}
 
-		// sizeof unary
+		// sizeof unary_expr
 		if (tok != NULL){
 			token = tok;
 		}
-		Node_t *node = unary();
+		Node_t *node = unary_expr();
 		return new_node_num(sizeofType(node->type));
 	}
 
 	if(consume(TK_RESERVED, "++")){
 		// ++iは(i += 1)と解釈する
-		return new_node(ND_ASSIGN_ADD, unary(), new_node_num(1), NULL, NULL, NULL, NULL);
+		return new_node(ND_ASSIGN_ADD, unary_expr(), new_node_num(1), NULL, NULL, NULL, NULL);
 	}
 	if(consume(TK_RESERVED, "--")){
 		// --iは(i -= 1)と解釈する
-		return new_node(ND_ASSIGN_SUB, unary(), new_node_num(1), NULL, NULL, NULL, NULL);
+		return new_node(ND_ASSIGN_SUB, unary_expr(), new_node_num(1), NULL, NULL, NULL, NULL);
 	}
-	return postfix();
+	return postfix_expr();
 }
 
  /* 正しい
- * postfix 		= primary 
- * 						| postfix ( "[" expr "]" | "(" ParamList ")" )*
- * 						| postfix "++"
- * 						| postfix "--"
+ * postfix_expr 		= primary_expr 
+ * 						| postfix_expr ( "[" expr "]" | "(" ParamList ")" )*
+ * 						| postfix_expr "++"
+ * 						| postfix_expr "--"
  /* 現在
- * postfix 		= primary ( "[" expr "]" | "(" ParamList ")" )*
- * 						| postfix "++"
- * 						| postfix "--"
+ * postfix_expr 		= primary_expr ( "[" expr "]" | "(" ParamList ")" )*
+ * 						| postfix_expr "++"
+ * 						| postfix_expr "--"
  */
-Node_t* postfix(void){
+Node_t* postfix_expr(void){
 	Node_t* node;
 	Types_t* type = NULL;
-	node = primary();
+	node = primary_expr();
 
 	if(consume(TK_RESERVED, "++")){
 	// i++は((i += 1) - 1)と解釈する
@@ -832,7 +845,7 @@ Node_t* postfix(void){
 	}
 }
 
-Node_t *primary(void) {
+Node_t *primary_expr(void) {
   DEBUG_WRITE("\n");
 	Token_t *tok = consume_ident();
 	if(tok != NULL){
