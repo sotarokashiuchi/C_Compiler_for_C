@@ -586,26 +586,40 @@ Node_t* declarator(NodeKind kind){
 	return new_identifier(kind, tok, type);
 }
 
- // initializer= assign_expr
- //						| "{" assign_expr? ("," assign_expr)* ","? "}"
+Node_t* copy_node(NodeKind kind, Node_t *source){
+	Node_t *destination = calloc(1, sizeof(Node_t));
+	destination->kind = kind;
+	destination->type = source->type;
+	destination->identifier = source->identifier;
+	return destination;
+}
+
 Node_t* initializer(Node_t *node_declarator){
-	Node_t *node;
+	Node_t *node, *return_node;
+	Vector_t* vector;
+	vector = new_vector(node_declarator, NULL); // ex)int x;
+	return_node = new_node(ND_DOUBLESTMT, NULL, NULL, NULL, NULL, NULL, vector);
 	if(consume(TK_RESERVED, "{")){
 		// list
+		int index = 0;
+		do{
+			if(peek(TK_RESERVED, "}")){
+				break;
+			}
+			// 左辺
+			node = copy_node(node_declarator->expr1->kind, node_declarator->expr1);
+			node = new_node(ND_ADD, node, new_node_num(index++), NULL, NULL, NULL, NULL);
+			node = new_node(ND_DEREF, node, NULL, NULL, NULL, NULL, NULL);
+
+			// 右辺
+			node = new_node(ND_ASSIGN_EQ, node, assign_expr(), NULL, NULL, NULL, NULL); 
+			node = new_node(ND_SINGLESTMT, node, NULL, NULL, NULL, NULL, NULL);
+			vector = new_vector(node, vector);
+		} while(consume(TK_RESERVED, ","));
+		expect(TK_RESERVED, "}");
 	} else {
-		Vector_t* vector;
-		vector = new_vector(node_declarator, NULL); // ex)int x;
 		// 左辺
-		node = new_node(ND_LVAR, NULL, NULL, NULL, NULL, NULL, NULL);
-		node->identifier = node_declarator->expr1->identifier;
-		node->type = node_declarator->expr1->identifier->type;
-		if(node->identifier->kind == IK_LVAR){
-			node->kind = ND_LVAR;
-		} else if (node->identifier->kind == IK_GVAR){
-			node->kind = ND_GVAR;
-		} else {
-			parseError("存在しない識別子の種類です\n");
-		}
+		node = copy_node(node_declarator->expr1->kind, node_declarator->expr1);
 
 		// 右辺
 		node = new_node(ND_ASSIGN_EQ, node, assign_expr(), NULL, NULL, NULL, NULL); 
@@ -613,7 +627,7 @@ Node_t* initializer(Node_t *node_declarator){
 		vector = new_vector(node, vector);
 		node = new_node(ND_DOUBLESTMT, NULL, NULL, NULL, NULL, NULL, vector);
 	}
-	return node;
+	return return_node;
 }
 
 Node_t* declaration(NodeKind kind){
