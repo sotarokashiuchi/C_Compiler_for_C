@@ -31,8 +31,8 @@ StringVector_t *stringHead = NULL;
  * expr       			= assign_expr
  * assign_expr 			= conditional_expr (("=" | "*=" | "/=" | "%=" | "+=" | "-=") assign_expr)?
  * conditional_expr = logicalOr_expr '("?" expr ":" conditional_expr)?'
- * logicalOr_expr 	= logicalAnd_expr '("||" logicalAnd_expr )*'
- * logicalAnd_expr 	= inclusiveOr_expr '("&&" inclusiveOr_expr)*'
+ * logicalOr_expr 	= logicalAnd_expr ("||" logicalAnd_expr )*
+ * logicalAnd_expr 	= inclusiveOr_expr ("&&" inclusiveOr_expr)*
  * inclusiveOr_expr	= equality_expr
  * equality_expr 		= relational_expr (("==" | "!=") relational_expr)*
  * relational_expr 	= shift_expr (("<" | ">" | "<=" | ">=" ) shift_expr)*
@@ -667,18 +667,18 @@ Node_t* conditional_expr(void){
 }
 
 Node_t* logicalOr_expr(void){
- 	// logicalOr_expr 	= logicalAnd_expr '("||" logicalAnd_expr )*'
+ 	// logicalOr_expr 	= logicalAnd_expr ("||" logicalAnd_expr )*
 	Node_t *node = logicalAnd_expr();
-	if(consume(TK_RESERVED, "||")){
+	while(consume(TK_RESERVED, "||")){
 		node = new_node(ND_LOGICAL_OR, node, logicalAnd_expr(), NULL, NULL, NULL, NULL);
 	}
 	return node;
 }
 
 Node_t* logicalAnd_expr(void){
- 	// logicalAnd_expr 	= inclusiveOr_expr '("&&" inclusiveOr_expr)*'
+ 	// logicalAnd_expr 	= inclusiveOr_expr ("&&" inclusiveOr_expr)*
 	Node_t *node = inclusiveOr_expr();
-	if(consume(TK_RESERVED, "&&")){
+	while(consume(TK_RESERVED, "&&")){
 		node = new_node(ND_LOGICAL_AND, node, inclusiveOr_expr(), NULL, NULL, NULL, NULL);
 	}
 	return node;
