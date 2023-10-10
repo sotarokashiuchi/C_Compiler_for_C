@@ -46,13 +46,12 @@ StringVector_t *stringHead = NULL;
 										| ( & | * | + | - | ! ) cast_expr
 										| sizeof unary_expr
 										| sizeof "(" typeName ")"
- * postfix_expr 		= primary_expr
-                    | postfix_expr "[" expr "]"
-                    | postfix_expr "(" ParamList ")"
-                    '| postfix_expr "." identifier'
-                    '| postfix_expr "->" identifier'
-                    | postfix_expr "++"
-                    | postfix_expr "--"
+ * postfix_expr 		= primary_expr ("[" expr "]"
+																		| "(" ParamList ")"
+																		| "." identifier
+																		| "->" identifier
+																		| "++"
+																		| "--" )*
  * primary_expr 		= identifier | num | string | "(" expr ")"
  * ParamList 	= expr? | expr ("," expr)*
  */
@@ -103,13 +102,11 @@ StringVector_t *stringHead = NULL;
 										| ( & | * | + | - | ~ | ! ) cast_expr
 										| sizeof unary_expr
 										| sizeof typeName
- * postfix_expr 		= primary_expr
-                    | postfix_expr "[" expr "]"
-                    | postfix_expr "(" {<assignment-expression>}* ")" # 不明
-                    '| postfix_expr "." identifier'
-                    '| postfix_expr "->" identifier'
-                    | postfix_expr "++"
-                    | postfix_expr "--"
+ * postfix_expr 		= primary_expr ("[" expr "]"
+																		| "(" ParamList ")"
+																		| "." identifier
+																		| "->" identifier
+																		| "++"
  * primary_expr 		= identifier | constant | string | "(" expr ")"  # constant にnumが入る
  */
 
@@ -833,39 +830,25 @@ Node_t* unary_expr(){
 	return postfix_expr();
 }
 
- /* 正しい
- * postfix_expr 		= primary_expr 
- * 						| postfix_expr ( "[" expr "]" | "(" ParamList ")" )*
- * 						| postfix_expr "++"
- * 						| postfix_expr "--"
- /* 現在
- * postfix_expr 		= primary_expr ( "[" expr "]" | "(" ParamList ")" )*
- * 						| postfix_expr "++"
- * 						| postfix_expr "--"
- */
 Node_t* postfix_expr(void){
 	Node_t* node;
 	Types_t* type = NULL;
 	node = primary_expr();
 
-	if(consume(TK_RESERVED, "++")){
-	// i++は((i += 1) - 1)と解釈する
-		node = new_node(ND_ASSIGN_ADD, node, new_node_num(1), NULL, NULL, NULL, NULL);
-		return new_node(ND_SUB, node, new_node_num(1), NULL, NULL, NULL, NULL);
-	}
-	if(consume(TK_RESERVED, "--")){
-	// i--は((i -= 1) + 1)と解釈する
-		node = new_node(ND_ASSIGN_SUB, node, new_node_num(1), NULL, NULL, NULL, NULL);
-		return new_node(ND_ADD, node, new_node_num(1), NULL, NULL, NULL, NULL);
-	}
-
-	for( ; ; ){
-		if(consume(TK_RESERVED, "[")){
+	for(;;){
+		if(consume(TK_RESERVED, "++")){
+		// i++は((i += 1) - 1)と解釈する
+			node = new_node(ND_ASSIGN_ADD, node, new_node_num(1), NULL, NULL, NULL, NULL);
+			node = new_node(ND_SUB, node, new_node_num(1), NULL, NULL, NULL, NULL);
+		} else if(consume(TK_RESERVED, "--")){
+		// i--は((i -= 1) + 1)と解釈する
+			node = new_node(ND_ASSIGN_SUB, node, new_node_num(1), NULL, NULL, NULL, NULL);
+			node = new_node(ND_ADD, node, new_node_num(1), NULL, NULL, NULL, NULL);
+		} else if(consume(TK_RESERVED, "[")){
 			// 配列
 			node = new_node(ND_ADD, node, expr(), NULL, NULL, NULL, NULL);
 			node = new_node(ND_DEREF, node, NULL, NULL, NULL, NULL, NULL);
 			expect(TK_RESERVED, "]");
-			continue;
 		} else if(consume(TK_RESERVED, "(")){
 			// 関数呼び出し
 			node->kind = ND_FUNCCALL;
@@ -873,11 +856,11 @@ Node_t* postfix_expr(void){
 			// プロトタイプ宣言を利用し、戻り値の型を入れるべき(未実装)
 			node->type = new_type(DT_INT, NULL);
 			expect(TK_RESERVED, ")");
-			// 複数回呼べない()
-			continue;
+		} else {
+			return node;
 		}
-		return node;
 	}
+	return node;
 }
 
 Node_t *primary_expr(void) {
