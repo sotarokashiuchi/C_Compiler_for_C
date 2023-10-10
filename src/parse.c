@@ -786,19 +786,19 @@ Node_t* cast_expr(void){
 Node_t* unary_expr(){
   DEBUG_WRITE("\n");
 	if(consume(TK_RESERVED, "+")){
-		return new_node(ND_ADD, new_node_num(0), postfix_expr(), NULL, NULL, NULL, NULL);
+		return new_node(ND_ADD, new_node_num(0), cast_expr(), NULL, NULL, NULL, NULL);
 	}
 	if(consume(TK_RESERVED, "-")){
-		return new_node(ND_SUB, new_node_num(0), postfix_expr(), NULL, NULL, NULL, NULL);
+		return new_node(ND_SUB, new_node_num(0), cast_expr(), NULL, NULL, NULL, NULL);
 	}
 	if(consume(TK_RESERVED, "!")){
-		return new_node(ND_EQUALTO, new_node_num(0), unary_expr(), NULL, NULL, NULL, NULL);
+		return new_node(ND_EQUALTO, new_node_num(0), cast_expr(), NULL, NULL, NULL, NULL);
 	}
 	if(consume(TK_RESERVED, "&")){
-		return new_node(ND_ADDR, unary_expr(), NULL, NULL, NULL, NULL, NULL);
+		return new_node(ND_ADDR, cast_expr(), NULL, NULL, NULL, NULL, NULL);
 	}
 	if(consume(TK_RESERVED, "*")){
-		return new_node(ND_DEREF, unary_expr(), NULL, NULL, NULL, NULL, NULL);
+		return new_node(ND_DEREF, cast_expr(), NULL, NULL, NULL, NULL, NULL);
 	}
 
 	if(consume(TK_KEYWORD, "sizeof")){
