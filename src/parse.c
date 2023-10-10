@@ -544,8 +544,12 @@ Node_t* stmt(void){
 		return node;
 	}
 
-	node = expr();
-	expect(TK_RESERVED, ";");
+	if(consume(TK_RESERVED, ";")){
+		node = new_node_num(1);
+	} else {
+		node = expr();
+		expect(TK_RESERVED, ";");
+	}
 	node = new_node(ND_SINGLESTMT, node, NULL, NULL, NULL, NULL, NULL);
 	return node;
 }
