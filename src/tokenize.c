@@ -143,6 +143,15 @@ Token_t* tokenize(void){
 			continue;
 		}
 
+		// 文字(character)
+		if(*p == '\''){
+			p++;
+			cur = new_token(TK_CHARACTER, cur, &p, 0);
+			cur->val = *p;
+			p += 2;
+			continue;
+		}
+
 		// 変数(複数文字列)
 		if(isalpha(*p) || *p == '_'){
 			int i;
@@ -239,6 +248,15 @@ void back_token(Token_t *tok){
 
 Token_t* consume_string(void){
 	if(token->kind != TK_STRING){
+		return NULL;
+	}
+	Token_t *tok = token;
+	token = token->next;
+	return tok;
+}
+
+Token_t* consume_character(void){
+	if(token->kind != TK_CHARACTER){
 		return NULL;
 	}
 	Token_t *tok = token;

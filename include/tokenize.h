@@ -13,6 +13,7 @@ typedef enum{
 	TK_KEYWORD,			// Keyword(予約語)
 	TK_NUM,					// 整数トークン
 	TK_STRING,			// 文字列リテラル
+	TK_CHARACTER,		// 
 	TK_EOF,					// 入力の終わりを表すトークン
 	TK_ERROR,				// エラートークン
 } TokenKind;
@@ -66,6 +67,7 @@ extern void expect(TokenKind kind, char *op);
 void back_token(Token_t *tok);
 
 Token_t* consume_string(void);
+Token_t* consume_character(void);
 
 /// @brief  次のトークンが識別子か調べ、識別子の場合には、
 ///					トークンを1つ読み進めてトークン構造体を返す。それ以外の場合にはNULLを返す。

@@ -106,7 +106,7 @@ StringVector_t *stringHead = NULL;
 																		| "." identifier
 																		| "->" identifier
 																		| "++"
- * primary_expr 		= identifier | constant | string | "(" expr ")"  # constant にnumが入る
+ * primary_expr 		= identifier | constant | string | "(" expr ")"  # constant にnumが入る constant =  <integer-constant> | <character-constant> | <floating-constant> | <enumeration-constant>
  */
 
 void program(void);
@@ -917,6 +917,11 @@ Node_t *primary_expr(void) {
 	if ((tok = consume_string()) != NULL) {
 		DEBUG_WRITE("consume_string\n");
 		return new_string_vector(tok);
+	}
+
+	if ((tok = consume_character()) != NULL) {
+		DEBUG_WRITE("consume_character\n");
+		return new_node_num(tok->val);
 	}
 
   // 数値
