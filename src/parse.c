@@ -22,10 +22,9 @@ StringVector_t *stringHead = NULL;
  * 						| "for" "(" (expr | declaration)? ";" expr? ";" expr? ")" stmt
  *  					| "{" stmt* "}"
  * 						| declaration ";"
- * declaration= declarator
- * 						| declarator "=" initializer
- * initializer= expr
- * 						| "{" expr? | ("," expr)* "}"
+ * declaration= declarator ("=" initializer)?
+ * initializer= assign_expr
+ * 						| "{" assign_expr? ("," assign_expr)* ","? "}"
  * declarator = typeSpec ident ("[" num "]")?
  * typeSpec		= ("int" | "char") "*"*
  * expr       			= assign_expr
@@ -587,10 +586,11 @@ Node_t* declarator(NodeKind kind){
 	return new_identifier(kind, tok, type);
 }
 
+ // initializer= assign_expr
+ //						| "{" assign_expr? ("," assign_expr)* ","? "}"
 Node_t* initializer(Node_t *node_declarator){
 	Node_t *node;
 	if(consume(TK_RESERVED, "{")){
-		expect(TK_RESERVED, "=");
 		// list
 	} else {
 		Vector_t* vector;
@@ -608,7 +608,6 @@ Node_t* initializer(Node_t *node_declarator){
 		}
 
 		// 右辺
-		expect(TK_RESERVED, "=");
 		node = new_node(ND_ASSIGN_EQ, node, assign_expr(), NULL, NULL, NULL, NULL); 
 		node = new_node(ND_SINGLESTMT, node, NULL, NULL, NULL, NULL, NULL);
 		vector = new_vector(node, vector);
@@ -617,12 +616,6 @@ Node_t* initializer(Node_t *node_declarator){
 	return node;
 }
 
- /* declaration= declarator ";"
- * 						| declarator "=" initializer ";"
- * initializer= expr
- * 						| "{" expr? | ("," expr)* "}"
- * declarator = typeSpec ident ("[" num "]")?
- */
 Node_t* declaration(NodeKind kind){
 	Node_t *node;
 	node = declarator(kind);
@@ -631,7 +624,7 @@ Node_t* declaration(NodeKind kind){
 		node = new_node(ND_SINGLESTMT, node, NULL, NULL, NULL, NULL, NULL);
 	}
 	
-	if(!peek(TK_RESERVED, ";")){
+	if(consume(TK_RESERVED, "=")){
 		node = initializer(node);
 	}
 	return node;
