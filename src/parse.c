@@ -86,8 +86,8 @@ StringVector_t *stringHead = NULL;
  * expr       			= assign_expr '| expr "," assign_expr'
  * assign_expr 			= conditional_expr (("=" | "*=" | "/=" | "%=" | "+=" | "-=" '| "<<=" | ">>=" | "&=" | "^=" | "|=" ') assign_expr)?
  * conditional_expr = logicalOr_expr '("?" expr ":" conditional_expr)?'
- * logicalOr_expr 	= logicalAnd_expr '("||" logicalAnd_expr )*'
- * logicalAnd_expr 	= inclusiveOr_expr '("&&" inclusiveOr_expr)*'
+ * logicalOr_expr 	= logicalAnd_expr ("||" logicalAnd_expr )*
+ * logicalAnd_expr 	= inclusiveOr_expr ("&&" inclusiveOr_expr)*
  * inclusiveOr_expr	= exclusiveOr_expr '("|" exclusiveOr_expr)*'
  * exclusiveOr_expr	= and_expr '("^" and_expr)*'
  * and_expr 				= equality_expre '("&" equality_expr)*'
@@ -785,7 +785,7 @@ Node_t* cast_expr(void){
 Node_t* unary_expr(){
   DEBUG_WRITE("\n");
 	if(consume(TK_RESERVED, "+")){
-		return postfix_expr();
+		return new_node(ND_ADD, new_node_num(0), postfix_expr(), NULL, NULL, NULL, NULL);
 	}
 	if(consume(TK_RESERVED, "-")){
 		return new_node(ND_SUB, new_node_num(0), postfix_expr(), NULL, NULL, NULL, NULL);
