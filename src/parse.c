@@ -25,6 +25,7 @@ StringVector_t *stringHead = NULL;
  * declaration= declarator ("=" initializer)?
  * initializer= assign_expr
  * 						| "{" assign_expr? ("," assign_expr)* ","? "}"
+ * 						| string
  * declarator = typeSpec ident ("[" num "]")?
  * typeSpec		= ("int" | "char") "*"*
  * expr       			= assign_expr
@@ -597,6 +598,7 @@ Node_t* copy_node(NodeKind kind, Node_t *source){
 Node_t* initializer(Node_t *node_declarator){
 	Node_t *node, *return_node;
 	Vector_t* vector;
+	Token_t *tok;
 	vector = new_vector(node_declarator, NULL); // ex)int x;
 	return_node = new_node(ND_DOUBLESTMT, NULL, NULL, NULL, NULL, NULL, vector);
 	if(consume(TK_RESERVED, "{")){
@@ -617,6 +619,24 @@ Node_t* initializer(Node_t *node_declarator){
 			vector = new_vector(node, vector);
 		} while(consume(TK_RESERVED, ","));
 		expect(TK_RESERVED, "}");
+	} else if((tok = consume_string())) {
+		// stringのときのみ特殊に扱う。本来はassign_expr()のstringでパースすべきだが、assign_exprのstringは文字列リテラルの先頭アドレスを返し、配列の初期化のときは特殊であるため
+		for(int index = 0; index <= tok->len; index++){
+			// 左辺
+			node = copy_node(node_declarator->expr1->kind, node_declarator->expr1);
+			node = new_node(ND_ADD, node, new_node_num(index), NULL, NULL, NULL, NULL);
+			node = new_node(ND_DEREF, node, NULL, NULL, NULL, NULL, NULL);
+
+			// 右辺
+			if(index == tok->len){
+				// 文字列の末尾なら、ナル文字を挿入(仕様とは異なるので注意)
+				node = new_node(ND_ASSIGN_EQ, node, new_node_num('\0'), NULL, NULL, NULL, NULL); 
+			} else {
+				node = new_node(ND_ASSIGN_EQ, node, new_node_num(tok->str[index]), NULL, NULL, NULL, NULL); 
+			}
+			node = new_node(ND_SINGLESTMT, node, NULL, NULL, NULL, NULL, NULL);
+			vector = new_vector(node, vector);
+		}
 	} else {
 		// 左辺
 		node = copy_node(node_declarator->expr1->kind, node_declarator->expr1);
