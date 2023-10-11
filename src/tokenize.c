@@ -50,6 +50,9 @@ Token_t* tokenize(void){
 	}
 
 	for(count=0, p=user_input; *p; count++){
+		/* 
+		 * プリプロセッサ処理
+		 */
 		// 制御文字、空白文字をスキップ
 		if(isspace(*p)){
 			p++;
@@ -76,6 +79,15 @@ Token_t* tokenize(void){
 			continue;
 		}
 
+		if(!strncmp(p, "NULL", 4) && !is_alnum(p[4])){
+			cur = new_token(TK_NUM, cur, &p, 4);
+			cur->val = 0;
+			continue;
+		}
+
+		/*
+		 * コンパイラ処理
+		 */
 		// keyword
 		if(!strncmp(p, "return", 6) && !is_alnum(p[6])){
 			cur = new_token(TK_KEYWORD, cur, &p, 6);
