@@ -1,4 +1,3 @@
-The syntax of C in Backus-Naur Form
 <translation-unit> ::= {<external-declaration>}*
 
 <external-declaration> ::= <function-definition>
@@ -6,40 +5,31 @@ The syntax of C in Backus-Naur Form
 
 <function-definition> ::= {<declaration-specifier>}* <declarator> {<declaration>}* <compound-statement>
 
-<declaration-specifier> ::= <storage-class-specifier>
+
+****************************************************************************************
+<declaration> ::=  {<declaration-specifier>}+ {<declarator> (= <initializer>)?}* ;
+
+<declaration-specifier> ::= auto | register | static | extern | typedef
                           | <type-specifier>
                           | <type-qualifier>
 
-<storage-class-specifier> ::= auto
-                            | register
-                            | static
-                            | extern
-                            | typedef
+<declarator> ::= {<pointer>}? <direct-declarator>
 
-<type-specifier> ::= void
-                   | char
-                   | short
-                   | int
-                   | long
-                   | float
-                   | double
-                   | signed
-                   | unsigned
+<direct-declarator> ::= <identifier>
+                      | ( <declarator> )
+                      | <direct-declarator> [ {<constant-expression>}? ]
+                      | <direct-declarator> ( <parameter-type-list> )
+                      | <direct-declarator> ( {<identifier>}* )
+**************************************************************************************
+<type-specifier> ::= void | char | short | int | long | float | double | signed | unsigned
                    | <struct-or-union-specifier>
                    | <enum-specifier>
                    | <typedef-name>
 
-<struct-or-union-specifier> ::= <struct-or-union> <identifier> { {<struct-declaration>}+ }
-                              | <struct-or-union> { {<struct-declaration>}+ }
-                              | <struct-or-union> <identifier>
+<struct-or-union-specifier> ::= (struct | union) <identifier>? { {{<specifier-qualifier>}* <struct-declarator-list>}+ }
+                              | (struct | union) <identifier>
 
-<struct-or-union> ::= struct
-                    | union
-
-<struct-declaration> ::= {<specifier-qualifier>}* <struct-declarator-list>
-
-<specifier-qualifier> ::= <type-specifier>
-                        | <type-qualifier>
+<specifier-qualifier> ::= <type-specifier> | <type-qualifier>
 
 <struct-declarator-list> ::= <struct-declarator>
                            | <struct-declarator-list> , <struct-declarator>
@@ -48,18 +38,11 @@ The syntax of C in Backus-Naur Form
                       | <declarator> : <constant-expression>
                       | : <constant-expression>
 
-<declarator> ::= {<pointer>}? <direct-declarator>
-
 <pointer> ::= * {<type-qualifier>}* {<pointer>}?
 
 <type-qualifier> ::= const
                    | volatile
 
-<direct-declarator> ::= <identifier>
-                      | ( <declarator> )
-                      | <direct-declarator> [ {<constant-expression>}? ]
-                      | <direct-declarator> ( <parameter-type-list> )
-                      | <direct-declarator> ( {<identifier>}* )
 
 <constant-expression> ::= <conditional-expression>
 
@@ -68,7 +51,46 @@ The syntax of C in Backus-Naur Form
              | <floating-constant>
              | <enumeration-constant>
 
+<type-name> ::= {<specifier-qualifier>}+ {<abstract-declarator>}?
 
+<parameter-type-list> ::= <parameter-list>
+                        | <parameter-list> , ...
+
+<parameter-list> ::= <parameter-declaration>
+                   | <parameter-list> , <parameter-declaration>
+
+<parameter-declaration> ::= {<declaration-specifier>}+ <declarator>
+                          | {<declaration-specifier>}+ <abstract-declarator>
+                          | {<declaration-specifier>}+
+
+<abstract-declarator> ::= <pointer>
+                        | <pointer> <direct-abstract-declarator>
+                        | <direct-abstract-declarator>
+
+<direct-abstract-declarator> ::=  ( <abstract-declarator> )
+                               | {<direct-abstract-declarator>}? [ {<constant-expression>}? ]
+                               | {<direct-abstract-declarator>}? ( {<parameter-type-list>}? )
+
+<enum-specifier> ::= enum <identifier> { <enumerator-list> }
+                   | enum { <enumerator-list> }
+                   | enum <identifier>
+
+<enumerator-list> ::= <enumerator>
+                    | <enumerator-list> , <enumerator>
+
+<enumerator> ::= <identifier>
+               | <identifier> = <constant-expression>
+
+<typedef-name> ::= <identifier>
+
+
+
+<initializer> ::= <assignment-expression>
+                | { <initializer-list> }
+                | { <initializer-list> , } # 配列の初期化時には最後がカンマで終了してもよい
+
+<initializer-list> ::= <initializer>
+                     | <initializer-list> , <initializer>
 
 ***********************************************************************************************************
 comment
@@ -120,7 +142,6 @@ conditional-expr はunaryに持っていかなければいけない。なぜな�
                        | <string>
                        | ( <expression> )
 
-*******************************************************************************************************
 <conditional-expression> ::= <logical-or-expression>
                            | <logical-or-expression> ? <expression> : <conditional-expression>
 
@@ -160,52 +181,7 @@ conditional-expr はunaryに持っていかなければいけない。なぜな�
 
 ***********************************************************************************************************
 
-<type-name> ::= {<specifier-qualifier>}+ {<abstract-declarator>}?
 
-<parameter-type-list> ::= <parameter-list>
-                        | <parameter-list> , ...
-
-<parameter-list> ::= <parameter-declaration>
-                   | <parameter-list> , <parameter-declaration>
-
-<parameter-declaration> ::= {<declaration-specifier>}+ <declarator>
-                          | {<declaration-specifier>}+ <abstract-declarator>
-                          | {<declaration-specifier>}+
-
-<abstract-declarator> ::= <pointer>
-                        | <pointer> <direct-abstract-declarator>
-                        | <direct-abstract-declarator>
-
-<direct-abstract-declarator> ::=  ( <abstract-declarator> )
-                               | {<direct-abstract-declarator>}? [ {<constant-expression>}? ]
-                               | {<direct-abstract-declarator>}? ( {<parameter-type-list>}? )
-
-<enum-specifier> ::= enum <identifier> { <enumerator-list> }
-                   | enum { <enumerator-list> }
-                   | enum <identifier>
-
-<enumerator-list> ::= <enumerator>
-                    | <enumerator-list> , <enumerator>
-
-<enumerator> ::= <identifier>
-               | <identifier> = <constant-expression>
-
-<typedef-name> ::= <identifier>
-
-<declaration> ::=  {<declaration-specifier>}+ {<init-declarator>}* ;
-
-<init-declarator> ::= <declarator>
-                    | <declarator> = <initializer>
-
-<initializer> ::= <assignment-expression>
-                | { <initializer-list> }
-                | { <initializer-list> , } # 配列の初期化時には最後がカンマで終了してもよい
-
-<initializer-list> ::= <initializer>
-                     | <initializer-list> , <initializer>
-
-
-***************************************************************************************************
 <statement> ::= <labeled-statement>
               | <expression-statement>
               | <compound-statement>
