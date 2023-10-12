@@ -14,7 +14,7 @@ StringVector_t *stringHead = NULL;
 /* 関数プロトタイプ宣言 */
 /* EBNF
  * program    = funcDefine* | declaration
- * funcDefine = ident ("(" ident? | ident ("," ident)* ")"){ stmt* }
+ * funcDefine = typeSpec* declarator ("(" ident? | ident ("," ident)* ")"){ stmt* }
  * stmt    		= expr? ";"
  * 						| "return" expr? ";"
  * 						| "if" "(" expr ")" stmt ("else" stmt)?
@@ -22,12 +22,12 @@ StringVector_t *stringHead = NULL;
  * 						| "for" "(" (expr | declaration)? ";" expr? ";" expr? ")" stmt
  *  					| "{" stmt* "}"
  * 						| declaration ";"
- * declaration= declarator ("=" initializer)?
+ * declaration= typeSpec declarator ("=" initializer)?
+ * declarator = "*"* ident ("[" num "]")?
  * initializer= assign_expr
  * 						| "{" assign_expr? ("," assign_expr)* ","? "}"
  * 						| string
- * declarator = typeSpec ident ("[" num "]")?
- * typeSpec		= ("int" | "char") "*"*
+ * typeSpec		= "int" | "char"
  * expr       			= assign_expr
  * assign_expr 			= conditional_expr (("=" | "*=" | "/=" | "%=" | "+=" | "-=") assign_expr)?
  * conditional_expr = logicalOr_expr '("?" expr ":" conditional_expr)?'
@@ -108,6 +108,10 @@ StringVector_t *stringHead = NULL;
 																		| "->" identifier
 																		| "++"
  * primary_expr 		= identifier | constant | string | "(" expr ")"  # constant にnumが入る constant =  <integer-constant> | <character-constant> | <floating-constant> | <enumeration-constant>
+ */
+
+/* struct
+ * 
  */
 
 void program(void);
