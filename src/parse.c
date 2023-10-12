@@ -20,10 +20,10 @@ StringVector_t *stringHead = NULL;
  * 						| "return" expr? ";"
  * 						| "if" "(" expr ")" stmt ("else" stmt)?
  * 						| "while" "(" expr ")" stmt
- * 						| "for" "(" (expr | declaration)? ";" expr? ";" expr? ")" stmt
+ * 						| "for" "(" (expr? ";" | declaration) expr? ";" expr? ")" stmt
  *  					| "{" stmt* "}"
- * 						| declaration ";"
- * declaration= typeSpec declarator ("=" initializer)?
+ * 						| declaration
+ * declaration= typeSpec declarator ("=" initializer)? ";"
  * declarator = "*"* (ident | declarator) ( 											# 変数定義
  * 																					"[" num "]" 					# 配列定義
  * 																				'| "(" paramTypeList ")" # プロトタイプ宣言
@@ -389,7 +389,6 @@ void program(void){
 			code[i++] = funcDefine();
 		} else {
 			code[i++] = declaration(ND_GVARDEFINE);
-			expect(TK_RESERVED, ";");
 		}
 	}
 	code[i] = NULL;
@@ -449,7 +448,6 @@ Node_t* stmt(void){
 
 	if(peek(TK_KEYWORD, "int") || peek(TK_KEYWORD, "char")){
 		node = declaration(ND_LVAR);
-		expect(TK_RESERVED, ";");
 		return node;
 	}
 		
@@ -493,7 +491,7 @@ Node_t* stmt(void){
 	}
 	
 	if(consume(TK_KEYWORD, "for")){
- 		// "for" "(" (expr | declaration)? ";" expr? ";" expr? ")" stmt
+		// "for" "(" (expr? ";" | declaration) expr? ";" expr? ")" stmt
 		// for(A; B; C)D
 		Node_t *node_declaration = NULL;
 		expect(TK_RESERVED, "(");
@@ -510,8 +508,8 @@ Node_t* stmt(void){
 				node_declaration = declaration(ND_LVAR);
 			} else {
 				expr1 = expr();
+				expect(TK_RESERVED, ";");
 			}
-			expect(TK_RESERVED, ";");
 		}
 
 		if(consume(TK_RESERVED, ";")){
@@ -672,6 +670,8 @@ Node_t* declaration(NodeKind kind){
 	if(consume(TK_RESERVED, "=")){
 		node = initializer(node);
 	}
+
+	expect(TK_RESERVED, ";");
 	return node;
 }
 
