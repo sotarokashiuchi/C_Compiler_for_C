@@ -15,11 +15,12 @@
 
 <declarator> ::= {<pointer>}? <direct-declarator>
 
-<direct-declarator> ::= <identifier>
-                      | ( <declarator> )
-                      | <direct-declarator> [ {<constant-expression>}? ]
-                      | <direct-declarator> ( <parameter-type-list> )
-                      | <direct-declarator> ( {<identifier>}* )
+# 定義
+<direct-declarator> ::= <identifier> 																					# 変数定義
+                      | ( <declarator> ) 																			# 
+                      | <direct-declarator> [ {<constant-expression>}? ] 			# 配列定義
+                      | <direct-declarator> ( <parameter-type-list> ) 				# プロトタイプ宣言
+                      | <direct-declarator> ( {<identifier>}* ) 							# プロトタイプ宣言
 **************************************************************************************
 <type-specifier> ::= void | char | short | int | long | float | double | signed | unsigned
                    | <struct-or-union-specifier>

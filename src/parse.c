@@ -2,6 +2,7 @@
 #include "parse.h"
 #include "tokenize.h"
 #include <stdio.h>
+#include <stdlib.h>
 /* グローバル変数 */
 // 文ごとの先頭ノードを格納
 Node_t *code[100];
@@ -14,7 +15,7 @@ StringVector_t *stringHead = NULL;
 /* 関数プロトタイプ宣言 */
 /* EBNF
  * program    = funcDefine* | declaration
- * funcDefine = typeSpec* declarator ("(" ident? | ident ("," ident)* ")"){ stmt* }
+ * funcDefine = typeSpec* declarator ("(" ident? | ident ("," ident)* ")") "{" stmt* "}"
  * stmt    		= expr? ";"
  * 						| "return" expr? ";"
  * 						| "if" "(" expr ")" stmt ("else" stmt)?
@@ -23,7 +24,11 @@ StringVector_t *stringHead = NULL;
  *  					| "{" stmt* "}"
  * 						| declaration ";"
  * declaration= typeSpec declarator ("=" initializer)?
- * declarator = "*"* ident ("[" num "]")?
+ * declarator = "*"* (ident | declarator) ( 											# 変数定義
+ * 																					"[" num "]" 					# 配列定義
+ * 																				'| "(" paramTypeList ")" # プロトタイプ宣言
+ * 																				| ("{" ident "}")*' 			# プロトタイプ宣言
+ * 																				)*
  * initializer= assign_expr
  * 						| "{" assign_expr? ("," assign_expr)* ","? "}"
  * 						| string
@@ -141,7 +146,9 @@ Node_t* declaration(NodeKind kind);
 /// @param inner 
 /// @return 
 Types_t* new_type(DataType dataType, Types_t* inner);
+Types_t* typeName(void);
 Types_t* typeSpec(void);
+Node_t* declarator(NodeKind kind, Types_t *type);
 
 
 
@@ -373,6 +380,7 @@ void program(void){
 	while(!at_eof()){
 		tok = token;
 		typeSpec();
+		while(consume(TK_RESERVED, "*"));
 		consume_ident();
 		status = peek(TK_RESERVED, "(");
 
@@ -396,42 +404,39 @@ Node_t* funcDefine(){
 	int i = 0;
 	
 	// 戻り値の型
-	typeSpec();
+	type = typeSpec();
+	node = declarator(ND_FUNCDEFINE, type);
 
-  if((tok = consume_ident()) != NULL){
-		if(consume(TK_RESERVED, "(")){
-			node = new_identifier(ND_FUNCDEFINE, tok, NULL);
+	if(consume(TK_RESERVED, "(")){
+		if(!consume(TK_RESERVED, ")")){
+			// 引数がある場合 未実装
+			// 一つ目の仮引数
+			type = typeSpec();
+			tok = consume_ident();
+			vector = new_vector(new_identifier(ND_LVAR, tok, type), NULL);
+			node->vector = vector;
 
-			if(!consume(TK_RESERVED, ")")){
-				// 引数がある場合 未実装
-				// 一つ目の仮引数
-				type = typeSpec();
+			while(consume(TK_RESERVED, ",")){
+				// 二つ目以降の仮引数
+				typeSpec();
 				tok = consume_ident();
-				vector = new_vector(new_identifier(ND_LVAR, tok, type), NULL);
-				node->vector = vector;
-
-				while(consume(TK_RESERVED, ",")){
-					// 二つ目以降の仮引数
-					typeSpec();
-					tok = consume_ident();
-					if(tok != NULL){
-						vector = new_vector(new_identifier(ND_LVAR, tok, type), vector);
-					}
+				if(tok != NULL){
+					vector = new_vector(new_identifier(ND_LVAR, tok, type), vector);
 				}
-				expect(TK_RESERVED, ")");
 			}
-			expect(TK_RESERVED, "{");
-			vector = new_vector(stmt(), NULL);
-			// Identifier_t dummy = {NULL, NULL, 0, 0};
-  		// identHead = &dummy;
-			node->expr1 = new_node(ND_BLOCK, NULL, NULL, NULL, NULL, NULL, vector);
-			while(!consume(TK_RESERVED, "}")){
-				vector = new_vector(stmt(), vector);
-			}
-			return node;
-		}else{
-			back_token(tok);
+			expect(TK_RESERVED, ")");
 		}
+		expect(TK_RESERVED, "{");
+		vector = new_vector(stmt(), NULL);
+		// Identifier_t dummy = {NULL, NULL, 0, 0};
+		// identHead = &dummy;
+		node->expr1 = new_node(ND_BLOCK, NULL, NULL, NULL, NULL, NULL, vector);
+		while(!consume(TK_RESERVED, "}")){
+			vector = new_vector(stmt(), vector);
+		}
+		return node;
+	}else{
+		parseError("error call\n");
 	}
 }
 
@@ -575,15 +580,15 @@ Types_t* declaration_array(Types_t* types){
 	}
 }
 
-Node_t* declarator(NodeKind kind){
+Node_t* declarator(NodeKind kind, Types_t *type){
 	Token_t *tok;
-	Types_t *type;
 
-	// 変数宣言 (int *a[5] などは非対応)
-	type = typeSpec();
+	// アスタリスクをパース
+	while(consume(TK_RESERVED, "*")){
+		type = new_type(DT_PTR, type);
+	}
 	
 	tok = consume_ident();
-	assert(tok!=NULL && "変数名がない");
 
 	// 配列を再帰的にパース
 	type  = declaration_array(type);
@@ -655,8 +660,10 @@ Node_t* initializer(Node_t *node_declarator){
 }
 
 Node_t* declaration(NodeKind kind){
+	Types_t *type;
 	Node_t *node;
-	node = declarator(kind);
+	type = typeSpec();
+	node = declarator(kind, type);
 
 	if(kind != ND_GVARDEFINE){
 		node = new_node(ND_SINGLESTMT, node, NULL, NULL, NULL, NULL, NULL);
@@ -837,9 +844,9 @@ Node_t* unary_expr(){
 		Token_t* tok;
 		tok = peek(TK_RESERVED, "(");
 		if (tok) {
-			// sizeof ( typeSpec )
+			// sizeof ( typeName )
 			token = tok->next;
-			type = typeSpec();
+			type = typeName();
 			if(type != NULL){
 				expect(TK_RESERVED, ")");
 				return new_node_num(sizeofType(type));
@@ -966,6 +973,20 @@ Types_t* new_type(DataType dataType, Types_t* inner){
 }
 
 Types_t* typeSpec(void){
+	Types_t *type;
+	// 基本型の読み込み
+	if(consume(TK_KEYWORD, "int")){
+		type = new_type(DT_INT, NULL);
+	} else if(consume(TK_KEYWORD, "char")){
+		type = new_type(DT_CHAR, NULL);
+	} else {
+		return NULL;
+		todoError("まだ実装していない基本型です\n");
+	}
+	return type;
+}
+
+Types_t* typeName(void){
 	Types_t *type;
 
 	// 基本型の読み込み
