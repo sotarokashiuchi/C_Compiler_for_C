@@ -33,6 +33,7 @@ StringVector_t *stringHead = NULL;
  * 						| "{" assign_expr? ("," assign_expr)* ","? "}"
  * 						| string
  * typeSpec		= "int" | "char"
+ * 						| ("struct"  | "union") (ident? (typeSpec* declaration) | ident)
  * expr       			= assign_expr
  * assign_expr 			= conditional_expr (("=" | "*=" | "/=" | "%=" | "+=" | "-=") assign_expr)?
  * conditional_expr = logicalOr_expr '("?" expr ":" conditional_expr)?'

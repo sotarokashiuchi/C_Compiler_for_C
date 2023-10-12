@@ -34,6 +34,7 @@
 
 <struct-declarator-list> ::= <struct-declarator>
                            | <struct-declarator-list> , <struct-declarator>
+# 上記の文を変換可能？ <struct-declarator-list> ::= <struct-declarator> , <struct-declarator>*
 
 <struct-declarator> ::= <declarator>
                       | <declarator> : <constant-expression>
