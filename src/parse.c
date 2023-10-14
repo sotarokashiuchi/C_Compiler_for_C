@@ -149,7 +149,7 @@ Node_t* declaration(NodeKind kind);
 Types_t* new_type(DataType dataType, Types_t* inner);
 Types_t* typeName(void);
 Types_t* typeSpec(void);
-Node_t* declarator(NodeKind kind, Types_t *type);
+Identifier_t* declarator(NodeKind kind, Types_t *type);
 
 
 
@@ -576,7 +576,7 @@ Types_t* declaration_array(Types_t* types){
 	}
 }
 
-Node_t* declarator(NodeKind kind, Types_t *type){
+Identifier_t* declarator(NodeKind kind, Types_t *type){
 	Token_t *tok;
 
 	// アスタリスクをパース
