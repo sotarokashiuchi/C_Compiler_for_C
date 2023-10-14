@@ -42,6 +42,7 @@ typedef enum{
 	ND_SINGLESTMT,	// 文
 	ND_DOUBLESTMT,	// 複文
 	ND_DECLARATION, // 宣言
+	ND_STRUCT_MEMBER,
 } NodeKind;
 
 typedef enum {
@@ -50,12 +51,14 @@ typedef enum {
   DT_PTR,
   DT_ARRAY,
 	DT_STRUCT,
+	DT_STRUCT_MEMBER,
   DT_FUNC,
 } DataType;
 
 typedef enum {
 	IK_LVAR,
 	IK_GVAR,
+	IK_STRUCT_MEMBER,
 	IK_FUNC,
 } IdentifierKind;
 
@@ -63,7 +66,7 @@ typedef enum {
 typedef struct Identifier_tag {
 	IdentifierKind kind;
 	struct Identifier_tag* next;
-	struct Identifier_tag* member; // structの場合のみ使用
+	struct Identifier_tag* member_list; // structの場合のみ使用
 	char *name;
 	int len;
 	int offset;
@@ -107,6 +110,9 @@ typedef struct Types_tag {
   DataType dataType;
   struct Types_tag *inner;
   size_t array_size;
+	size_t struct_size;
+	// char *struct_name;
+	// int struct_name_len;
 } Types_t;
 
 

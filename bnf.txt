@@ -14,11 +14,11 @@
                           | <type-qualifier>
 
 <declarator> ::= {<pointer>}? <direct-declarator>
- * declaration= typeSpec declarator ("=" initializer)? ";"?
- * declarator = "*"* (ident | declarator) ( 											# 変数定義
+ /* declaration= typeSpec declarator ("=" initializer)? ";"?
+ /* declarator = "*"* (ident | declarator) ( 											# 変数定義
 
- * typeSpec		= "int" | "char"
- * 						| ("struct"  | "union") (ident? "{" (typeSpec* declarator+) "}" | ident)
+ /* typeSpec		= "int" | "char"
+ /* 						| ("struct"  | "union") (ident? "{" (typeSpec* declarator+) "}" | ident)
 
 # 定義
 <direct-declarator> ::= <identifier> 																					# 変数定義

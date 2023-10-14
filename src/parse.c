@@ -210,6 +210,9 @@ int sizeofType(Types_t *type){
 		case DT_PTR:
 			size = 8;
 			break;
+		case DT_STRUCT:
+			size = type->struct_size;
+			break;
 	}
 	return size;
 }
@@ -335,7 +338,7 @@ Node_t* new_string_vector(Token_t *tok){
 /// @param type
 /// @return 生成した識別子
 Identifier_t* new_identifier(NodeKind kind, Token_t *tok, Types_t *type){
-  DEBUG_WRITE("this is identifier.\n");
+  DEBUG_WRITE("this is identifier.------ %.*s \n", tok->len, tok->str);
 	// 新しく識別子を定義する	
 	Identifier_t *identifier = calloc(1, sizeof(Identifier_t));
 	identifier->next = identHead;
@@ -352,6 +355,8 @@ Identifier_t* new_identifier(NodeKind kind, Token_t *tok, Types_t *type){
 			identifier->offset = identHead->offset + (size>=8 ? size : 8);
 			identifier->kind = IK_LVAR;
 			break;
+		case ND_STRUCT_MEMBER:
+			return identifier;
 		case ND_FUNCDEFINE:
 			identifier->kind = IK_FUNC;
 			break;
@@ -446,7 +451,7 @@ Node_t* stmt(void){
 	Token_t *tok;
 	Types_t *type;
 
-	if(peek(TK_KEYWORD, "int") || peek(TK_KEYWORD, "char")){
+	if(peek(TK_KEYWORD, "int") || peek(TK_KEYWORD, "char") || peek(TK_KEYWORD, "struct")){
 		node = declaration(ND_LVAR);
 		return node;
 	}
@@ -660,7 +665,8 @@ Node_t* initializer(Node_t *node_declarator){
 Node_t* declaration(NodeKind kind){
 	Node_t *node;
 	Types_t *type = typeSpec(kind);
-	if(type->dataType == DT_STRUCT){
+	if(type == NULL){
+		DEBUG_WRITE("HELLO\n");
 		return new_node(ND_DECLARATION, NULL, NULL, NULL, NULL, NULL, NULL);
 	}
 	Identifier_t *identifier = declarator(kind, type);
@@ -988,22 +994,37 @@ Types_t* typeSpec(NodeKind kind){
 	} else if(consume(TK_KEYWORD, "struct") ) {
 		Token_t *tok;
 		Node_t *node;
-		Identifier_t *identifier;
+		Identifier_t *identifier, *identifier_tag;
+		size_t struct_size = 0;
 		type = new_type(DT_STRUCT, NULL);
+		//type->struct_name = tok->str;
+		//type->struct_name_len = tok->len;
 		if((tok = consume_ident())){
 			// tag name
-			fprintf(stderr, "tag\n");
-			identifier = new_identifier(kind, tok, type); // ND_LVARではなくND_GVARの可能性もあるので要検討
+			if((identifier = find_identifier(tok))){
+				identifier_tag = identifier;
+			} else {
+				identifier = new_identifier(kind, tok, type);
+				identifier_tag = identifier;
+			}
 		}
 
-		expect(TK_RESERVED, "{");
-		while(!consume(TK_RESERVED, "}")){
-			// member name
-			fprintf(stderr, "member name\n");
-			identifier->member = declarator(kind, typeSpec(kind));
+		if(consume(TK_RESERVED, "{")){
+			while(!consume(TK_RESERVED, "}")){
+				// member name
+				identifier->member_list = declarator(kind, typeSpec(ND_STRUCT_MEMBER));
+				size_t size;
+				size = sizeofType(identifier->member_list->type);
+				struct_size += size > 8 ? size : 8;
+				identifier = identifier->member_list;
+				expect(TK_RESERVED, ";");
+			}
+			identifier_tag->type->struct_size = struct_size;
 			expect(TK_RESERVED, ";");
+			return NULL;
+		} else {
+			type = identifier_tag->type;
 		}
-		expect(TK_RESERVED, ";");
 	} else {
 		return NULL;
 		todoError("まだ実装していない基本型です\n");
