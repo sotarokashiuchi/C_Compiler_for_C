@@ -334,17 +334,15 @@ Node_t* new_string_vector(Token_t *tok){
 /// @param tok 識別子を指すトークン
 /// @param type
 /// @return 生成した識別子
-Node_t* new_identifier(NodeKind kind, Token_t *tok, Types_t *type){
+Identifier_t* new_identifier(NodeKind kind, Token_t *tok, Types_t *type){
   DEBUG_WRITE("this is identifier.\n");
 	// 新しく識別子を定義する	
-	Node_t *node = new_node(kind, NULL, NULL, NULL, NULL, NULL, NULL);
 	Identifier_t *identifier = calloc(1, sizeof(Identifier_t));
 	identifier->next = identHead;
 	identifier->name = tok->str;
 	identifier->len = tok->len;
 	identifier->type = type;
 	identifier->offset = 0;
-	node->type = type;
 
 	switch(kind){
 		case ND_LVAR:
@@ -369,8 +367,7 @@ Node_t* new_identifier(NodeKind kind, Token_t *tok, Types_t *type){
 	}
 
 	identHead = identifier;
-	node->identifier = identifier;
-	return node;
+	return identifier;
 }
 
 void program(void){
@@ -931,7 +928,7 @@ Node_t *primary_expr(void) {
 		}else{
 			if(peek(TK_RESERVED, "(")){
 				// 外部のファイルから呼び出した関数の場合
-				node->identifier = new_identifier(ND_FUNCCALL, tok, new_type(DT_FUNC, NULL))->identifier;
+				node->identifier = new_identifier(ND_FUNCCALL, tok, new_type(DT_FUNC, NULL));
 				node->type = node->identifier->type;
 				return node;
 			}
