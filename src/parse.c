@@ -23,7 +23,7 @@ StringVector_t *stringHead = NULL;
  * 						| "for" "(" (expr? ";" | declaration) expr? ";" expr? ")" stmt
  *  					| "{" stmt* "}"
  * 						| declaration
- * declaration= typeSpec declarator ("=" initializer)? ";"
+ * declaration= typeSpec declarator ("=" initializer)? ";"?
  * declarator = "*"* (ident | declarator) ( 											# 変数定義
  * 																					"[" num "]" 					# 配列定義
  * 																				'| "(" paramTypeList ")" # プロトタイプ宣言
@@ -656,20 +656,20 @@ Node_t* initializer(Node_t *node_declarator){
 }
 
 Node_t* declaration(NodeKind kind){
-	Types_t *type;
 	Node_t *node;
-	type = typeSpec();
-	node = declarator(kind, type);
+	Identifier_t *identifier = declarator(kind, typeSpec());
+	node = new_node(kind, NULL, NULL, NULL, NULL, NULL, NULL);
+	node->type = identifier->type;
+	node->identifier = identifier;
 
-	if(kind != ND_GVARDEFINE){
+	if((peek(TK_RESERVED, "=") || peek(TK_RESERVED, ";")) && kind != ND_GVARDEFINE){
 		node = new_node(ND_SINGLESTMT, node, NULL, NULL, NULL, NULL, NULL);
-	}
-	
-	if(consume(TK_RESERVED, "=")){
-		node = initializer(node);
+		if(consume(TK_RESERVED, "=")){
+			node = initializer(node);
+		}
 	}
 
-	expect(TK_RESERVED, ";");
+	consume(TK_RESERVED, ";");
 	return node;
 }
 
