@@ -15,7 +15,7 @@ StringVector_t *stringHead = NULL;
 /* 関数プロトタイプ宣言 */
 /* EBNF
  * program    = funcDefine* | declaration
- * funcDefine = typeSpec* declarator ("(" ident? | ident ("," ident)* ")") "{" stmt* "}"
+ * funcDefine = typeSpec* declarator ("(" declaration? | declaration ("," declaration)* ")") "{" stmt* "}"
  * stmt    		= expr? ";"
  * 						| "return" expr? ";"
  * 						| "if" "(" expr ")" stmt ("else" stmt)?
@@ -402,24 +402,21 @@ Node_t* funcDefine(){
 	
 	// 戻り値の型
 	type = typeSpec();
-	node = declarator(ND_FUNCDEFINE, type);
+	Identifier_t *identifier = declarator(ND_FUNCDEFINE, type);
+	node = new_node(ND_FUNCDEFINE, NULL, NULL, NULL, NULL, NULL, NULL);
+	node->type = type;
+	node->identifier = identifier;
 
 	if(consume(TK_RESERVED, "(")){
 		if(!consume(TK_RESERVED, ")")){
 			// 引数がある場合 未実装
 			// 一つ目の仮引数
-			type = typeSpec();
-			tok = consume_ident();
-			vector = new_vector(new_identifier(ND_LVAR, tok, type), NULL);
+			vector = new_vector(declaration(ND_LVAR), NULL);
 			node->vector = vector;
 
 			while(consume(TK_RESERVED, ",")){
 				// 二つ目以降の仮引数
-				typeSpec();
-				tok = consume_ident();
-				if(tok != NULL){
-					vector = new_vector(new_identifier(ND_LVAR, tok, type), vector);
-				}
+				vector = new_vector(declaration(ND_LVAR), vector);
 			}
 			expect(TK_RESERVED, ")");
 		}
