@@ -23,7 +23,7 @@ StringVector_t *stringHead = NULL;
  * 						| "for" "(" (expr? ";" | declaration) expr? ";" expr? ")" stmt
  *  					| "{" stmt* "}"
  * 						| declaration
- * declaration= typeSpec declarator ("=" initializer)? ";"?
+ * declaration= typeSpec declarator ("=" initializer)? ";"? # よくわからん
  * declarator = "*"* (ident | declarator) ( 											# 変数定義
  * 																					"[" num "]" 					# 配列定義
  * 																				'| "(" paramTypeList ")" # プロトタイプ宣言
@@ -33,7 +33,7 @@ StringVector_t *stringHead = NULL;
  * 						| "{" assign_expr? ("," assign_expr)* ","? "}"
  * 						| string
  * typeSpec		= "int" | "char"
- * 						| ("struct"  | "union") (ident? (typeSpec* declaration) | ident)
+ * 						| ("struct"  | "union") (ident? "{" (typeSpec* declarator+) "}" | ident)
  * expr       			= assign_expr
  * assign_expr 			= conditional_expr (("=" | "*=" | "/=" | "%=" | "+=" | "-=") assign_expr)?
  * conditional_expr = logicalOr_expr '("?" expr ":" conditional_expr)?'
@@ -148,7 +148,7 @@ Node_t* declaration(NodeKind kind);
 /// @return 
 Types_t* new_type(DataType dataType, Types_t* inner);
 Types_t* typeName(void);
-Types_t* typeSpec(void);
+Types_t* typeSpec(NodeKind kind);
 Identifier_t* declarator(NodeKind kind, Types_t *type);
 
 
@@ -377,10 +377,15 @@ void program(void){
 	void* status;
 	while(!at_eof()){
 		tok = token;
-		typeSpec();
-		while(consume(TK_RESERVED, "*"));
-		consume_ident();
-		status = peek(TK_RESERVED, "(");
+		
+		if(consume(TK_KEYWORD, "struct")){
+			status = false;
+		} else {
+			typeSpec(-1);
+			while(consume(TK_RESERVED, "*"));
+			consume_ident();
+			status = peek(TK_RESERVED, "(");
+		}
 
 		back_token(tok);
 		if(status){
@@ -401,7 +406,7 @@ Node_t* funcDefine(){
 	int i = 0;
 	
 	// 戻り値の型
-	type = typeSpec();
+	type = typeSpec(-1);
 	Identifier_t *identifier = declarator(ND_FUNCDEFINE, type);
 	node = new_node(ND_FUNCDEFINE, NULL, NULL, NULL, NULL, NULL, NULL);
 	node->type = type;
@@ -654,7 +659,11 @@ Node_t* initializer(Node_t *node_declarator){
 
 Node_t* declaration(NodeKind kind){
 	Node_t *node;
-	Identifier_t *identifier = declarator(kind, typeSpec());
+	Types_t *type = typeSpec(kind);
+	if(type->dataType == DT_STRUCT){
+		return new_node(ND_DECLARATION, NULL, NULL, NULL, NULL, NULL, NULL);
+	}
+	Identifier_t *identifier = declarator(kind, type);
 	node = new_node(kind, NULL, NULL, NULL, NULL, NULL, NULL);
 	node->type = identifier->type;
 	node->identifier = identifier;
@@ -967,13 +976,34 @@ Types_t* new_type(DataType dataType, Types_t* inner){
 	return type;
 }
 
-Types_t* typeSpec(void){
+ //* typeSpec		= "int" | "char"
+ //* 						| ("struct"  | "union") (ident? "{" (typeSpec* declarator+) "}" | ident)
+Types_t* typeSpec(NodeKind kind){
 	Types_t *type;
 	// 基本型の読み込み
 	if(consume(TK_KEYWORD, "int")){
 		type = new_type(DT_INT, NULL);
 	} else if(consume(TK_KEYWORD, "char")){
 		type = new_type(DT_CHAR, NULL);
+	} else if(consume(TK_KEYWORD, "struct") ) {
+		Token_t *tok;
+		Node_t *node;
+		Identifier_t *identifier;
+		type = new_type(DT_STRUCT, NULL);
+		if((tok = consume_ident())){
+			// tag name
+			fprintf(stderr, "tag\n");
+			identifier = new_identifier(kind, tok, type); // ND_LVARではなくND_GVARの可能性もあるので要検討
+		}
+
+		expect(TK_RESERVED, "{");
+		while(!consume(TK_RESERVED, "}")){
+			// member name
+			fprintf(stderr, "member name\n");
+			identifier->member = declarator(kind, typeSpec(kind));
+			expect(TK_RESERVED, ";");
+		}
+		expect(TK_RESERVED, ";");
 	} else {
 		return NULL;
 		todoError("まだ実装していない基本型です\n");

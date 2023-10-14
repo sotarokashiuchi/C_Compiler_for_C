@@ -160,6 +160,10 @@ void gen(Node_t *node) {
     return;
   }
   switch (node->kind){
+  case ND_DECLARATION:{
+  	asmPrint("	#ND_DECLARATION\n");
+    return;
+	 }
   case ND_SINGLESTMT:{
     gen(node->expr1);
     popPrint("rax");
@@ -236,7 +240,7 @@ void gen(Node_t *node) {
       int i;
       Vector_t *vector = node->vector;
       for(i=1; ; i++){
-	gen_address(vector->node);
+				gen_address(vector->node);
         popPrint("rax");
         switch (i){
           case 1:
