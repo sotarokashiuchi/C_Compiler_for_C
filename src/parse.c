@@ -356,6 +356,7 @@ Identifier_t* new_identifier(NodeKind kind, Token_t *tok, Types_t *type){
 			identifier->kind = IK_LVAR;
 			break;
 		case ND_STRUCT_MEMBER:
+			identifier->kind = IK_STRUCT_MEMBER;
 			return identifier;
 		case ND_FUNCDEFINE:
 			identifier->kind = IK_FUNC;
@@ -882,13 +883,46 @@ Node_t* unary_expr(){
 	return postfix_expr();
 }
 
+ /* postfix_expr 		= primary_expr ("[" expr "]"
+																		| "(" ParamList ")"
+																		| "." identifier
+																		| "->" identifier
+																		| "++"
+																		:*/
 Node_t* postfix_expr(void){
 	Node_t* node;
 	Types_t* type = NULL;
 	node = primary_expr();
 
 	for(;;){
-		if(consume(TK_RESERVED, "++")){
+		if(consume(TK_RESERVED, ".")){
+			Token_t *tok;
+			Types_t *type = node->identifier->type;
+			Identifier_t *identifier;
+			size_t size;
+
+			// タグの検索も必要
+			for(identifier=identHead; identifier; identifier=identifier->next){
+				if(identifier->len == type->struct_name_len 
+						&& !memcmp(type->struct_name, identifier->name, identifier->len)) {
+					DEBUG_WRITE("this is STRUCT tag.----%.*s\n", identifier->len, identifier->name);
+					break;
+				}
+			}
+			// memberの検索
+			tok = consume_ident();
+			for(identifier = identifier->member_list; identifier; identifier = identifier->member_list){
+				if(identifier->len == tok->len && !memcmp(tok->str, identifier->name, identifier->len) 
+						&& identifier->kind == IK_STRUCT_MEMBER){
+					DEBUG_WRITE("this is STRUCT member.---%.*s\n", identifier->len, identifier->name);
+					break;
+				}
+			}
+
+			size = node->identifier->offset + identifier->offset;
+			node->expr1 = new_node(ND_STRUCT_MEMBER, NULL, NULL, NULL, NULL, NULL, NULL);
+			node->expr1->identifier = identifier;
+		} else 	if(consume(TK_RESERVED, "++")){
 		// i++は((i += 1) - 1)と解釈する
 			node = new_node(ND_ASSIGN_ADD, node, new_node_num(1), NULL, NULL, NULL, NULL);
 			node = new_node(ND_SUB, node, new_node_num(1), NULL, NULL, NULL, NULL);
@@ -995,10 +1029,8 @@ Types_t* typeSpec(NodeKind kind){
 		Token_t *tok;
 		Node_t *node;
 		Identifier_t *identifier, *identifier_tag;
-		size_t struct_size = 0;
+		size_t struct_size = 0, size;
 		type = new_type(DT_STRUCT, NULL);
-		//type->struct_name = tok->str;
-		//type->struct_name_len = tok->len;
 		if((tok = consume_ident())){
 			// tag name
 			if((identifier = find_identifier(tok))){
@@ -1007,15 +1039,17 @@ Types_t* typeSpec(NodeKind kind){
 				identifier = new_identifier(kind, tok, type);
 				identifier_tag = identifier;
 			}
+			type->struct_name = tok->str;
+			type->struct_name_len = tok->len;
 		}
 
 		if(consume(TK_RESERVED, "{")){
 			while(!consume(TK_RESERVED, "}")){
 				// member name
-				identifier->member_list = declarator(kind, typeSpec(ND_STRUCT_MEMBER));
-				size_t size;
+				identifier->member_list = declarator(ND_STRUCT_MEMBER, typeSpec(ND_STRUCT_MEMBER));
 				size = sizeofType(identifier->member_list->type);
 				struct_size += size > 8 ? size : 8;
+				identifier->offset = struct_size;
 				identifier = identifier->member_list;
 				expect(TK_RESERVED, ";");
 			}

@@ -111,8 +111,8 @@ typedef struct Types_tag {
   struct Types_tag *inner;
   size_t array_size;
 	size_t struct_size;
-	// char *struct_name;
-	// int struct_name_len;
+	char *struct_name;
+	int struct_name_len;
 } Types_t;
 
 

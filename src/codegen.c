@@ -104,7 +104,11 @@ void gen_address(Node_t *node){
   if(node->kind == ND_LVAR){
 		// ローカル変数
     asmPrint("  mov rax, rbp\n");
-    asmPrint("  sub rax, %d\n", node->identifier->offset);
+		if(node->expr1 != NULL){
+			asmPrint("  sub rax, %d\n", node->identifier->offset+node->expr1->identifier->offset);
+		} else {
+			asmPrint("  sub rax, %d\n", node->identifier->offset);
+		}
     pushPrint("rax");
   } else if(node->kind == ND_GVAR){
 		// グローバル変数
