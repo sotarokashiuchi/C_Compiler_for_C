@@ -67,7 +67,7 @@ typedef enum {
 typedef struct Identifier_tag {
 	IdentifierKind kind;
 	struct Identifier_tag* next;
-	struct Identifier_tag* member_list; // structの場合のみ使用
+	struct Identifier_tag* member_list; // typeの基本型がstructの場合のみ使用
 	char *name;
 	int len;
 	int offset;

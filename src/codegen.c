@@ -101,14 +101,15 @@ char* gen_identifier_name(Node_t *node){
 /// @brief 左辺値の評価(アドレス計算)
 /// @param node 評価対象のノード
 void gen_address(Node_t *node){
-  if(node->kind == ND_LVAR){
+	if(node->kind == ND_STRUCT){
+		gen_address(node->expr1);
+		popPrint("rax");
+		asmPrint(" 	sub rax, %d\n", node->expr2->identifier->offset);
+		pushPrint("rax");
+	}else if(node->kind == ND_LVAR){
 		// ローカル変数
     asmPrint("  mov rax, rbp\n");
-		if(node->expr1 != NULL){
-			asmPrint("  sub rax, %d\n", node->identifier->offset+node->expr1->identifier->offset);
-		} else {
-			asmPrint("  sub rax, %d\n", node->identifier->offset);
-		}
+		asmPrint("  sub rax, %d\n", node->identifier->offset);
     pushPrint("rax");
   } else if(node->kind == ND_GVAR){
 		// グローバル変数
@@ -397,6 +398,7 @@ void gen(Node_t *node) {
     pushPrint("rax");
     return;
 	}
+	case ND_STRUCT:
   case ND_LVAR:{
     gen_address(node);
     popPrint("rax");

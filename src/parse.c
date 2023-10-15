@@ -270,18 +270,6 @@ Node_t *new_node(NodeKind kind, Node_t *expr1, Node_t *expr2, Node_t *expr3, Nod
 		node->type = expr1->type;
 	}
 
-	if(kind == ND_STRUCT){
-		if(expr1->identifier->kind == IK_LVAR){
-			DEBUG_WRITE("LVAR CREATE\n");
-			node = new_node(ND_LVAR, NULL, NULL, NULL, NULL, NULL, NULL);
-		} else if(expr1->identifier->kind == IK_GVAR){
-			DEBUG_WRITE("GVAR CREATE\n");
-			node = new_node(ND_GVAR, NULL, NULL, NULL, NULL, NULL, NULL);
-		} else {
-			parseError("ERRor");
-		}
-		node->type = expr2->type;
-	}
 
 
   // ND_LVAR,        // ローカル変数
@@ -361,6 +349,23 @@ Identifier_t* new_identifier(NodeKind kind, Token_t *tok, Types_t *type){
 	identifier->len = tok->len;
 	identifier->type = type;
 	identifier->offset = 0;
+
+	Types_t *type_end;
+	for(type_end=type; type_end->inner != NULL; type_end=type_end->inner);
+	if(type_end->dataType == DT_STRUCT){
+			DEBUG_WRITE("point\n");
+			Identifier_t *identifier_tag;
+
+			// タグの検索
+			for(identifier_tag=identHead; identifier_tag; identifier_tag=identifier_tag->next){
+				if(identifier_tag->len == type_end->struct_name_len 
+						&& !memcmp(type_end->struct_name, identifier_tag->name, identifier_tag->len)) {
+					DEBUG_WRITE("this is STRUCT tag.----%.*s\n", identifier_tag->len, identifier_tag->name);
+					break;
+				}
+			}
+			identifier->member_list = identifier_tag->member_list;
+	}
 
 	switch(kind){
 		case ND_LVAR:
@@ -913,39 +918,24 @@ Node_t* postfix_expr(void){
 		if(consume(TK_RESERVED, "->")){
 		} else 	if(consume(TK_RESERVED, ".")){
 			Token_t *tok;
-			Types_t *type = NULL;
 			Identifier_t *identifier;
 			size_t size;
 			Node_t *node_member, *node_var;
-			// type
-			node_var = node;
-			type = node_var->type;
-			assert(type != NULL && "Tag情報を格納しているnodeが探索できませんでした。");
-
-			// タグの検索
-			for(identifier=identHead; identifier; identifier=identifier->next){
-				if(identifier->len == type->struct_name_len 
-						&& !memcmp(type->struct_name, identifier->name, identifier->len)) {
-					DEBUG_WRITE("this is STRUCT tag.----%.*s\n", identifier->len, identifier->name);
-					break;
-				}
-			}
-			// node_var->identifier = identifier;
-			node_var->identifier->member_list = identifier->member_list;
 
 			// memberの検索
 			tok = consume_ident();
-			for(identifier = identifier->member_list; identifier; identifier = identifier->member_list){
+			for(identifier = node->identifier->member_list; identifier; identifier = identifier->member_list){
 				if(identifier->len == tok->len && !memcmp(tok->str, identifier->name, identifier->len) 
 						&& identifier->kind == IK_STRUCT_MEMBER){
 					DEBUG_WRITE("this is STRUCT member.---%.*s\n", identifier->len, identifier->name);
 					break;
 				}
 			}
+			assert(identifier != NULL && "memberがない\n");
 
 			node_member = new_node(ND_STRUCT_MEMBER, NULL, NULL, NULL, NULL, NULL, NULL);
 			node_member->identifier = identifier;
-			node = new_node(ND_STRUCT, node_var, node_member, NULL, NULL, NULL, NULL);
+			node = new_node(ND_STRUCT, node, node_member, NULL, NULL, NULL, NULL);
 			node->identifier = identifier;
 			node->type = identifier->type;
 		} else 	if(consume(TK_RESERVED, "++")){
