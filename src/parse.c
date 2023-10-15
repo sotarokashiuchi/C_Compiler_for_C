@@ -915,8 +915,12 @@ Node_t* postfix_expr(void){
 	node = primary_expr();
 
 	for(;;){
-		if(consume(TK_RESERVED, "->")){
-		} else 	if(consume(TK_RESERVED, ".")){
+		if(consume(TK_RESERVED, ".") || peek(TK_RESERVED, "->")){
+			if(consume(TK_RESERVED, "->")){
+				// A->x  (*A).x
+				node = new_node(ND_DEREF, node, NULL, NULL, NULL, NULL, NULL);
+			}
+
 			Token_t *tok;
 			Identifier_t *identifier;
 			size_t size;
