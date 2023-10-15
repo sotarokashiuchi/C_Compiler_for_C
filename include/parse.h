@@ -43,6 +43,7 @@ typedef enum{
 	ND_DOUBLESTMT,	// 複文
 	ND_DECLARATION, // 宣言
 	ND_STRUCT_MEMBER,
+	ND_STRUCT,
 } NodeKind;
 
 typedef enum {

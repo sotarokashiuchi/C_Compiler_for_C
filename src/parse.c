@@ -258,6 +258,7 @@ Node_t *new_node(NodeKind kind, Node_t *expr1, Node_t *expr2, Node_t *expr3, Nod
 	
 	if(kind == ND_DEREF){
 		node->type = expr1->type->inner;
+		node->identifier = expr1->identifier;
 	}
 
 	if(kind == ND_ADDR){
@@ -268,6 +269,20 @@ Node_t *new_node(NodeKind kind, Node_t *expr1, Node_t *expr2, Node_t *expr3, Nod
 		// 左辺値の型を代入
 		node->type = expr1->type;
 	}
+
+	if(kind == ND_STRUCT){
+		if(expr1->identifier->kind == IK_LVAR){
+			DEBUG_WRITE("LVAR CREATE\n");
+			node = new_node(ND_LVAR, NULL, NULL, NULL, NULL, NULL, NULL);
+		} else if(expr1->identifier->kind == IK_GVAR){
+			DEBUG_WRITE("GVAR CREATE\n");
+			node = new_node(ND_GVAR, NULL, NULL, NULL, NULL, NULL, NULL);
+		} else {
+			parseError("ERRor");
+		}
+		node->type = expr2->type;
+	}
+
 
   // ND_LVAR,        // ローカル変数
   // ND_EQUALTO,     // ==
@@ -895,13 +910,19 @@ Node_t* postfix_expr(void){
 	node = primary_expr();
 
 	for(;;){
-		if(consume(TK_RESERVED, ".")){
+		if(consume(TK_RESERVED, "->")){
+		} else 	if(consume(TK_RESERVED, ".")){
 			Token_t *tok;
-			Types_t *type = node->identifier->type;
+			Types_t *type = NULL;
 			Identifier_t *identifier;
 			size_t size;
+			Node_t *node_member, *node_var;
+			// type
+			node_var = node;
+			type = node_var->type;
+			assert(type != NULL && "Tag情報を格納しているnodeが探索できませんでした。");
 
-			// タグの検索も必要
+			// タグの検索
 			for(identifier=identHead; identifier; identifier=identifier->next){
 				if(identifier->len == type->struct_name_len 
 						&& !memcmp(type->struct_name, identifier->name, identifier->len)) {
@@ -909,6 +930,9 @@ Node_t* postfix_expr(void){
 					break;
 				}
 			}
+			// node_var->identifier = identifier;
+			node_var->identifier->member_list = identifier->member_list;
+
 			// memberの検索
 			tok = consume_ident();
 			for(identifier = identifier->member_list; identifier; identifier = identifier->member_list){
@@ -919,9 +943,11 @@ Node_t* postfix_expr(void){
 				}
 			}
 
-			size = node->identifier->offset + identifier->offset;
-			node->expr1 = new_node(ND_STRUCT_MEMBER, NULL, NULL, NULL, NULL, NULL, NULL);
-			node->expr1->identifier = identifier;
+			node_member = new_node(ND_STRUCT_MEMBER, NULL, NULL, NULL, NULL, NULL, NULL);
+			node_member->identifier = identifier;
+			node = new_node(ND_STRUCT, node_var, node_member, NULL, NULL, NULL, NULL);
+			node->identifier = identifier;
+			node->type = identifier->type;
 		} else 	if(consume(TK_RESERVED, "++")){
 		// i++は((i += 1) - 1)と解釈する
 			node = new_node(ND_ASSIGN_ADD, node, new_node_num(1), NULL, NULL, NULL, NULL);
