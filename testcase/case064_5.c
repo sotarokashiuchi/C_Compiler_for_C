@@ -4,20 +4,21 @@ struct taype_tag {
 	char z;
 };
 
-int change(struct taype_tag *B){
-	printf("B = %p\n", B);
-	(*B).x = 3;
-	(*B).y = 2;
-	// B->x = 3;
-	// B->y = 2;
+int change(struct taype_tag *X){
+	printf("X = %p\n", X);
+	(*X).x = 1;
+	(*X).y = 2;
 	return 0;
 }
 
 int main(){
 	struct taype_tag A;
+	struct taype_tag B;
 	printf("A = %p\n", &A);
+	printf("B = %p\n", &B);
 	change(&A);
-	return A.x + A.y;
+	change(&B);
+	return A.x + A.y + B.x + B.y -1;
 }
 
 
