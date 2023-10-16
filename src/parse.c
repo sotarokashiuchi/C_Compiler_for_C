@@ -464,6 +464,9 @@ Node_t* funcDefine(){
 		while(!consume(TK_RESERVED, "}")){
 			vector = new_vector(stmt(), vector);
 		}
+		if(vector->node->kind != ND_RETURN){
+			vector = new_vector(new_node(ND_RETURN, NULL, NULL, NULL, NULL, NULL, NULL), vector);
+		}
 		return node;
 	}else{
 		parseError("error call\n");
