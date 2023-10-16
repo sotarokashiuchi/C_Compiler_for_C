@@ -104,6 +104,11 @@ Token_t* tokenize(void){
 			continue;
 		}
 
+		if(!strncmp(p, "void", 4) && !is_alnum(p[4])){
+			cur = new_token(TK_KEYWORD, cur, &p, 4);
+			continue;
+		}
+
 		if(!strncmp(p, "struct", 6) && !is_alnum(p[6])){
 			cur = new_token(TK_KEYWORD, cur, &p, 6);
 			continue;

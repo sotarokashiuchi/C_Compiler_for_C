@@ -23,7 +23,7 @@ StringVector_t *stringHead = NULL;
  * 						| "for" "(" (expr? ";" | declaration) expr? ";" expr? ")" stmt
  *  					| "{" stmt* "}"
  * 						| declaration
- * declaration= typeSpec declarator ("=" initializer)? ";"? # よくわからん
+ * declaration= typeSpec declarator? ("=" initializer)? ";"? # よくわからん
  * declarator = "*"* (ident | declarator) ( 											# 変数定義
  * 																					"[" num "]" 					# 配列定義
  * 																				'| "(" paramTypeList ")" # プロトタイプ宣言
@@ -32,7 +32,7 @@ StringVector_t *stringHead = NULL;
  * initializer= assign_expr
  * 						| "{" assign_expr? ("," assign_expr)* ","? "}"
  * 						| string
- * typeSpec		= "int" | "char"
+ * typeSpec		= "int" | "char" | "void"
  * 						| ("struct"  | "union") (ident? "{" (typeSpec* declarator+) "}" | ident)
  * expr       			= assign_expr
  * assign_expr 			= conditional_expr (("=" | "*=" | "/=" | "%=" | "+=" | "-=") assign_expr)?
@@ -341,10 +341,15 @@ Node_t* new_string_vector(Token_t *tok){
 /// @param type
 /// @return 生成した識別子
 Identifier_t* new_identifier(NodeKind kind, Token_t *tok, Types_t *type){
-  DEBUG_WRITE("this is identifier.------ %.*s \n", tok->len, tok->str);
 	// 新しく識別子を定義する	
 	Identifier_t *identifier = calloc(1, sizeof(Identifier_t));
+	if(!tok){
+		identifier->type = type;
+		identifier->offset = 0;
+		return identifier;
+	}
 	identifier->next = identHead;
+	DEBUG_WRITE("this is identifier.------ %.*s \n", tok->len, tok->str);
 	identifier->name = tok->str;
 	identifier->len = tok->len;
 	identifier->type = type;
@@ -1045,6 +1050,8 @@ Types_t* typeSpec(NodeKind kind){
 		type = new_type(DT_INT, NULL);
 	} else if(consume(TK_KEYWORD, "char")){
 		type = new_type(DT_CHAR, NULL);
+	} else if(consume(TK_KEYWORD, "void")){
+		type = new_type(DT_VOID, NULL);
 	} else if(consume(TK_KEYWORD, "struct") ) {
 		Token_t *tok;
 		Node_t *node;

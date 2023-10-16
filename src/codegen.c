@@ -239,7 +239,7 @@ void gen(Node_t *node) {
     pushPrint("rbp");
     asmPrint("  mov rbp, rsp\n");
     asmPrint("  sub rsp, %d\n", local_variable_stack);
-    if(node->vector != NULL){
+    if(node->vector != NULL && node->vector->node->type->dataType != DT_VOID){
       // 引数がある場合
       asmPrint("#仮引数に実引数を代入\n");
       int i;

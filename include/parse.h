@@ -49,6 +49,7 @@ typedef enum{
 typedef enum {
   DT_INT,
 	DT_CHAR,
+	DT_VOID,
   DT_PTR,
   DT_ARRAY,
 	DT_STRUCT,
