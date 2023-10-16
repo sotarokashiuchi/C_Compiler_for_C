@@ -480,7 +480,7 @@ Node_t* stmt(void){
 	Token_t *tok;
 	Types_t *type;
 
-	if(peek(TK_KEYWORD, "int") || peek(TK_KEYWORD, "char") || peek(TK_KEYWORD, "struct")){
+	if(peek(TK_KEYWORD, "int") || peek(TK_KEYWORD, "char") || peek(TK_KEYWORD, "void") || peek(TK_KEYWORD, "struct")){
 		node = declaration(ND_LVAR);
 		return node;
 	}
@@ -533,7 +533,7 @@ Node_t* stmt(void){
 			expr1 = NULL;
 		}else{
 			// Aの読み込み
-			if(peek(TK_KEYWORD, "int") || peek(TK_KEYWORD, "char")){
+			if(peek(TK_KEYWORD, "int") || peek(TK_KEYWORD, "char")|| peek(TK_KEYWORD, "void") ){
 				/* for (int i = 0; i < n; i++) { ... } を
 				 * {
 				 * 	int i = 0;
