@@ -62,64 +62,6 @@ StringVector_t *stringHead = NULL;
  * ParamList 	= expr? | expr ("," expr)*
  */
 
-/* _stmt
- * stmt 			= 
-		expression_stmt
-							| {<expression>}? ;
-		selection_stmt
-							| if ( <expression> ) <statement>
-							| if ( <expression> ) <statement> else <statement>
-							'| switch ( <expression> ) <statement>'
-		iteration_stmt
-							| while ( <expression> ) <statement>
-							'| do <statement> while ( <expression> ) ;'
-							| for ( {<expression>}? ; {<expression>}? ; {<expression>}? ) <statement> # 変数の初期化の場合は？
-		compound_stmt
-							'| { {<declaration>}* {<statement>}* }'
-		labeled_stmt
-							'| <identifier> : <statement>'
-							'| case <constant-expression> : <statement>'
-							'| default : <statement>'
-		jump_stmt
-							'| goto <identifier> ;'
-							'| continue ;'
-							'| break ;'
-							| return {<expression>}? ;
- */
-
-/* _expr
- * expr       			= assign_expr '| expr "," assign_expr'
- * assign_expr 			= conditional_expr (("=" | "*=" | "/=" | "%=" | "+=" | "-=" '| "<<=" | ">>=" | "&=" | "^=" | "|=" ') assign_expr)?
- * conditional_expr = logicalOr_expr '("?" expr ":" conditional_expr)?'
- * logicalOr_expr 	= logicalAnd_expr ("||" logicalAnd_expr )*
- * logicalAnd_expr 	= inclusiveOr_expr ("&&" inclusiveOr_expr)*
- * inclusiveOr_expr	= exclusiveOr_expr '("|" exclusiveOr_expr)*'
- * exclusiveOr_expr	= and_expr '("^" and_expr)*'
- * and_expr 				= equality_expre '("&" equality_expr)*'
- * equality_expr 		= relational_expr (("==" | "!=") relational_expr)*
- * relational_expr 	= shift_expr (("<" | ">" | "<=" | ">=" ) shift_expr)*
- * shift_expr 			= additive_expr '(( "<<" | ">>" ) additive_expr)*
- * additive_expr 		= multiplicative_expr (( "+" | "-" ) multiplicative_expr)*
- * multiplicative_expr= cast_expr (( "*" | "/" | "%" ) cast_expr)*
- * cast_expr 				= unary_expr '| (typeName) cast_expr'
- * unary_expr 			= postfix_expr
-										| ++ unary_expr
-										| -- unary_expr
-										| ( & | * | + | - | ~ | ! ) cast_expr
-										| sizeof unary_expr
-										| sizeof typeName
- * postfix_expr 		= primary_expr ("[" expr "]"
-																		| "(" ParamList ")"
-																		| "." identifier
-																		| "->" identifier
-																		| "++"
- * primary_expr 		= identifier | constant | string | "(" expr ")"  # constant にnumが入る constant =  <integer-constant> | <character-constant> | <floating-constant> | <enumeration-constant>
- */
-
-/* struct
- * 
- */
-
 void program(void);
 Node_t* funcDefine();
 Node_t* stmt(void);
