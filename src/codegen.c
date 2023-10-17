@@ -124,7 +124,6 @@ void gen_address(Node_t *node){
   } else if(node->kind == ND_GVAR){
 		// グローバル変数
 		asmPrint("	lea rax, [rip+%s]\n", gen_identifier_name(node));
-		// asmPrint("	mov rax, DWORD PTR %s[rip]\n", gen_identifier_name(node));
 		pushPrint("rax");
   } else if(node->kind == ND_DEREF){
     gen(node->expr1);
@@ -454,6 +453,8 @@ void gen(Node_t *node) {
     	asmPrint("  mov [rax], %s\n", getRegNameFromSize(size, "rdi"));
 		} else if (size == 4 || size == 8){
     	asmPrint("  mov [rax], %s\n", getRegNameFromSize(size, "rdi"));
+		} else {
+			codegenError("sizeが大きなメモリのコピーはできません\n");
 		}
 
     pushPrint("rdi");
