@@ -116,11 +116,11 @@ void gen_address(Node_t *node){
 		popPrint("rax");
 		asmPrint(" 	add rax, %d\n", node->expr2->identifier->offset);
 		pushPrint("rax");
-	}else if(node->kind == ND_LVAR){
+	} else if(node->kind == ND_LVAR){
 		// ローカル変数
-    asmPrint("  mov rax, rbp\n");
+		asmPrint("  mov rax, rbp\n");
 		asmPrint("  sub rax, %d\n", node->identifier->offset);
-    pushPrint("rax");
+		pushPrint("rax");
   } else if(node->kind == ND_GVAR){
 		// グローバル変数
 		asmPrint("	lea rax, [rip+%s]\n", gen_identifier_name(node));

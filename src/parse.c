@@ -901,7 +901,6 @@ Node_t* postfix_expr(void){
 			node_member = new_node(ND_STRUCT_MEMBER, NULL, NULL, NULL, NULL, NULL, NULL);
 			node_member->identifier = identifier;
 			node = new_node(ND_STRUCT, node, node_member, NULL, NULL, NULL, NULL);
-			node->identifier = identifier;
 			node->type = identifier->type;
 		} else 	if(consume(TK_RESERVED, "++")){
 		// i++は((i += 1) - 1)と解釈する
