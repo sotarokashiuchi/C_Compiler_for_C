@@ -355,23 +355,6 @@ Identifier_t* new_identifier(NodeKind kind, Token_t *tok, Types_t *type){
 	identifier->type = type;
 	identifier->offset = 0;
 
-	Types_t *type_end;
-	for(type_end=type; type_end->inner != NULL; type_end=type_end->inner);
-	if(type_end->dataType == DT_STRUCT){
-			DEBUG_WRITE("point\n");
-			Identifier_t *identifier_tag;
-
-			// タグの検索
-			for(identifier_tag=identHead; identifier_tag; identifier_tag=identifier_tag->next){
-				if(identifier_tag->len == type_end->struct_name_len 
-						&& !memcmp(type_end->struct_name, identifier_tag->name, identifier_tag->len)) {
-					DEBUG_WRITE("this is STRUCT tag.----%.*s\n", identifier_tag->len, identifier_tag->name);
-					break;
-				}
-			}
-			identifier->member_list = identifier_tag->member_list;
-	}
-
 	switch(kind){
 		case ND_LVAR:
 			DEBUG_WRITE("sizeofType = %d\n", sizeofType(type));
@@ -620,6 +603,7 @@ Identifier_t* declarator(NodeKind kind, Types_t *type){
 		type = new_type(DT_PTR, type);
 	}
 	
+	// 変数名?
 	tok = consume_ident();
 
 	// 配列を再帰的にパース
@@ -911,6 +895,30 @@ Node_t* unary_expr(){
 	return postfix_expr();
 }
 
+
+/// @brief typeからstructタグを検索する (struct A { ... }; という宣言ならAのこと)
+/// @param type 基本型がDT_STRUCTのtype
+/// @return structタグがあれば、そのメンバのリストの先頭Identifier_t*を返す。未宣言のstructの場合はNULLを返す
+Identifier_t* find_struct_tag(Types_t *type){
+	Types_t *type_end;
+	for(type_end=type; type_end->inner != NULL; type_end=type_end->inner);
+	if(type_end->dataType == DT_STRUCT){
+			DEBUG_WRITE("point\n");
+			Identifier_t *identifier_tag;
+
+			// タグの検索
+			for(identifier_tag=identHead; identifier_tag; identifier_tag=identifier_tag->next){
+				if(identifier_tag->len == type_end->struct_name_len 
+						&& !memcmp(type_end->struct_name, identifier_tag->name, identifier_tag->len)) {
+					DEBUG_WRITE("this is STRUCT tag.----%.*s\n", identifier_tag->len, identifier_tag->name);
+					break;
+				}
+			}
+			return identifier_tag->member_list;
+	}
+	return NULL;
+}
+
  /* postfix_expr 		= primary_expr ("[" expr "]"
 																		| "(" ParamList ")"
 																		| "." identifier
@@ -934,9 +942,12 @@ Node_t* postfix_expr(void){
 			size_t size;
 			Node_t *node_member, *node_var;
 
+			// struct tag の検索
+			identifier = find_struct_tag(node->type);
+
 			// memberの検索
 			tok = consume_ident();
-			for(identifier = node->identifier->member_list; identifier; identifier = identifier->member_list){
+			for( ; identifier; identifier = identifier->member_list){
 				if(identifier->len == tok->len && !memcmp(tok->str, identifier->name, identifier->len) 
 						&& identifier->kind == IK_STRUCT_MEMBER){
 					DEBUG_WRITE("this is STRUCT member.---%.*s\n", identifier->len, identifier->name);
@@ -1078,8 +1089,8 @@ Types_t* typeSpec(NodeKind kind){
 				// member name
 				identifier->member_list = declarator(ND_STRUCT_MEMBER, typeSpec(ND_STRUCT_MEMBER));
 				size = sizeofType(identifier->member_list->type);
-				struct_size += size > 8 ? size : 8;
 				identifier->offset = struct_size;
+				struct_size += size > 8 ? size : 8;
 				identifier = identifier->member_list;
 				expect(TK_RESERVED, ";");
 			}

@@ -102,9 +102,19 @@ char* gen_identifier_name(Node_t *node){
 /// @param node 評価対象のノード
 void gen_address(Node_t *node){
 	if(node->kind == ND_STRUCT){
+		/* strcut のメモリ配置
+		 * struct A { int x; int y; int z;};
+		 * +--------+ A   :rbp-(3*8byte)
+		 * + int x  |
+		 * +--------+ A.y :(rbp-(3*8byte)) + (1*8byte)
+		 * + int y  |
+		 * +--------+
+		 * + int z  |
+		 * +--------+ rbp
+		 */
 		gen_address(node->expr1);
 		popPrint("rax");
-		asmPrint(" 	sub rax, %d\n", node->expr2->identifier->offset);
+		asmPrint(" 	add rax, %d\n", node->expr2->identifier->offset);
 		pushPrint("rax");
 	}else if(node->kind == ND_LVAR){
 		// ローカル変数
