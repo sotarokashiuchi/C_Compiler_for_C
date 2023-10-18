@@ -1030,7 +1030,7 @@ Types_t* typeSpec(NodeKind kind){
 				// member name
 				identifier->member_list = declarator(ND_STRUCT_MEMBER, typeSpec(ND_STRUCT_MEMBER));
 				size = sizeofType(identifier->member_list->type);
-				identifier->offset = struct_size;
+				identifier->member_list->offset = struct_size;
 				struct_size += size > 8 ? size : 8;
 				identifier = identifier->member_list;
 				expect(TK_RESERVED, ";");

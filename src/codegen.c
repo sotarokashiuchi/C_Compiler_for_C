@@ -97,6 +97,50 @@ char* getRegNameFromSize(int size, char const *register_name){
 	assert((size==4 || size==8) && "failed serch data size");
 }
 
+/// @brief スタック上にあるデータを指定されたデータ量だけポップする
+/// @param size ポップするサイズ
+void stack_pop(int size){
+	while(size>0){
+		popPrint("rax");
+		size -= 8;
+	}
+}
+
+/// @brief メモリにあるデータをメモリにあるデータに複製すると同時に、コピーしたデータをスタックに積む
+/// @param size コピーするサイズ
+/// @param *src コピー元
+/// @param *dest コピー先
+void stack_copy(int size, char *src, char *dest){
+	/* copyの様子
+	 * struct A { int x; int y; int z;};
+	 * +--------+ src            +--------+
+	 * + int x  | ------------+    int z
+	 * +--------+             |  +--------+
+	 * + int y  | ------------+->  int y
+	 * +--------+             |  +--------+
+	 * + int z  |             +->  int x
+	 * +--------+           dest +--------+
+	 */
+	while(size!=0){
+		if(size%8 == 0){
+			asmPrint("  mov [%s], %s\n", src, getRegNameFromSize(8, dest));
+			pushPrint(dest);
+			asmPrint("  add %s, 0x8\n", dest);
+			asmPrint("  add %s, 0x8\n",src);
+			size -= 8;
+		} else if (size == 4){
+			asmPrint("  mov [%s], %s\n", src, getRegNameFromSize(4, dest));
+			pushPrint(dest);
+			size -= 4;
+		}  else if(size == 1){
+			asmPrint("  mov [%s], %s\n", src, getRegNameFromSize(1, dest));
+			pushPrint(dest);
+			size -= 1;
+		} else {
+			codegenError("stackに正しくデータを格納できませんでした\n");
+		}
+	}
+}
 
 /// @brief lvalの名前の文字列を取得
 /// @param node lvar名を求めたいノード
@@ -195,7 +239,8 @@ void gen(Node_t *node) {
 	 }
   case ND_SINGLESTMT:{
     gen(node->expr1);
-    popPrint("rax");
+		size = getRegNameFromType(node->expr1->type);
+		stack_pop(size);
   	asmPrint("	#end ND_SINGLESTMT\n");
     return;
   }
@@ -460,26 +505,11 @@ void gen(Node_t *node) {
     // 右辺の評価
     gen(node->expr2);
 
-    popPrint("rsi");
     popPrint("rdi");
+    popPrint("rax");
     // 変数への代入
 		size = getRegNameFromType(node->type);
-		if(size == 1){
-    	asmPrint("  mov [rdi], %s\n", getRegNameFromSize(size, "rsi"));
-		} else if (size == 4 || size == 8){
-    	asmPrint("  mov [rdi], %s\n", getRegNameFromSize(size, "rsi"));
-		} else {
-			// codegenError("sizeが大きなメモリのコピーはできません\n");
-    	asmPrint("	mov rcx, %d\n", size);
-    	asmPrint("	pushf\n"); // フラグレジスタの値を退避
-    	asmPrint("	cld\n"); // ディレクションフラグの値を0にする
-    	asmPrint("	rep\n");
-    	asmPrint("	movsb\n");
-    	asmPrint("	popf\n"); // フラグレジスタの値を退避
-			asmPrint("  mov rsi, 0\n");
-		}
-
-    pushPrint("rsi");  // ## マスト
+		stack_copy(size, "rax", "rdi");
     return;
   }
   case ND_ASSIGN_MUL:
