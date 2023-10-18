@@ -49,6 +49,8 @@ int getRegNameFromType(Types_t *type){
   switch (type->dataType){
     case DT_INT:
     case DT_CHAR:
+    case DT_VOID:
+    case DT_STRUCT:
     case DT_PTR:
     	return sizeofType(type);
     case DT_ARRAY:
@@ -79,7 +81,19 @@ char* getRegNameFromSize(int size, char const *register_name){
 		if(size==8){
 			return "rdi";
 		}
+	} else if(!strncmp(register_name, "rsi", 3)){
+		// rsi
+		if(size==1){
+			return "sil";
+		}
+		if(size==4){
+			return "esi";
+		}
+		if(size==8){
+			return "rsi";
+		}
 	}
+
 	assert((size==4 || size==8) && "failed serch data size");
 }
 
@@ -115,6 +129,7 @@ void gen_address(Node_t *node){
 		gen_address(node->expr1);
 		popPrint("rax");
 		asmPrint(" 	add rax, %d\n", node->expr2->identifier->offset);
+		DEBUG_WRITE("%d\n", node->expr2->identifier->offset);
 		pushPrint("rax");
 	} else if(node->kind == ND_LVAR){
 		// ローカル変数
@@ -445,19 +460,26 @@ void gen(Node_t *node) {
     // 右辺の評価
     gen(node->expr2);
 
+    popPrint("rsi");
     popPrint("rdi");
-    popPrint("rax");
     // 変数への代入
 		size = getRegNameFromType(node->type);
 		if(size == 1){
-    	asmPrint("  mov [rax], %s\n", getRegNameFromSize(size, "rdi"));
+    	asmPrint("  mov [rdi], %s\n", getRegNameFromSize(size, "rsi"));
 		} else if (size == 4 || size == 8){
-    	asmPrint("  mov [rax], %s\n", getRegNameFromSize(size, "rdi"));
+    	asmPrint("  mov [rdi], %s\n", getRegNameFromSize(size, "rsi"));
 		} else {
-			codegenError("sizeが大きなメモリのコピーはできません\n");
+			// codegenError("sizeが大きなメモリのコピーはできません\n");
+    	asmPrint("	mov rcx, %d\n", size);
+    	asmPrint("	pushf\n"); // フラグレジスタの値を退避
+    	asmPrint("	cld\n"); // ディレクションフラグの値を0にする
+    	asmPrint("	rep\n");
+    	asmPrint("	movsb\n");
+    	asmPrint("	popf\n"); // フラグレジスタの値を退避
+			asmPrint("  mov rsi, 0\n");
 		}
 
-    pushPrint("rdi");
+    pushPrint("rsi");  // ## マスト
     return;
   }
   case ND_ASSIGN_MUL:

@@ -22,6 +22,12 @@ int main(){
 	struct type_tag type_next;
 	type_next.name = "char";
 	type.inner = &type_next;
-	printf("%s\n", type.inner->name);
-	return global_identifier.len;
+	global_identifier.type = type;
+	/*
+	add(global_identifier.len, global_identifier.len);
+	*/
+	// printf("%s\n", type.inner->name);
+	printf("%s\n", "Hello");
+	//printf("%s\n", global_identifier.type.inner->name);
+	return 5;
 }

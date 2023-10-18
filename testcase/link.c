@@ -35,7 +35,9 @@ void getAlloc(int **p, int w, int x, int y, int z){
 
 void intPrint(int x){
   printf("%d", x);
+/*
   fflush(stdout);
+*/
 }
 
 void sortPrint(int *x){
