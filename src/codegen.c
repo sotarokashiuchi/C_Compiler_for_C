@@ -499,17 +499,9 @@ void gen(Node_t *node) {
     gen_address(node);
     popPrint("rax");
 		size = getRegNameFromType(node->type);
-		/*
-		if(size == 1){
-    	asmPrint("  movzx rax, BYTE PTR [rax]\n");
-		} else if (size == 4 || size == 8){
-    	asmPrint("  mov %s, [rax]\n", getRegNameFromSize(size, "rax")); // 32bitレジスタでも自動的に拡張が行われる
-		}
 
-    pushPrint("rax");  // ## マスト */
-
-		char *src = "rax";
 		int offset=0;
+		printf("# size = %d\n", size);
 		if(size == 1){
     	asmPrint("  movzx rax, BYTE PTR [rax]\n");
 			pushPrint("rax");
@@ -517,16 +509,16 @@ void gen(Node_t *node) {
     	asmPrint("  mov %s, [rax]\n", getRegNameFromSize(size, "rax")); // 32bitレジスタでも自動的に拡張
 			pushPrint("rax");
 		} else {
-			assert(0 && "Error");
 			// 8byte以上の場合は8の倍数であるという仮定
-			asmPrint("  sub rsp, %d\n", size);
+			alignmentCount -= size;
+			asmPrint("  sub rsp, %d  # %d\n", size, alignmentCount-local_variable_stack);
 			for(int i=0; i<size/8; i++){
 				asmPrint("  mov rdi, [rax+%d]\n", offset); //  copy元
 				asmPrint("  mov [rsp+%d], rdi\n", offset);
 				offset += 8;
 			}
 		}
-
+		return;
   }
   case ND_ADDR:{
     asmPrint("  #ND_ADDR\n");
@@ -547,22 +539,33 @@ void gen(Node_t *node) {
     return;
   }
   case ND_ASSIGN_EQ:{
-    // 左辺の評価
-    gen_address(node->expr1);
     // 右辺の評価
     gen(node->expr2);
+    // 左辺の評価
+    gen_address(node->expr1);
 
-    popPrint("rdi");
-    popPrint("rax");
+    popPrint("rax"); // copy先 dest
     // 変数への代入
 		size = getRegNameFromType(node->type);
+		int offset=0;
+		printf("# size = %d\n", size);
 		if(size == 1){
+			popPrint("rdi");
     	asmPrint("  mov [rax], %s\n", getRegNameFromSize(size, "rdi"));
-		} else if (size == 4 || size == 8){
+			pushPrint("rdi");
+		} else if(size == 4 || size == 8){
+			popPrint("rdi");
     	asmPrint("  mov [rax], %s\n", getRegNameFromSize(size, "rdi"));
+			pushPrint("rdi");
+		} else {
+			// 8byte以上の場合は8の倍数であるという仮定
+			for(int i=0; i<size/8; i++){
+				asmPrint("  mov rdi, [rsp+%d]\n", offset); //  copy元
+				asmPrint("  mov [rax+%d], rdi\n", offset);
+				offset += 8;
+			}
+			// 値をpushせずにそのままスタックに放置することが、式の値を残すことに相当する
 		}
-
-    pushPrint("rdi");
     return;
   }
   case ND_ASSIGN_MUL:
