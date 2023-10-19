@@ -115,58 +115,56 @@ void stack_pop(int size){
 	}
 }
 
-void pushMultPrint(const char *src, Types_t *type){
-	int size = getRegNameFromType(type);
-  alignmentCount -= size;
-	asmTab();
-	if(size > 8){
-		asmPrint("  sub rsp, %d\n", size);
-		for(int i=0; i<size; i++){
-			asmPrint("  mov [rsp]\n", size);
-		}
+// srcはメモリアドレス
+// 一時レジスタにrdiを使用
+/// @brief 任意のメモリのデータをスタックに複製する
+/// @param size 複製するサイズ
+/// @param *dest 複製元のメモリアドレスが格納されたレジスタ名
+void pushVarToStack(int size, char *src){
+	int offset=0;
+	printf("# size = %d\n", size);
+
+	if(size == 1){
+		asmPrint("  movzx rdi, BYTE PTR [%s]\n", src);
+		pushPrint("rdi");
+	} else if(size == 4 || size == 8){
+		asmPrint("  mov %s, [%s]\n", getRegNameFromSize(size, "rdi"), src); // 32bitレジスタでも自動的に拡張
+		pushPrint("rdi");
 	} else {
-		printf("  push %s	# %d\n", src, alignmentCount-local_variable_stack);
+		// 8byte以上の場合は8の倍数であるという仮定
+		alignmentCount -= size;
+		asmPrint("  sub rsp, %d  # %d\n", size, alignmentCount-local_variable_stack);
+		for(int i=0; i<size/8; i++){
+			asmPrint("  mov rdi, [%s+%d]\n", src, offset);
+			asmPrint("  mov [rsp+%d], rdi\n", offset);
+			offset += 8;
+		}
 	}
 }
 
-/// @brief メモリにあるデータをメモリにあるデータに複製すると同時に、コピーしたデータをスタックに積む
-/// @param size コピーするサイズ
-/// @param *src コピー元
-/// @param *dest コピー先
-void stack_copy(int size, char *src, char *dest){
-	asmPrint("  ## stack_copy size = %d\n", size);
-	/* copyの様子
-	 * struct A { int x; int y; int z;};
-	 * +--------+ src            +--------+
-	 * + int x  | ------------+    int z
-	 * +--------+             |  +--------+
-	 * + int y  | ------------+->  int y
-	 * +--------+             |  +--------+
-	 * + int z  |             +->  int x
-	 * +--------+           dest +--------+
-	 */
-	// coyp
-	while(size!=0){
-		if(size%8 == 0){
-			asmPrint("  mov [%s], %s\n", src, getRegNameFromSize(8, dest));
-			pushPrint(dest);
-			asmPrint("  add %s, 0x8\n", dest);
-			popPrint(src);
-			//asmPrint("  add %s, 0x8\n",src);
-			size -= 8;
-		} else if (size == 4){
-			asmPrint("  mov [%s], %s\n", src, getRegNameFromSize(4, dest));
-			pushPrint(dest);
-			size -= 4;
-		}  else if(size == 1){
-			asmPrint("  mov [%s], %s\n", src, getRegNameFromSize(1, dest));
-			pushPrint(dest);
-			size -= 1;
-		} else {
-			codegenError("stackに正しくデータを格納できませんでした\n");
+/// @brief 任意のメモリへスタックのデータを複製する
+/// @param size 複製するサイズ
+/// @param *dest 複製先のメモリアドレスが格納されたレジスタ名
+void popVarFromStack(int size, char *dest){
+	int offset=0;
+	printf("# size = %d\n", size);
+	if(size == 1){
+		popPrint("rdi");
+		asmPrint("  mov [%s], %s\n", dest, getRegNameFromSize(size, "rdi"));
+		pushPrint("rdi");
+	} else if(size == 4 || size == 8){
+		popPrint("rdi");
+		asmPrint("  mov [%s], %s\n", dest, getRegNameFromSize(size, "rdi"));
+		pushPrint("rdi");
+	} else {
+		// 8byte以上の場合は8の倍数であるという仮定
+		for(int i=0; i<size/8; i++){
+			asmPrint("  mov rdi, [rsp+%d]\n", offset);
+			asmPrint("  mov [%s+%d], rdi\n", dest, offset);
+			offset += 8;
 		}
+		// 値をpushせずにそのままスタックに放置することが、式の値を残すことに相当する
 	}
-	// stackに値を積む
 }
 
 /// @brief lvalの名前の文字列を取得
@@ -530,13 +528,8 @@ void gen(Node_t *node) {
     gen(node->expr1);
     popPrint("rax");
 		size = getRegNameFromType(node->type);
-		if(size == 1){
-    	asmPrint("  movzx rax, BYTE PTR [rax]\n");
-		} else if (size == 4 || size == 8){
-    	asmPrint("  mov %s, [rax]\n", getRegNameFromSize(size, "rax"));
-		}
-    pushPrint("rax"); // ## マスト
-    return;
+		pushVarToStack(size, "rax");
+		return;
   }
   case ND_ASSIGN_EQ:{
     // 右辺の評価
@@ -547,25 +540,7 @@ void gen(Node_t *node) {
     popPrint("rax"); // copy先 dest
     // 変数への代入
 		size = getRegNameFromType(node->type);
-		int offset=0;
-		printf("# size = %d\n", size);
-		if(size == 1){
-			popPrint("rdi");
-    	asmPrint("  mov [rax], %s\n", getRegNameFromSize(size, "rdi"));
-			pushPrint("rdi");
-		} else if(size == 4 || size == 8){
-			popPrint("rdi");
-    	asmPrint("  mov [rax], %s\n", getRegNameFromSize(size, "rdi"));
-			pushPrint("rdi");
-		} else {
-			// 8byte以上の場合は8の倍数であるという仮定
-			for(int i=0; i<size/8; i++){
-				asmPrint("  mov rdi, [rsp+%d]\n", offset); //  copy元
-				asmPrint("  mov [rax+%d], rdi\n", offset);
-				offset += 8;
-			}
-			// 値をpushせずにそのままスタックに放置することが、式の値を残すことに相当する
-		}
+		popVarFromStack(size, "rax");
     return;
   }
   case ND_ASSIGN_MUL:
