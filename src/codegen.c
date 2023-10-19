@@ -23,11 +23,18 @@ void codegenError(char *fmt, ...){
 	exit(1);
 }
 
+void asmTab(){
+	for(int i=0; i<abs((alignmentCount-local_variable_stack)/8); i++){
+		//printf("\t");
+	}
+}
+
 void popPrint(const char *p){
   // va_list ap;
   // va_start(ap, fmt);
   alignmentCount += 8;
   // vprintf(fmt, ap);
+	asmTab();
   printf("  pop %s	# %d\n", p, alignmentCount-local_variable_stack);
 }
 
@@ -36,10 +43,12 @@ void pushPrint(const char *p){
   // va_start(ap, fmt);
   alignmentCount -= 8;
   // vprintf(fmt, ap);
+	asmTab();
   printf("  push %s	# %d\n", p, alignmentCount-local_variable_stack);
 }
 
 void asmPrint(char *fmt, ...){
+	asmTab();
   va_list ap;
   va_start(ap, fmt);
   vprintf(fmt, ap);
@@ -106,11 +115,26 @@ void stack_pop(int size){
 	}
 }
 
+void pushMultPrint(const char *src, Types_t *type){
+	int size = getRegNameFromType(type);
+  alignmentCount -= size;
+	asmTab();
+	if(size > 8){
+		asmPrint("  sub rsp, %d\n", size);
+		for(int i=0; i<size; i++){
+			asmPrint("  mov [rsp]\n", size);
+		}
+	} else {
+		printf("  push %s	# %d\n", src, alignmentCount-local_variable_stack);
+	}
+}
+
 /// @brief メモリにあるデータをメモリにあるデータに複製すると同時に、コピーしたデータをスタックに積む
 /// @param size コピーするサイズ
 /// @param *src コピー元
 /// @param *dest コピー先
 void stack_copy(int size, char *src, char *dest){
+	asmPrint("  ## stack_copy size = %d\n", size);
 	/* copyの様子
 	 * struct A { int x; int y; int z;};
 	 * +--------+ src            +--------+
@@ -121,12 +145,14 @@ void stack_copy(int size, char *src, char *dest){
 	 * + int z  |             +->  int x
 	 * +--------+           dest +--------+
 	 */
+	// coyp
 	while(size!=0){
 		if(size%8 == 0){
 			asmPrint("  mov [%s], %s\n", src, getRegNameFromSize(8, dest));
 			pushPrint(dest);
 			asmPrint("  add %s, 0x8\n", dest);
-			asmPrint("  add %s, 0x8\n",src);
+			popPrint(src);
+			//asmPrint("  add %s, 0x8\n",src);
 			size -= 8;
 		} else if (size == 4){
 			asmPrint("  mov [%s], %s\n", src, getRegNameFromSize(4, dest));
@@ -140,6 +166,7 @@ void stack_copy(int size, char *src, char *dest){
 			codegenError("stackに正しくデータを格納できませんでした\n");
 		}
 	}
+	// stackに値を積む
 }
 
 /// @brief lvalの名前の文字列を取得
@@ -464,7 +491,7 @@ void gen(Node_t *node) {
 			asmPrint("	mov %s, %s[rip]\n", getRegNameFromSize(size, "rax"), gen_identifier_name(node));
 		}
 
-    pushPrint("rax");
+    pushPrint("rax");  // ## マスト
     return;
 	}
 	case ND_STRUCT:
@@ -472,14 +499,34 @@ void gen(Node_t *node) {
     gen_address(node);
     popPrint("rax");
 		size = getRegNameFromType(node->type);
+		/*
 		if(size == 1){
     	asmPrint("  movzx rax, BYTE PTR [rax]\n");
 		} else if (size == 4 || size == 8){
     	asmPrint("  mov %s, [rax]\n", getRegNameFromSize(size, "rax")); // 32bitレジスタでも自動的に拡張が行われる
 		}
 
-    pushPrint("rax");
-    return;
+    pushPrint("rax");  // ## マスト */
+
+		char *src = "rax";
+		int offset=0;
+		if(size == 1){
+    	asmPrint("  movzx rax, BYTE PTR [rax]\n");
+			pushPrint("rax");
+		} else if(size == 4 || size == 8){
+    	asmPrint("  mov %s, [rax]\n", getRegNameFromSize(size, "rax")); // 32bitレジスタでも自動的に拡張
+			pushPrint("rax");
+		} else {
+			assert(0 && "Error");
+			// 8byte以上の場合は8の倍数であるという仮定
+			asmPrint("  sub rsp, %d\n", size);
+			for(int i=0; i<size/8; i++){
+				asmPrint("  mov rdi, [rax+%d]\n", offset); //  copy元
+				asmPrint("  mov [rsp+%d], rdi\n", offset);
+				offset += 8;
+			}
+		}
+
   }
   case ND_ADDR:{
     asmPrint("  #ND_ADDR\n");
@@ -496,7 +543,7 @@ void gen(Node_t *node) {
 		} else if (size == 4 || size == 8){
     	asmPrint("  mov %s, [rax]\n", getRegNameFromSize(size, "rax"));
 		}
-    pushPrint("rax");
+    pushPrint("rax"); // ## マスト
     return;
   }
   case ND_ASSIGN_EQ:{
@@ -509,7 +556,13 @@ void gen(Node_t *node) {
     popPrint("rax");
     // 変数への代入
 		size = getRegNameFromType(node->type);
-		stack_copy(size, "rax", "rdi");
+		if(size == 1){
+    	asmPrint("  mov [rax], %s\n", getRegNameFromSize(size, "rdi"));
+		} else if (size == 4 || size == 8){
+    	asmPrint("  mov [rax], %s\n", getRegNameFromSize(size, "rdi"));
+		}
+
+    pushPrint("rdi");
     return;
   }
   case ND_ASSIGN_MUL:
@@ -528,7 +581,7 @@ void gen(Node_t *node) {
 		} else if (size == 4 || size == 8){
     	asmPrint("  mov %s, [rax]\n", getRegNameFromSize(size, "rax")); // 32bitレジスタでも自動的に拡張が行われる
 		}
-		pushPrint("rax");
+		pushPrint("rax");  // ## マスト
 
     // bの値を評価
     gen(node->expr2);
