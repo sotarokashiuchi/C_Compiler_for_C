@@ -115,8 +115,6 @@ void stack_pop(int size){
 	}
 }
 
-// srcはメモリアドレス
-// 一時レジスタにrdiを使用
 /// @brief 任意のメモリのデータをスタックに複製する
 /// @param size 複製するサイズ
 /// @param *dest 複製元のメモリアドレスが格納されたレジスタ名
@@ -479,43 +477,13 @@ void gen(Node_t *node) {
     pushPrint("rax");
     return;
   }
-  case ND_GVAR:{
-    gen_address(node);
-    popPrint("rax");
-		size = getRegNameFromType(node->type);
-		if(size == 1){
-    	asmPrint("  movzx rax, BYTE PTR [rax]\n");
-		} else if (size == 4 || size == 8){
-			asmPrint("	mov %s, %s[rip]\n", getRegNameFromSize(size, "rax"), gen_identifier_name(node));
-		}
-
-    pushPrint("rax");  // ## マスト
-    return;
-	}
 	case ND_STRUCT:
+  case ND_GVAR:
   case ND_LVAR:{
     gen_address(node);
     popPrint("rax");
 		size = getRegNameFromType(node->type);
-
-		int offset=0;
-		printf("# size = %d\n", size);
-		if(size == 1){
-    	asmPrint("  movzx rax, BYTE PTR [rax]\n");
-			pushPrint("rax");
-		} else if(size == 4 || size == 8){
-    	asmPrint("  mov %s, [rax]\n", getRegNameFromSize(size, "rax")); // 32bitレジスタでも自動的に拡張
-			pushPrint("rax");
-		} else {
-			// 8byte以上の場合は8の倍数であるという仮定
-			alignmentCount -= size;
-			asmPrint("  sub rsp, %d  # %d\n", size, alignmentCount-local_variable_stack);
-			for(int i=0; i<size/8; i++){
-				asmPrint("  mov rdi, [rax+%d]\n", offset); //  copy元
-				asmPrint("  mov [rsp+%d], rdi\n", offset);
-				offset += 8;
-			}
-		}
+		pushVarToStack(size, "rax");
 		return;
   }
   case ND_ADDR:{
@@ -559,7 +527,7 @@ void gen(Node_t *node) {
 		} else if (size == 4 || size == 8){
     	asmPrint("  mov %s, [rax]\n", getRegNameFromSize(size, "rax")); // 32bitレジスタでも自動的に拡張が行われる
 		}
-		pushPrint("rax");  // ## マスト
+		pushPrint("rax");
 
     // bの値を評価
     gen(node->expr2);
