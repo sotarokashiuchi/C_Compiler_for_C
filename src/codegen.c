@@ -23,11 +23,18 @@ void codegenError(char *fmt, ...){
 	exit(1);
 }
 
+void asmTab(){
+	for(int i=0; i<abs((alignmentCount-local_variable_stack)/8); i++){
+		//printf("\t");
+	}
+}
+
 void popPrint(const char *p){
   // va_list ap;
   // va_start(ap, fmt);
   alignmentCount += 8;
   // vprintf(fmt, ap);
+	asmTab();
   printf("  pop %s	# %d\n", p, alignmentCount-local_variable_stack);
 }
 
@@ -36,10 +43,12 @@ void pushPrint(const char *p){
   // va_start(ap, fmt);
   alignmentCount -= 8;
   // vprintf(fmt, ap);
+	asmTab();
   printf("  push %s	# %d\n", p, alignmentCount-local_variable_stack);
 }
 
 void asmPrint(char *fmt, ...){
+	asmTab();
   va_list ap;
   va_start(ap, fmt);
   vprintf(fmt, ap);
@@ -49,6 +58,8 @@ int getRegNameFromType(Types_t *type){
   switch (type->dataType){
     case DT_INT:
     case DT_CHAR:
+		case DT_VOID:
+		case DT_STRUCT:
     case DT_PTR:
     	return sizeofType(type);
     case DT_ARRAY:
@@ -79,7 +90,19 @@ char* getRegNameFromSize(int size, char const *register_name){
 		if(size==8){
 			return "rdi";
 		}
+	} else if(!strncmp(register_name, "rsi", 3)){
+		// rsi
+		if(size==1){
+			return "sil";
+		}
+		if(size==4){
+			return "esi";
+		}
+		if(size==8){
+			return "rsi";
+		}
 	}
+
 	assert((size==4 || size==8) && "failed serch data size");
 }
 
@@ -92,39 +115,53 @@ void stack_pop(int size){
 	}
 }
 
-/// @brief メモリにあるデータをメモリにあるデータに複製すると同時に、コピーしたデータをスタックに積む
-/// @param size コピーするサイズ
-/// @param *src コピー元
-/// @param *dest コピー先
-void stack_copy(int size, char *src, char *dest){
-	/* copyの様子
-	 * struct A { int x; int y; int z;};
-	 * +--------+ src            +--------+
-	 * + int x  | ------------+    int z
-	 * +--------+             |  +--------+
-	 * + int y  | ------------+->  int y
-	 * +--------+             |  +--------+
-	 * + int z  |             +->  int x
-	 * +--------+           dest +--------+
-	 */
-	while(size!=0){
-		if(size%8 == 0){
-			asmPrint("  mov [%s], %s\n", src, getRegNameFromSize(8, dest));
-			pushPrint(dest);
-			asmPrint("  add %s, 0x8\n", dest);
-			asmPrint("  add %s, 0x8\n",src);
-			size -= 8;
-		} else if (size == 4){
-			asmPrint("  mov [%s], %s\n", src, getRegNameFromSize(4, dest));
-			pushPrint(dest);
-			size -= 4;
-		}  else if(size == 1){
-			asmPrint("  mov [%s], %s\n", src, getRegNameFromSize(1, dest));
-			pushPrint(dest);
-			size -= 1;
-		} else {
-			codegenError("stackに正しくデータを格納できませんでした\n");
+/// @brief 任意のメモリのデータをスタックに複製する
+/// @param size 複製するサイズ
+/// @param *dest 複製元のメモリアドレスが格納されたレジスタ名
+void pushVarToStack(int size, char *src){
+	int offset=0;
+	printf("# size = %d\n", size);
+
+	if(size == 1){
+		asmPrint("  movzx rdi, BYTE PTR [%s]\n", src);
+		pushPrint("rdi");
+	} else if(size == 4 || size == 8){
+		asmPrint("  mov %s, [%s]\n", getRegNameFromSize(size, "rdi"), src); // 32bitレジスタでも自動的に拡張
+		pushPrint("rdi");
+	} else {
+		// 8byte以上の場合は8の倍数であるという仮定
+		alignmentCount -= size;
+		asmPrint("  sub rsp, %d  # %d\n", size, alignmentCount-local_variable_stack);
+		for(int i=0; i<size/8; i++){
+			asmPrint("  mov rdi, [%s+%d]\n", src, offset);
+			asmPrint("  mov [rsp+%d], rdi\n", offset);
+			offset += 8;
 		}
+	}
+}
+
+/// @brief 任意のメモリへスタックのデータを複製する
+/// @param size 複製するサイズ
+/// @param *dest 複製先のメモリアドレスが格納されたレジスタ名
+void popVarFromStack(int size, char *dest){
+	int offset=0;
+	printf("# size = %d\n", size);
+	if(size == 1){
+		popPrint("rdi");
+		asmPrint("  mov [%s], %s\n", dest, getRegNameFromSize(size, "rdi"));
+		pushPrint("rdi");
+	} else if(size == 4 || size == 8){
+		popPrint("rdi");
+		asmPrint("  mov [%s], %s\n", dest, getRegNameFromSize(size, "rdi"));
+		pushPrint("rdi");
+	} else {
+		// 8byte以上の場合は8の倍数であるという仮定
+		for(int i=0; i<size/8; i++){
+			asmPrint("  mov rdi, [rsp+%d]\n", offset);
+			asmPrint("  mov [%s+%d], rdi\n", dest, offset);
+			offset += 8;
+		}
+		// 値をpushせずにそのままスタックに放置することが、式の値を残すことに相当する
 	}
 }
 
@@ -439,32 +476,14 @@ void gen(Node_t *node) {
     pushPrint("rax");
     return;
   }
-  case ND_GVAR:{
-    gen_address(node);
-    popPrint("rax");
-		size = getRegNameFromType(node->type);
-		if(size == 1){
-    	asmPrint("  movzx rax, BYTE PTR [rax]\n");
-		} else if (size == 4 || size == 8){
-			asmPrint("	mov %s, %s[rip]\n", getRegNameFromSize(size, "rax"), gen_identifier_name(node));
-		}
-
-    pushPrint("rax");
-    return;
-	}
 	case ND_STRUCT:
+  case ND_GVAR:
   case ND_LVAR:{
     gen_address(node);
     popPrint("rax");
 		size = getRegNameFromType(node->type);
-		if(size == 1){
-    	asmPrint("  movzx rax, BYTE PTR [rax]\n");
-		} else if (size == 4 || size == 8){
-    	asmPrint("  mov %s, [rax]\n", getRegNameFromSize(size, "rax")); // 32bitレジスタでも自動的に拡張が行われる
-		}
-
-    pushPrint("rax");
-    return;
+		pushVarToStack(size, "rax");
+		return;
   }
   case ND_ADDR:{
     asmPrint("  #ND_ADDR\n");
@@ -476,33 +495,19 @@ void gen(Node_t *node) {
     gen(node->expr1);
     popPrint("rax");
 		size = getRegNameFromType(node->type);
-		if(size == 1){
-    	asmPrint("  movzx rax, BYTE PTR [rax]\n");
-		} else if (size == 4 || size == 8){
-    	asmPrint("  mov %s, [rax]\n", getRegNameFromSize(size, "rax"));
-		}
-    pushPrint("rax");
-    return;
+		pushVarToStack(size, "rax");
+		return;
   }
   case ND_ASSIGN_EQ:{
-    // 左辺の評価
-    gen_address(node->expr1);
     // 右辺の評価
     gen(node->expr2);
+    // 左辺の評価
+    gen_address(node->expr1);
 
-    popPrint("rdi");
-    popPrint("rax");
+    popPrint("rax"); // copy先 dest
     // 変数への代入
 		size = getRegNameFromType(node->type);
-		if(size == 1){
-    	asmPrint("  mov [rax], %s\n", getRegNameFromSize(size, "rdi"));
-		} else if (size == 4 || size == 8){
-    	asmPrint("  mov [rax], %s\n", getRegNameFromSize(size, "rdi"));
-		} else {
-			codegenError("sizeが大きなメモリのコピーはできません\n");
-		}
-
-    pushPrint("rdi");
+		popVarFromStack(size, "rax");
     return;
   }
   case ND_ASSIGN_MUL:

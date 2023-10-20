@@ -20,8 +20,10 @@ int main(){
 
 	struct type_tag type;
 	struct type_tag type_next;
-	type_next.name = "char";
+	type_next.name = "Type Nmae";
 	type.inner = &type_next;
-	printf("%s\n", type.inner->name);
+	global_identifier.type = type;
+	printf("type.inner->name = %s\n", type.inner->name);
+	printf("global_identifier.type.inner->name = %s\n", global_identifier.type.inner->name);
 	return global_identifier.len;
 }
