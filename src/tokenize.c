@@ -181,12 +181,13 @@ Token_t* tokenize(void){
 			p++;
 			int i;
 			char *tmpp = p;
-			tmpp++;;
-			for(i=1; *tmpp != '"'; i++){
+			for(i=0; *tmpp != '"'; i++){
 				tmpp++;
 			}
 			cur = new_token(TK_STRING, cur, &p, i);
 			p++;
+			//cur = new_token(TK_STRING, cur, &p, i+1);
+			//*(p-1) = '\0';
 			continue;
 		}
 
