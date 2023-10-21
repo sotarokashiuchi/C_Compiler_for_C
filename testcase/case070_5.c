@@ -22,12 +22,12 @@ int main(){
 	for(int i=0; i<5; i++){
 		type[i].len=i;
 		type[i].name="name";
-		//printf(".l=%d", type[0].len);
-		//printf(".l=%d", type[1].len);
-		//printf(".l=%d", type[2].len);
-		//printf(".l=%d", type[3].len);
-		//printf(".l=%d", type[4].len);
-		//printf("type[%d].name = %s .len = %d\n", i, type[i].name, type[i].len);
+		printf(".l=%d", type[0].len);
+		printf(".l=%d", type[1].len);
+		printf(".l=%d", type[2].len);
+		printf(".l=%d", type[3].len);
+		printf(".l=%d", type[4].len);
+		printf("type[%d].name = %s .len = %d\n", i, type[i].name, type[i].len);
 	}
 	for(int i=0; i<5; i++){
 		identifier[i].type=type[i];
@@ -48,6 +48,6 @@ int main(){
 	}
 	*/
 	global_identifier.type = type[2];
-	printf("%s\n", global_identifier.type.inner->name);
+	printf("%s\n", global_identifier.type.name);
 	return 5;
 }
