@@ -6,8 +6,10 @@
 /* グローバル変数 */
 // 文ごとの先頭ノードを格納
 Node_t *code[100];
-// lvarのリストの先頭ポインタ
+// identifierのリストの先頭ポインタ
 Identifier_t *identHead = NULL;
+// identifierのoffset
+int identHeadOffset = 0;
 // stringのリストの先頭ポインタ
 StringVector_t *stringHead = NULL;
 
@@ -302,7 +304,8 @@ Identifier_t* new_identifier(NodeKind kind, Token_t *tok, Types_t *type){
 			DEBUG_WRITE("sizeofType = %d\n", sizeofType(type));
 			int size = sizeofType(type);
 			// char型に対応できていない？
-			identifier->offset = identHead->offset + (size>=8 ? size : 8);
+			identHeadOffset += (size>=8 ? size : 8);
+			identifier->offset = identHeadOffset;
 			identifier->kind = IK_LVAR;
 			break;
 		case ND_STRUCT_MEMBER:
