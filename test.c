@@ -4,7 +4,7 @@
 #include <dirent.h>
 #include <string.h>
 
-#define TESTCODE_BUF 10000
+#define TESTCODE_BUF 100000
 #define TESTLINE_BUF 1000
 
 int read_file(char* buf, FILE *fp){
@@ -129,7 +129,7 @@ int main(int argc, char **argv){
 		printf("\e[36m********************************* [execution] *********************************\e[39m\n");
 		system("./tmp ; echo $? > tmp_status");
 
-		printf("Input:\n%s\n", test_code);
+		//printf("Input:\n%s\n", test_code);
 		printf("expect status:%d\n", expect_status);
 
 		if(is_successful(expect_status, &status) == 0){

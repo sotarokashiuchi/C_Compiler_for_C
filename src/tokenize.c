@@ -182,6 +182,10 @@ Token_t* tokenize(void){
 			int i;
 			char *tmpp = p;
 			for(i=0; *tmpp != '"'; i++){
+				if(*tmpp == '\\'){
+					tmpp++;
+					i++;
+				}
 				tmpp++;
 			}
 			cur = new_token(TK_STRING, cur, &p, i);
