@@ -49,17 +49,17 @@ StringVector_t *stringHead = NULL;
  * multiplicative_expr= cast_expr (( "*" | "/" | "%" ) cast_expr)*
  * cast_expr 				= unary_expr '| (typeName) cast_expr'
  * unary_expr 			= postfix_expr
-										| ++ unary_expr
-										| -- unary_expr
-										| ( & | * | + | - | ! ) cast_expr
-										| sizeof unary_expr
-										| sizeof "(" typeName ")"
+ | ++ unary_expr
+ | -- unary_expr
+ | ( & | * | + | - | ! ) cast_expr
+ | sizeof unary_expr
+ | sizeof "(" typeName ")"
  * postfix_expr 		= primary_expr ("[" expr "]"
-																		| "(" ParamList ")"
-																		| "." identifier
-																		| "->" identifier
-																		| "++"
-																		| "--" )*
+ | "(" ParamList ")"
+ | "." identifier
+ | "->" identifier
+ | "++"
+ | "--" )*
  * primary_expr 		= identifier | num | string | "(" expr ")"
  * ParamList 	= expr? | expr ("," expr)*
  */
@@ -199,7 +199,7 @@ Node_t *new_node(NodeKind kind, Node_t *expr1, Node_t *expr2, Node_t *expr3, Nod
 			node->type =  expr1->type;
 		}
 	}
-	
+
 	if(kind == ND_DEREF){
 		node->type = expr1->type->inner;
 		node->identifier = expr1->identifier;
@@ -216,22 +216,22 @@ Node_t *new_node(NodeKind kind, Node_t *expr1, Node_t *expr2, Node_t *expr3, Nod
 
 
 
-  // ND_LVAR,        // ローカル変数
-  // ND_EQUALTO,     // ==
-  // ND_NOT_EQUAL_TO,// !=
-  // ND_GREATER_THAN,// >
-  // ND_LESS_THAN,   // <
-  // ND_GREATER_THAN_OR_EQUAL_TO,  // >=
-  // ND_LESS_THAN_OR_EQUALT_TO,    // <=
-  // ND_RETURN,      // return
-  // ND_IF,          // if
-  // ND_ELSE,        // else
-  // ND_WHILE,       // while
-  // ND_FOR,         // for
-  // ND_BLOCK,       // block
-  // ND_FUNCCALL,    // funcCall
-  // ND_FUNCDEFINE,  // funcDefine
-  // ND_NUM, 				// 整数
+	// ND_LVAR,        // ローカル変数
+	// ND_EQUALTO,     // ==
+	// ND_NOT_EQUAL_TO,// !=
+	// ND_GREATER_THAN,// >
+	// ND_LESS_THAN,   // <
+	// ND_GREATER_THAN_OR_EQUAL_TO,  // >=
+	// ND_LESS_THAN_OR_EQUALT_TO,    // <=
+	// ND_RETURN,      // return
+	// ND_IF,          // if
+	// ND_ELSE,        // else
+	// ND_WHILE,       // while
+	// ND_FOR,         // for
+	// ND_BLOCK,       // block
+	// ND_FUNCCALL,    // funcCall
+	// ND_FUNCDEFINE,  // funcDefine
+	// ND_NUM, 				// 整数
 	return node;
 }
 
@@ -267,7 +267,7 @@ Vector_t* new_vector(Node_t *node, Vector_t *current){
 /// @param node ベクタに登録するノード
 Node_t* new_string_vector(Token_t *tok){
 	static int labelID;
-  DEBUG_WRITE("this is string, labelID %d\n", labelID);
+	DEBUG_WRITE("this is string, labelID %d\n", labelID);
 	Node_t *node = new_node(ND_STRING, NULL, NULL, NULL, NULL, NULL, NULL);
 	StringVector_t *stringVector = calloc(1, sizeof(StringVector_t));
 	stringVector->string = tok->str;
@@ -330,13 +330,13 @@ Identifier_t* new_identifier(NodeKind kind, Token_t *tok, Types_t *type){
 }
 
 void program(void){
-  DEBUG_WRITE("header node\n");
+	DEBUG_WRITE("header node\n");
 	int i = 0;
 	Token_t *tok;
 	void* status;
 	while(!at_eof()){
 		tok = token;
-		
+
 		if(consume(TK_KEYWORD, "struct")){
 			status = false;
 		} else {
@@ -363,7 +363,7 @@ Node_t* funcDefine(){
 	Vector_t *vector;
 	Types_t *type;
 	int i = 0;
-	
+
 	// 戻り値の型
 	type = typeSpec(-1);
 	Identifier_t *identifier = declarator(ND_FUNCDEFINE, type);
@@ -402,7 +402,7 @@ Node_t* funcDefine(){
 }
 
 Node_t* stmt(void){
-  DEBUG_WRITE("\n");
+	DEBUG_WRITE("\n");
 	Node_t *node;
 	Node_t *expr1, *expr2, *expr3, *expr4;
 	Token_t *tok;
@@ -412,8 +412,8 @@ Node_t* stmt(void){
 		node = declaration(ND_LVAR);
 		return node;
 	}
-		
-	
+
+
 	if (consume(TK_KEYWORD, "return")) {
 		// "return" expr? ";"
 		if(consume(TK_RESERVED, ";")){
@@ -423,8 +423,8 @@ Node_t* stmt(void){
 			expect(TK_RESERVED, ";");
 		}
 		return node;
-  }
-	
+	}
+
 	if(consume(TK_KEYWORD, "if")) {
 		// "if" "(" expr ")" stmt
 		// 左ノードに条件式を 右ノードに処理を
@@ -441,7 +441,7 @@ Node_t* stmt(void){
 		}
 		return node;
 	}
-	
+
 	if(consume(TK_KEYWORD, "while")){
 		// "while" "(" expr ")" stmt
 		expect(TK_RESERVED, "(");
@@ -451,7 +451,7 @@ Node_t* stmt(void){
 		node = new_node(ND_WHILE, expr1, expr2, NULL, NULL, NULL, NULL);
 		return node;
 	}
-	
+
 	if(consume(TK_KEYWORD, "for")){
 		// "for" "(" (expr? ";" | declaration) expr? ";" expr? ")" stmt
 		// for(A; B; C)D
@@ -489,7 +489,7 @@ Node_t* stmt(void){
 			expr3 = expr();
 			expect(TK_RESERVED, ")");
 		}
-		
+
 		expr4 = stmt();
 		if(node_declaration != NULL){
 			Vector_t *vector;
@@ -501,7 +501,7 @@ Node_t* stmt(void){
 		}
 		return node;
 	}
-	
+
 	if(consume(TK_RESERVED, "{")){
 		// "{" stmt* "}"
 		Vector_t *vector;
@@ -547,7 +547,7 @@ Identifier_t* declarator(NodeKind kind, Types_t *type){
 	while(consume(TK_RESERVED, "*")){
 		type = new_type(DT_PTR, type);
 	}
-	
+
 	// 変数名?
 	tok = consume_ident();
 
@@ -644,12 +644,12 @@ Node_t* declaration(NodeKind kind){
 }
 
 Node_t *expr(void) {
-  DEBUG_WRITE("\n");
+	DEBUG_WRITE("\n");
 	return assign_expr();
 }
 
 Node_t* assign_expr(void){
-  DEBUG_WRITE("\n");
+	DEBUG_WRITE("\n");
 	Node_t *node = conditional_expr();
 	if(TK_RESERVED, consume(TK_RESERVED, "=")){
 		node = new_node(ND_ASSIGN_EQ, node, assign_expr(), NULL, NULL, NULL, NULL);
@@ -677,7 +677,7 @@ Node_t* conditional_expr(void){
 }
 
 Node_t* logicalOr_expr(void){
- 	// logicalOr_expr 	= logicalAnd_expr ("||" logicalAnd_expr )*
+	// logicalOr_expr 	= logicalAnd_expr ("||" logicalAnd_expr )*
 	Node_t *node = logicalAnd_expr();
 	while(consume(TK_RESERVED, "||")){
 		node = new_node(ND_LOGICAL_OR, node, logicalAnd_expr(), NULL, NULL, NULL, NULL);
@@ -686,7 +686,7 @@ Node_t* logicalOr_expr(void){
 }
 
 Node_t* logicalAnd_expr(void){
- 	// logicalAnd_expr 	= inclusiveOr_expr ("&&" inclusiveOr_expr)*
+	// logicalAnd_expr 	= inclusiveOr_expr ("&&" inclusiveOr_expr)*
 	Node_t *node = inclusiveOr_expr();
 	while(consume(TK_RESERVED, "&&")){
 		node = new_node(ND_LOGICAL_AND, node, inclusiveOr_expr(), NULL, NULL, NULL, NULL);
@@ -699,7 +699,7 @@ Node_t* inclusiveOr_expr(void){
 }
 
 Node_t* equality_expr(void){
-  DEBUG_WRITE("\n");
+	DEBUG_WRITE("\n");
 	Node_t *node = relational_expr();
 
 	for(;;){
@@ -714,9 +714,9 @@ Node_t* equality_expr(void){
 }
 
 Vector_t* paramList(void){
-  DEBUG_WRITE("\n");
+	DEBUG_WRITE("\n");
 	Vector_t *vector;
-	
+
 	if(peek(TK_RESERVED, ")")){
 		return NULL;
 	} else {
@@ -730,7 +730,7 @@ Vector_t* paramList(void){
 }
 
 Node_t* relational_expr(void){
-  DEBUG_WRITE("\n");
+	DEBUG_WRITE("\n");
 	Node_t *node = shift_expr();
 
 	for(;;){
@@ -754,7 +754,7 @@ Node_t* shift_expr(void){
 
 
 Node_t* additive_expr(void) {
-  DEBUG_WRITE("\n");
+	DEBUG_WRITE("\n");
 	Node_t *node = multiplicative_expr(); 
 
 	for(;;){
@@ -769,9 +769,9 @@ Node_t* additive_expr(void) {
 }
 
 Node_t *multiplicative_expr(void){
-  DEBUG_WRITE("\n");
+	DEBUG_WRITE("\n");
 	Node_t *node = cast_expr();
-	
+
 	for(;;){
 		if(consume(TK_RESERVED, "*")){
 			node = new_node(ND_MUL, node, cast_expr(), NULL, NULL, NULL, NULL);
@@ -790,7 +790,7 @@ Node_t* cast_expr(void){
 }
 
 Node_t* unary_expr(){
-  DEBUG_WRITE("\n");
+	DEBUG_WRITE("\n");
 	if(consume(TK_RESERVED, "+")){
 		return new_node(ND_ADD, new_node_num(0), cast_expr(), NULL, NULL, NULL, NULL);
 	}
@@ -848,28 +848,28 @@ Identifier_t* find_struct_tag(Types_t *type){
 	Types_t *type_end;
 	for(type_end=type; type_end->inner != NULL; type_end=type_end->inner);
 	if(type_end->dataType == DT_STRUCT){
-			DEBUG_WRITE("point\n");
-			Identifier_t *identifier_tag;
+		DEBUG_WRITE("point\n");
+		Identifier_t *identifier_tag;
 
-			// タグの検索
-			for(identifier_tag=identHead; identifier_tag; identifier_tag=identifier_tag->next){
-				if(identifier_tag->len == type_end->struct_name_len 
-						&& !memcmp(type_end->struct_name, identifier_tag->name, identifier_tag->len)) {
-					DEBUG_WRITE("this is STRUCT tag.----%.*s\n", identifier_tag->len, identifier_tag->name);
-					break;
-				}
+		// タグの検索
+		for(identifier_tag=identHead; identifier_tag; identifier_tag=identifier_tag->next){
+			if(identifier_tag->len == type_end->struct_name_len 
+					&& !memcmp(type_end->struct_name, identifier_tag->name, identifier_tag->len)) {
+				DEBUG_WRITE("this is STRUCT tag.----%.*s\n", identifier_tag->len, identifier_tag->name);
+				break;
 			}
-			return identifier_tag->member_list;
+		}
+		return identifier_tag->member_list;
 	}
 	return NULL;
 }
 
- /* postfix_expr 		= primary_expr ("[" expr "]"
-																		| "(" ParamList ")"
-																		| "." identifier
-																		| "->" identifier
-																		| "++"
-																		:*/
+/* postfix_expr 		= primary_expr ("[" expr "]"
+	 | "(" ParamList ")"
+	 | "." identifier
+	 | "->" identifier
+	 | "++"
+	 :*/
 Node_t* postfix_expr(void){
 	Node_t* node;
 	Types_t* type = NULL;
@@ -906,11 +906,11 @@ Node_t* postfix_expr(void){
 			node = new_node(ND_STRUCT, node, node_member, NULL, NULL, NULL, NULL);
 			node->type = identifier->type;
 		} else 	if(consume(TK_RESERVED, "++")){
-		// i++は((i += 1) - 1)と解釈する
+			// i++は((i += 1) - 1)と解釈する
 			node = new_node(ND_ASSIGN_ADD, node, new_node_num(1), NULL, NULL, NULL, NULL);
 			node = new_node(ND_SUB, node, new_node_num(1), NULL, NULL, NULL, NULL);
 		} else if(consume(TK_RESERVED, "--")){
-		// i--は((i -= 1) + 1)と解釈する
+			// i--は((i -= 1) + 1)と解釈する
 			node = new_node(ND_ASSIGN_SUB, node, new_node_num(1), NULL, NULL, NULL, NULL);
 			node = new_node(ND_ADD, node, new_node_num(1), NULL, NULL, NULL, NULL);
 		} else if(consume(TK_RESERVED, "[")){
@@ -933,7 +933,7 @@ Node_t* postfix_expr(void){
 }
 
 Node_t *primary_expr(void) {
-  DEBUG_WRITE("\n");
+	DEBUG_WRITE("\n");
 	Token_t *tok = consume_ident();
 	if(tok != NULL){
 		// 識別子の読み込み
@@ -964,13 +964,13 @@ Node_t *primary_expr(void) {
 			parseError("%*s 宣言されていない変数です\n", tok->len, tok->str);
 		}
 	}
-	
-  // "(" expr ")"
-  if (consume(TK_RESERVED, "(")) {
-  	Node_t *node = expr();
-    expect(TK_RESERVED, ")");
-    return node;
-  }
+
+	// "(" expr ")"
+	if (consume(TK_RESERVED, "(")) {
+		Node_t *node = expr();
+		expect(TK_RESERVED, ")");
+		return node;
+	}
 
 	if ((tok = consume_string()) != NULL) {
 		DEBUG_WRITE("consume_string\n");
@@ -982,9 +982,9 @@ Node_t *primary_expr(void) {
 		return new_node_num(tok->val);
 	}
 
-  // 数値
-  DEBUG_WRITE("this is number.\n");
-  return new_node_num(expect_number());
+	// 数値
+	DEBUG_WRITE("this is number.\n");
+	return new_node_num(expect_number());
 }
 
 /// @brief 新しいType_tを作成する
@@ -992,15 +992,15 @@ Node_t *primary_expr(void) {
 /// @param inner 
 /// @return 
 Types_t* new_type(DataType dataType, Types_t* inner){
-  DEBUG_WRITE("\n");
+	DEBUG_WRITE("\n");
 	Types_t* type = calloc(1, sizeof(Types_t));
 	type->dataType = dataType;
 	type->inner = inner;
 	return type;
 }
 
- //* typeSpec		= "int" | "char"
- //* 						| ("struct"  | "union") (ident? "{" (typeSpec* declarator+) "}" | ident)
+//* typeSpec		= "int" | "char"
+//* 						| ("struct"  | "union") (ident? "{" (typeSpec* declarator+) "}" | ident)
 Types_t* typeSpec(NodeKind kind){
 	Types_t *type;
 	// 基本型の読み込み
@@ -1071,7 +1071,7 @@ Types_t* typeName(void){
 
 	// 配列を再帰的にパース
 	type  = declaration_array(type);
-	
+
 	// int*** -> int** -> int* -> int の順に並ぶ
 	return type;
 }

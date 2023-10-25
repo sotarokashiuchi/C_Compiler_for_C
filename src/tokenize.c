@@ -33,18 +33,18 @@ int string(char* str, int len){
 		if('\\' == *buf){
 			buf++;
 			switch (*buf) {
-			case '\'': *str=0x27; break;
-			case '\"': *str=0x22; break;
-			case '\?': *str=0x3F; break;
-			case '\\': *str=0x5C; break;
-			case '\a': *str=0x07; break;
-			case '\b': *str=0x8; break;
-			case '\f': *str=0xC; break;
-			case '\n': *str=0xA; break;
-			case '\r': *str=0xD; break;
-			case '\t': *str=0xB; break;
-			case '\v': *str=0x7; break;
-			default: *str=*buf;
+				case '\'': *str=0x27; break;
+				case '\"': *str=0x22; break;
+				case '\?': *str=0x3F; break;
+				case '\\': *str=0x5C; break;
+				case '\a': *str=0x07; break;
+				case '\b': *str=0x8; break;
+				case '\f': *str=0xC; break;
+				case '\n': *str=0xA; break;
+				case '\r': *str=0xD; break;
+				case '\t': *str=0xB; break;
+				case '\v': *str=0x7; break;
+				default: *str=*buf;
 			}
 		}
 	}
@@ -175,7 +175,7 @@ Token_t* tokenize(void){
 			cur = new_token(TK_RESERVED, cur, &p, 1);
 			continue;
 		}
-		
+
 		// 文字列リテラル
 		if(*p == '"'){
 			p++;
@@ -223,7 +223,7 @@ Token_t* tokenize(void){
 			cur->val = strtol(p, &p, 10);
 			continue;
 		}
-		
+
 		cur = new_token(TK_ERROR, cur, &p, 1);
 		error_at(cur, "トークナイズできません");
 	}
@@ -241,7 +241,7 @@ static Token_t* new_token(TokenKind kind, Token_t *cur, char **str, int len){
 	new_tok->str = *str;
 	new_tok->len = len;
 	cur->next = new_tok;
-	
+
 	// token文字列を読み進める
 	while(len--){
 		(*str)++;
@@ -260,10 +260,10 @@ int expect_number() {
 }
 
 int is_alnum(char c){
-	  return 	('a' <= c && c <= 'z') ||
-						('A' <= c && c <= 'Z') ||
-						('0' <= c && c <= '9') ||
-						(c == '_');
+	return 	('a' <= c && c <= 'z') ||
+		('A' <= c && c <= 'Z') ||
+		('0' <= c && c <= '9') ||
+		(c == '_');
 }
 
 bool at_eof(){
@@ -333,7 +333,7 @@ static void error_at(Token_t *loc, char *fmt, ...){
 	char *outputLine;
 	int errorPoint = loc->str - user_input + 1;
 	int charTotal;
-	
+
 	for(line=1, charTotal=0; line<PROGRAM_LINE; line++){
 		charTotal += charPoint[line];
 		if(errorPoint<=charTotal){

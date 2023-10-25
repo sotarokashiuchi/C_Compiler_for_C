@@ -37,45 +37,45 @@ char *read_file(char *path) {
 }
 
 int main(int argc, char **argv){
-  DEBUG_WRITE("\n");
+	DEBUG_WRITE("\n");
 	// 入力データの確認
-  if(argc != 2){
-    fprintf(stderr, "エラー:引数の個数が正しくありません\n");
-    return 1;
-  }
+	if(argc != 2){
+		fprintf(stderr, "エラー:引数の個数が正しくありません\n");
+		return 1;
+	}
 
-  /* 初期化 */
-  char *debug = getenv("CC_DEBUG");
-  debugEnabled = debug && !strcmp(debug, "1");
+	/* 初期化 */
+	char *debug = getenv("CC_DEBUG");
+	debugEnabled = debug && !strcmp(debug, "1");
 	user_input = read_file(argv[1]);
 	// printf("%s", user_input);
-  Identifier_t dummyIdentifier = {0, NULL, NULL, 0, 0};
-  identHead = &dummyIdentifier;
+	Identifier_t dummyIdentifier = {0, NULL, NULL, 0, 0};
+	identHead = &dummyIdentifier;
 	StringVector_t dummyStringVecotr = {NULL, 0, 0, NULL};
-  stringHead = &dummyStringVecotr;
+	stringHead = &dummyStringVecotr;
 
-  /* トークナイズ */
-  token = tokenize();
+	/* トークナイズ */
+	token = tokenize();
 	DEBUG_WRITE("\033[35mcompleted tokenize\033[39m\n\n");
 
-  /* パーサ */
+	/* パーサ */
 	program();
 	DEBUG_WRITE("\033[35mcompleted parse\033[39m\n\n");
 
-  /* コード生成 */
+	/* コード生成 */
 	gens();
 	DEBUG_WRITE("\033[35mcompleted codegen\033[39m\n\n");
 
-  return 0;
+	return 0;
 }
 
 void debug_write(char *fmt, ...){
-  if(!debugEnabled){
-    return;
-  }
-  va_list ap;
-  va_start(ap, fmt);
-  vfprintf(stderr, fmt, ap);
-  va_end(ap);
+	if(!debugEnabled){
+		return;
+	}
+	va_list ap;
+	va_start(ap, fmt);
+	vfprintf(stderr, fmt, ap);
+	va_end(ap);
 }
 
