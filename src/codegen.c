@@ -153,19 +153,6 @@ void popVarFromStack(int size, char *dest){
 	}
 }
 
-/// @brief lvalの名前の文字列を取得
-/// @param node lvar名を求めたいノード
-/// @return 取得した文字列の先頭ポインタ(文字列の末尾には'\0'が格納されている)
-char* gen_identifier_name(Node_t *node){
-	int i;
-	char *ident_name = calloc(node->identifier->len+1, sizeof(char));
-	for(i=0; i < node->identifier->len; i++){
-		ident_name[i] = node->identifier->name[i];
-	}
-	ident_name[i] = '\0';
-	return ident_name;
-}
-
 
 /// @brief 左辺値の評価(アドレス計算)
 /// @param node 評価対象のノード
@@ -192,7 +179,7 @@ void gen_address(Node_t *node){
 		pushPrint("rax");
 	} else if(node->kind == ND_GVAR){
 		// グローバル変数
-		asmPrint("	lea rax, [rip+%s]\n", gen_identifier_name(node));
+		asmPrint("	lea rax, [rip+%.*s]\n", node->identifier->len, node->identifier->name);
 		pushPrint("rax");
 	} else if(node->kind == ND_DEREF){
 		gen(node->expr1);
@@ -294,7 +281,7 @@ void gen(Node_t *node) {
 			}
 		}
 		int displacement = setAlignment(16);
-		asmPrint("  call %s\n", gen_identifier_name(node));
+		asmPrint("  call %.*s\n", node->identifier->len, node->identifier->name);
 		asmPrint("  add rsp, %d\n", displacement);
 		alignmentCount -= displacement;
 		for(int i=7; i<=numOfArgu; i++){
@@ -305,15 +292,18 @@ void gen(Node_t *node) {
 		return;
 	}
 	case ND_GVARDEFINE:{
+    asmPrint("#Var Define\n");
+		/*
     asmPrint("\n.data\n");
 		asmPrint("%s:\n", gen_identifier_name(node));
-		asmPrint("	.zero %d\n", getRegNameFromType(node->type));
+		asmPrint("	.zero %d\n", sizeofType(node->type));
+		*/
 		return;
 	}
 	case ND_FUNCDEFINE:{
 		alignmentCount = local_variable_stack+8;
 		asmPrint("\n.text\n");
-		asmPrint("%s:\n", gen_identifier_name(node));
+		asmPrint("%.*s:\n", node->identifier->len, node->identifier->name);
 		asmPrint("  #プロローグ\n");
 		pushPrint("rbp");
 		asmPrint("  mov rbp, rsp\n");
