@@ -71,11 +71,22 @@ Token_t* tokenize(void){
 
 		// ブロックコメントをスキップ
 		if(strncmp(p, "/*", 2) == 0){
-			char *q = strstr(p + 2, "*/");
-			if(!q){
-				error_at(new_token(TK_ERROR, cur, &p, 1), "コメントが閉じられていません。");
-			}
-			p = q + 2;
+			DEBUG_WRITE("/*");
+			p++;
+			do{
+				p++;
+				if(*p == '"'){
+					fprintf(stderr, "\"");
+					while(*++p!='"'){
+						if(*p == '\\'){
+							p++;
+						}
+					}
+					fprintf(stderr, " --- \"");
+				}
+			} while(strncmp(p, "*/", 2));
+			p += 2;
+			DEBUG_WRITE("*/\n");
 			continue;
 		}
 
