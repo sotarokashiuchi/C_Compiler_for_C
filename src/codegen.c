@@ -54,18 +54,6 @@ void asmPrint(char *fmt, ...){
 	vprintf(fmt, ap);
 }
 
-int getRegNameFromType(Types_t *type){
-	switch (type->dataType){
-		case DT_INT:
-		case DT_CHAR:
-		case DT_VOID:
-		case DT_STRUCT:
-		case DT_PTR:
-			return sizeofType(type);
-		case DT_ARRAY:
-			return 8;
-	}
-}
 
 char* getRegNameFromSize(int size, char const *register_name){
 	if(!strncmp(register_name, "rax", 3)){
@@ -261,7 +249,7 @@ void gen(Node_t *node) {
 	 }
 	case ND_SINGLESTMT:{
     gen(node->expr1);
-		size = getRegNameFromType(node->expr1->type);
+		size = sizeofType(node->expr1->type);
 		stack_pop(size);
   	asmPrint("	#end ND_SINGLESTMT\n");
     return;
@@ -481,7 +469,7 @@ void gen(Node_t *node) {
 	case ND_LVAR:{
 		gen_address(node);
 		popPrint("rax");
-		size = getRegNameFromType(node->type);
+		size = sizeofType(node->type);
 		pushVarToStack(size, "rax");
 		return;
 	}
@@ -494,7 +482,7 @@ void gen(Node_t *node) {
 		asmPrint("  #ND_DEREF\n");
 		gen(node->expr1);
 		popPrint("rax");
-		size = getRegNameFromType(node->type);
+		size = sizeofType(node->type);
 		pushVarToStack(size, "rax");
 		return;
 	}
@@ -506,7 +494,7 @@ void gen(Node_t *node) {
 
 		popPrint("rax"); // copy先 dest
     // 変数への代入
-		size = getRegNameFromType(node->type);
+		size = sizeofType(node->type);
 		popVarFromStack(size, "rax");
 		return;
 	}
@@ -520,7 +508,7 @@ void gen(Node_t *node) {
 		gen_address(node->expr1);
 
 		// aの値を評価 // raxにaのアドレスが格納されている想定 // sizeを考慮していない
-		size = getRegNameFromType(node->expr1->type);
+		size = sizeofType(node->expr1->type);
 		if(size == 1){
 			asmPrint("  movzx rax, BYTE PTR [rax]\n");
 		} else if (size == 4 || size == 8){
@@ -567,7 +555,7 @@ void gen(Node_t *node) {
 		// aのアドレスにa+bを代入
 		popPrint("rdi");
 		popPrint("rax");
-		size = getRegNameFromType(node->type);
+		size = sizeofType(node->type);
 		if(size == 1){
 			asmPrint("  mov [rax], %s\n", getRegNameFromSize(size, "rdi"));
 		} else if (size == 4 || size == 8){
