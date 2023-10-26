@@ -205,11 +205,23 @@ void gens(void) {
 	printf(".intel_syntax noprefix\n");
 	printf(".globl main\n");
 
+	// date部分のコード生成
 	asmPrint(".data\n");
+	// 文字列リテラル生成
 	for(StringVector_t *string=stringHead; string->next; string = string->next){
 		asmPrint(".LC%d:\n", string->labelID);
 		asmPrint("	.string \"%.*s\"\n", string->len, string->string);
 	}
+	// グローバル変数生成
+	for(Identifier_t *identifier=identHead; identifier; identifier = identifier->next){
+		if(identifier->kind == IK_GVAR){
+			DEBUG_WRITE("this is GVAR.\n");
+			asmPrint("\n.data\n");
+			asmPrint("%.*s:\n", identifier->len, identifier->name);
+			asmPrint("	.zero %d\n", sizeofType(identifier->type));
+		}
+	}
+	// 関数の識別子を検索
 	fflush(stdout);
 
 	for(int i=0; code[i] != NULL; i++){
@@ -225,15 +237,21 @@ void gen(Node_t *node) {
 	int lavelIndexLocal = labelIndex++;
 	int size;
 
+	switch (node->kind) {
+	case ND_DECLARATION:{
+		asmPrint("	#ND_DECLARATION\n");
+		return;
+	}
+	case ND_GVARDEFINE:{
+		asmPrint("	\n#ND_GVARDEFINE\n\n");
+		return;
+	}
+	}
 	if(node->type != NULL && node->type->dataType == DT_ARRAY){
 		gen_address(node);
 		return;
 	}
 	switch (node->kind){
-	case ND_DECLARATION:{
-  	asmPrint("	#ND_DECLARATION\n");
-    return;
-	 }
 	case ND_SINGLESTMT:{
     gen(node->expr1);
 		size = sizeofType(node->expr1->type);
@@ -289,15 +307,6 @@ void gen(Node_t *node) {
 		}
 		asmPrint("  #戻り値をスタックに積む\n");
 		pushPrint("rax");
-		return;
-	}
-	case ND_GVARDEFINE:{
-    asmPrint("#Var Define\n");
-		/*
-    asmPrint("\n.data\n");
-		asmPrint("%s:\n", gen_identifier_name(node));
-		asmPrint("	.zero %d\n", sizeofType(node->type));
-		*/
 		return;
 	}
 	case ND_FUNCDEFINE:{

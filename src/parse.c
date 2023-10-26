@@ -645,7 +645,6 @@ Node_t* declaration(NodeKind kind){
 	Node_t *node;
 	Types_t *type = typeSpec(kind);
 	if(type == NULL){
-		DEBUG_WRITE("HELLO\n");
 		return new_node(ND_DECLARATION, NULL, NULL, NULL, NULL, NULL, NULL);
 	}
 	Identifier_t *identifier = declarator(kind, type);
