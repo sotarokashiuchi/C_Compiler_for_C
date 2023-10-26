@@ -591,7 +591,8 @@ Node_t* initializer(Node_t *node_declarator){
 		expect(TK_RESERVED, "}");
 	} else if((tok = consume_string())) {
 		// stringのときのみ特殊に扱う。本来はassign_expr()のstringでパースすべきだが、assign_exprのstringは文字列リテラルの先頭アドレスを返し、配列の初期化のときは特殊であるため
-		for(int index = 0; index <= tok->len; index++){
+		char c;
+		for(int index = 0, offset = 0; index <= tok->len; index++){
 			// 左辺
 			node = copy_node(node_declarator->expr1->kind, node_declarator->expr1);
 			node = new_node(ND_ADD, node, new_node_num(index), NULL, NULL, NULL, NULL);
@@ -602,7 +603,27 @@ Node_t* initializer(Node_t *node_declarator){
 				// 文字列の末尾なら、ナル文字を挿入(仕様とは異なるので注意)
 				node = new_node(ND_ASSIGN_EQ, node, new_node_num('\0'), NULL, NULL, NULL, NULL); 
 			} else {
-				node = new_node(ND_ASSIGN_EQ, node, new_node_num(tok->str[index]), NULL, NULL, NULL, NULL); 
+				if(tok->str[index+offset] == '\\'){
+					//  エスケープ文字を処理
+					offset++;
+					switch(tok->str[index+offset]){
+						case '\'': c=0x27; break;
+						case '"':  c=0x22; break;
+						case '?':  c=0x3F; break;
+						case '\\': c=0x5C; break;
+						case 'a':  c=0x07; break;
+						case 'b':  c=0x8; break;
+						case 'f':  c=0xC; break;
+						case 'n':  c=0xA; break;
+						case 'r':  c=0xD; break;
+						case 't':  c=0xB; break;
+						case 'v':  c=0x7; break;
+						default: exit(1);
+					}
+				} else {
+					c = tok->str[index+offset];
+				}
+				node = new_node(ND_ASSIGN_EQ, node, new_node_num(c), NULL, NULL, NULL, NULL); 
 			}
 			node = new_node(ND_SINGLESTMT, node, NULL, NULL, NULL, NULL, NULL);
 			vector = new_vector(node, vector);
