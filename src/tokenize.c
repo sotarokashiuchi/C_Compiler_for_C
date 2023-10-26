@@ -26,31 +26,6 @@ static void error_at(Token_t *loc, char *fmt, ...);
 /// @return 1:トークンを構成する文字列, 0:トークンを構成しない文字列
 int is_alnum(char c);
 
-int string(char* str, int len){
-	char *head = str;
-	char *buf;
-	for(buf=str; buf-head<len; str++, buf++){
-		if('\\' == *buf){
-			buf++;
-			switch (*buf) {
-				case '\'': *str=0x27; break;
-				case '\"': *str=0x22; break;
-				case '\?': *str=0x3F; break;
-				case '\\': *str=0x5C; break;
-				case '\a': *str=0x07; break;
-				case '\b': *str=0x8; break;
-				case '\f': *str=0xC; break;
-				case '\n': *str=0xA; break;
-				case '\r': *str=0xD; break;
-				case '\t': *str=0xB; break;
-				case '\v': *str=0x7; break;
-				default: *str=*buf;
-			}
-		}
-	}
-	return str-head;
-}
-
 Token_t* tokenize(void){
 	char *p=NULL;
 	int count, line;
@@ -183,6 +158,7 @@ Token_t* tokenize(void){
 			char *tmpp = p;
 			for(i=0; *tmpp != '"'; i++){
 				if(*tmpp == '\\'){
+					// エスケープ文字はアセンブラで翻訳されるため、そのままトークナイズしてよい
 					tmpp++;
 					i++;
 				}
@@ -190,17 +166,32 @@ Token_t* tokenize(void){
 			}
 			cur = new_token(TK_STRING, cur, &p, i);
 			p++;
-			//cur = new_token(TK_STRING, cur, &p, i+1);
-			//*(p-1) = '\0';
 			continue;
 		}
 
 		// 文字(character)
 		if(*p == '\''){
 			p++;
+			if(*p == '\\'){
+				switch (*(++p)) {
+					case '\'': *p=0x27; break;
+					case '"': *p=0x22; break;
+					case '?': *p=0x3F; break;
+					case '\\': *p=0x5C; break;
+					case 'a': *p=0x07; break;
+					case 'b': *p=0x8; break;
+					case 'f': *p=0xC; break;
+					case 'n': *p=0xA; break;
+					case 'r': *p=0xD; break;
+					case 't': *p=0xB; break;
+					case 'v': *p=0x7; break;
+					default: exit(1);
+				}
+			}
 			cur = new_token(TK_CHARACTER, cur, &p, 0);
 			cur->val = *p;
 			p += 2;
+			cur->len = 1;
 			continue;
 		}
 
