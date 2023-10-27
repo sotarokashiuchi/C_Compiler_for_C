@@ -189,16 +189,6 @@ void gen_address(Node_t *node){
 	}
 }
 
-/// @brief アライメントを正しくする
-/// @param byte 揃えたいアライメントの境界を指定
-int setAlignment(int byte){
-	assert(alignmentCount>=0 && "over the aligmentCount buf\n");
-	int displacement = alignmentCount%byte;
-	alignmentCount += displacement;
-	asmPrint("  sub rsp, %d\n", displacement);
-	return displacement;
-}
-
 void gens(void) {
 	// 初期化処理
 	// 前半部分のコード生成
@@ -268,6 +258,7 @@ void gen(Node_t *node) {
 				gen(vector->node);
 				if(vector->prev == NULL){
 					break;
+		int adjustAligment;
 				}
 				vector = vector->prev;
 			}
@@ -298,13 +289,21 @@ void gen(Node_t *node) {
 				}
 			}
 		}
-		int displacement = setAlignment(16);
 		asmPrint("  call %.*s\n", node->identifier->len, node->identifier->name);
-		asmPrint("  add rsp, %d\n", displacement);
-		alignmentCount -= displacement;
 		for(int i=7; i<=numOfArgu; i++){
 			popPrint("rdi");
+
+		
+		// アライメント調節
+		adjustAligment = alignmentCount%16;
+		asmPrint("  sub rsp, %d\n", adjustAligment);
+		alignmentCount += adjustAligment;
 		}
+
+		// アライメント調節
+		asmPrint("  add rsp, %d\n", adjustAligment);
+		alignmentCount -= adjustAligment;
+
 		asmPrint("  #戻り値をスタックに積む\n");
 		pushPrint("rax");
 		return;
