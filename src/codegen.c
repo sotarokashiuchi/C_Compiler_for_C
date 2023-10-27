@@ -250,55 +250,85 @@ void gen(Node_t *node) {
     return;
 	}
 	case ND_FUNCCALL:{
-    int numOfArgu = 0;
-    if(node->vector != NULL){
-      // 引数がある場合
-			Vector_t *vector = node->vector;
-			for(numOfArgu=1; ; numOfArgu++){
-				gen(vector->node);
-				if(vector->prev == NULL){
-					break;
+    int argumentIndex;
+		int offsetSize=0;
 		int adjustAligment;
+		Vector_t *vector = node->vector;
+		Vector_t *stackVector = NULL;
+		Vector_t *stackVectorHead = NULL;
+		Vector_t *registerVector = NULL;
+		Vector_t *registerVectorHead = NULL;
+		for(argumentIndex=0; vector; vector = vector->prev){
+			if(argumentIndex > 6){
+				assert(0 && "引数が6個以上に対応していません");
+			} else if(vector->node->type != NULL 
+					&& vector->node->type->dataType != DT_ARRAY && sizeofType(vector->node->type) > 8){
+				// 引数をmemoryを介して渡す
+				if(stackVector == NULL){
+					stackVector = vector;
+					stackVectorHead = stackVector;
+				} else {
+					stackVector->next = vector;
+					stackVector = stackVector->next;
+					stackVector->next = NULL;
 				}
-				vector = vector->prev;
-			}
-			asmPrint("#引数詰め込み開始\n");
-			for(int i=1 ; i<=numOfArgu; i++){
-				switch (i){
-					case 1:
-						popPrint("rdi");
-						break;
-					case 2:
-						popPrint("rsi");
-						break;
-						break;
-					case 3:
-						popPrint("rdx");
-						break;
-					case 4:
-						popPrint("rcx");
-						break;
-					case 5:
-						popPrint("r8");
-						break;
-					case 6:
-						popPrint("r9");
-						break;
-					default:
-						break;
+				offsetSize += sizeofType(stackVector->node->type);
+			} else {
+				// 引数をregisterを介して渡す
+				if(registerVector == NULL){
+					registerVector = vector;
+					registerVectorHead = registerVector;
+				} else {
+					registerVector->next = vector;
+					registerVector = registerVector->next;
+					registerVector->next = NULL;
 				}
+				argumentIndex++;
 			}
 		}
-		asmPrint("  call %.*s\n", node->identifier->len, node->identifier->name);
-		for(int i=7; i<=numOfArgu; i++){
-			popPrint("rdi");
 
 		
 		// アライメント調節
 		adjustAligment = alignmentCount%16;
 		asmPrint("  sub rsp, %d\n", adjustAligment);
 		alignmentCount += adjustAligment;
+		// 引数をmemoryを介して渡す
+		for(stackVector = stackVectorHead; stackVector; stackVector=stackVector->next){
+			gen(stackVector->node);
 		}
+		// 引数をregisterを介して渡す
+		for(registerVector = registerVectorHead; registerVector; registerVector=registerVector->next){
+			gen(registerVector->node);
+		}
+
+		asmPrint("#引数詰め込み開始\n");
+		for(int i=1 ; i<=argumentIndex; i++){
+			switch (i){
+				case 1:
+					popPrint("rdi");
+					break;
+				case 2:
+					popPrint("rsi");
+					break;
+					break;
+				case 3:
+					popPrint("rdx");
+					break;
+				case 4:
+					popPrint("rcx");
+					break;
+				case 5:
+					popPrint("r8");
+					break;
+				case 6:
+					popPrint("r9");
+					break;
+				default:
+					break;
+			}
+		}
+		asmPrint("  call %.*s\n", node->identifier->len, node->identifier->name);
+		stack_pop(offsetSize+(argumentIndex<=6 ? 0 : argumentIndex-6));
 
 		// アライメント調節
 		asmPrint("  add rsp, %d\n", adjustAligment);
