@@ -319,40 +319,54 @@ void gen(Node_t *node) {
 		if(node->vector != NULL && node->vector->node->type->dataType != DT_VOID){
 			// 引数がある場合
 			asmPrint("#仮引数に実引数を代入\n");
-			int i;
+			int argumentIndex;
 			Vector_t *vector = node->vector;
-			for(i=1; ; i++){
-				gen_address(vector->node);
-				popPrint("rax");
-				switch (i){
-					case 1:
-						asmPrint("  mov [rax], rdi\n");
-						break;
-					case 2:
-						asmPrint("  mov [rax], rsi\n");
-						break;
-					case 3:
-						asmPrint("  mov [rax], rdx\n");
-						break;
-					case 4:
-						asmPrint("  mov [rax], rcx\n");
-						break;
-					case 5:
-						asmPrint("  mov [rax], r8\n");
-						break;
-					case 6:
-						asmPrint("  mov [rax], r9\n");
-						break;
-					default:
-						// スタックから実引数を仮引数に移動
-						asmPrint("  mov rdi, [rbp+%d]\n", 16+(i-7)*8);
-						asmPrint("  mov [rax], rdi\n");
-						break;
+			int offset=16;
+			for(argumentIndex=1; vector; vector=vector->next){
+				if(vector->node->type->dataType == DT_STRUCT){
+					// 8byte以上の引数をメモリを介して代入する
+					int size = sizeofType(vector->node->type);
+					// rbpの下位アドレスにある引数(memory argument)のoffsetを計算し、スタック上にコピー
+					asmPrint("	mov rax, rbp\n");
+					asmPrint("	add rax, %d\n", offset);
+					pushVarToStack(size, "rax");
+					// 仮引数のメモリを計算し、代入する
+					gen_address(vector->node);
+					popPrint("rax");
+					popVarFromStack(size, "rax");
+					offset += size;
+				} else {
+					// レジスタを介して引数を受け渡す
+					gen_address(vector->node);
+					popPrint("rax");
+					switch (argumentIndex){
+						case 1:
+							asmPrint("  mov [rax], rdi\n");
+							break;
+						case 2:
+							asmPrint("  mov [rax], rsi\n");
+							break;
+						case 3:
+							asmPrint("  mov [rax], rdx\n");
+							break;
+						case 4:
+							asmPrint("  mov [rax], rcx\n");
+							break;
+						case 5:
+							asmPrint("  mov [rax], r8\n");
+							break;
+						case 6:
+							asmPrint("  mov [rax], r9\n");
+							break;
+						default:
+							// スタックから実引数を仮引数に移動
+							asmPrint("  mov rdi, [rbp+%d]\n", offset);
+							asmPrint("  mov [rax], rdi\n");
+							offset += 8;
+							break;
+					}
+					argumentIndex++;
 				}
-				if(vector->next == NULL){
-					break;
-				}
-				vector = vector->next;
 			}
 		}
 
