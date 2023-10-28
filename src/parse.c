@@ -157,6 +157,12 @@ int sizeofType(Types_t *type){
 		case DT_STRUCT:
 			size = type->struct_size;
 			break;
+		case DT_VOID:
+			size = 0; // 仮の値
+			break;
+		default:
+			DEBUG_WRITE("dataType = %d\n", type->dataType);
+			assert( false && "型のサイズを計算できません");
 	}
 	return size;
 }
@@ -945,7 +951,6 @@ Node_t* postfix_expr(void){
 			node->kind = ND_FUNCCALL;
 			node->vector = paramList();
 			// プロトタイプ宣言を利用し、戻り値の型を入れるべき(未実装)
-			node->type = new_type(DT_INT, NULL);
 			expect(TK_RESERVED, ")");
 		} else {
 			return node;
@@ -972,6 +977,7 @@ Node_t *primary_expr(void) {
 			} else if (identifier->kind == IK_FUNC){
 				// 同じファイルで宣言されている関数の場合
 				node->kind = ND_FUNCCALL;
+				node->identifier = identifier;
 			} else {
 				parseError("存在しない識別子の種類です\n");
 			}
@@ -979,7 +985,7 @@ Node_t *primary_expr(void) {
 		}else{
 			if(peek(TK_RESERVED, "(")){
 				// 外部のファイルから呼び出した関数の場合
-				node->identifier = new_identifier(ND_FUNCCALL, tok, new_type(DT_FUNC, NULL));
+				node->identifier = new_identifier(ND_FUNCCALL, tok, new_type(DT_INT, NULL));
 				node->type = node->identifier->type;
 				return node;
 			}

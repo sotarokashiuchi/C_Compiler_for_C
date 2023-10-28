@@ -253,6 +253,15 @@ void gen(Node_t *node) {
     int argumentIndex;
 		int offsetSize=0;
 		int adjustAligment;
+		// 戻り値のアドレス確保
+		size = sizeofType(node->type);
+		size = size<8 ? 8 : size;
+		asmPrint("	# ND_FUNCCALL\n");
+		asmPrint("	sub rsp, %d\n", size);
+		asmPrint("	mov r12, rsp\n");
+		alignmentCount -= size;
+
+		// 引数
 		Vector_t *vector = node->vector;
 		Vector_t *stackVector = NULL;
 		Vector_t *stackVectorHead = NULL;
@@ -335,7 +344,10 @@ void gen(Node_t *node) {
 		alignmentCount -= adjustAligment;
 
 		asmPrint("  #戻り値をスタックに積む\n");
-		pushPrint("rax");
+		// 戻り値のサイズが8byte以下なら、r12のアドレスに代入し直す
+		if(size<=8){
+			asmPrint("	mov [r12], rax\n");
+		}
 		return;
 	}
 	case ND_FUNCDEFINE:{
