@@ -186,40 +186,48 @@ Node_t *new_node(NodeKind kind, Node_t *expr1, Node_t *expr2, Node_t *expr3, Nod
 	node->expr5 = expr5;
 	node->vector = vector;
 	// typeリストの最後のリストを確認する
-	if(kind == ND_ADD || kind == ND_SUB || kind == ND_MUL || kind == ND_DIV || kind == ND_MOD || kind == ND_ASSIGN_MUL || kind == ND_ASSIGN_DIV || kind == ND_ASSIGN_ADD || kind == ND_ASSIGN_SUB || kind == ND_ASSIGN_MOD){
-		if(expr1->type->dataType == DT_PTR){
-			// ポインタ
+	switch(kind){
+		case ND_ADD:
+		case ND_SUB:
+		case ND_MUL:
+		case ND_DIV:
+		case ND_MOD:
+		case ND_ASSIGN_ADD:
+		case ND_ASSIGN_SUB:
+		case ND_ASSIGN_MUL:
+		case ND_ASSIGN_DIV:
+		case ND_ASSIGN_MOD:
+			if(expr1->type->dataType == DT_PTR){
+				// ポインタ
+				node->type = expr1->type;
+			}else if(expr2->type->dataType == DT_PTR){
+				// ポインタ
+				node->type = expr2->type;
+			}else if(expr1->type->dataType == DT_ARRAY){
+				// 配列
+				node->type = new_type(DT_PTR, expr1->type->inner);
+			}else if(expr2->type->dataType == DT_ARRAY){
+				// 配列
+				node->type = new_type(DT_PTR, expr2->type->inner);
+			}else{
+				// 整数？
+				// expr1, 2 どちらでもよい?
+				node->type =  expr1->type;
+			}
+			break;
+		case ND_DEREF:
+			node->type = expr1->type->inner;
+			node->identifier = expr1->identifier;
+			break;
+		case ND_ADDR:
+			node->type = new_type(DT_PTR, expr1->type);
+			break;
+		case ND_ASSIGN_EQ:
+			// 左辺値の型を代入
 			node->type = expr1->type;
-		}else if(expr2->type->dataType == DT_PTR){
-			// ポインタ
-			node->type = expr2->type;
-		}else if(expr1->type->dataType == DT_ARRAY){
-			// 配列
-			node->type = new_type(DT_PTR, expr1->type->inner);
-		}else if(expr2->type->dataType == DT_ARRAY){
-			// 配列
-			node->type = new_type(DT_PTR, expr2->type->inner);
-		}else{
-			// 整数？
-			// expr1, 2 どちらでもよい?
-			node->type =  expr1->type;
-		}
-	}
+			break;
 
-	if(kind == ND_DEREF){
-		node->type = expr1->type->inner;
-		node->identifier = expr1->identifier;
 	}
-
-	if(kind == ND_ADDR){
-		node->type = new_type(DT_PTR, expr1->type);
-	}
-
-	if(kind == ND_ASSIGN_EQ){
-		// 左辺値の型を代入
-		node->type = expr1->type;
-	}
-
 
 
 	// ND_LVAR,        // ローカル変数
