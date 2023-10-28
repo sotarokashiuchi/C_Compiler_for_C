@@ -338,13 +338,14 @@ void program(void){
 		tok = token;
 
 		if(consume(TK_KEYWORD, "struct")){
-			status = false;
+			typeSpec(-1);
+			consume_ident(); // tagName
 		} else {
 			typeSpec(-1);
-			while(consume(TK_RESERVED, "*"));
-			consume_ident();
-			status = peek(TK_RESERVED, "(");
 		}
+		while(consume(TK_RESERVED, "*"));
+		consume_ident();
+		status = peek(TK_RESERVED, "(");
 
 		back_token(tok);
 		if(status){
@@ -368,6 +369,7 @@ Node_t* funcDefine(){
 	type = typeSpec(-1);
 	Identifier_t *identifier = declarator(ND_FUNCDEFINE, type);
 	node = new_node(ND_FUNCDEFINE, NULL, NULL, NULL, NULL, NULL, NULL);
+	// declaratorでアスタリスクをパースしているのでtypeだけでは不十分なのでは?
 	node->type = type;
 	node->identifier = identifier;
 
