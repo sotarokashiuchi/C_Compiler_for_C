@@ -358,6 +358,7 @@ void gen(Node_t *node) {
 		pushPrint("rbp");
 		asmPrint("  mov rbp, rsp\n");
 		asmPrint("  sub rsp, %d\n", local_variable_stack);
+		pushPrint("r12");
 		if(node->vector != NULL && node->vector->node->type->dataType != DT_VOID){
 			// 引数がある場合
 			asmPrint("#仮引数に実引数を代入\n");
@@ -376,6 +377,7 @@ void gen(Node_t *node) {
 					gen_address(vector->node);
 					popPrint("rax");
 					popVarFromStack(size, "rax");
+					stack_pop(size);
 					offset += size;
 				} else {
 					// レジスタを介して引数を受け渡す
@@ -496,12 +498,46 @@ void gen(Node_t *node) {
 		return;
 	}
 	case ND_RETURN:{
-    // returnは右方方向の木構造しかない
+		/*  8byte以上の戻り値がある場合
+		 *	+----------+ <-rsp
+		 *	| expr     |
+		 *	| (return  |
+		 *	|  value)  |
+		 *	+----------+ <-rsp+size
+		 *	| r12      | -+
+		 *	+----------+  |
+		 *	| rbp      |  |
+		 *	+----------+  |
+		 *	| ret addr |  |
+		 *	+----------+  |
+		 *	| memory   |  |
+		 *	| argument |  |
+		 *	+----------+  |
+		 *	| memory   |  |
+		 *	| argument |  |
+		 *	|          |  |
+		 *	+----------+ <+
+		 *	| return   | 
+		 *	| value    |
+		 *	|          |  
+		 *	+----------+  
+		 */
+		asmPrint("  #ND_RETURN\n");
 		if(node->expr2 != NULL){
+			// 戻り値の値
 			gen(node->expr2);
-			popPrint("rax");
-	}
+			size = sizeofType(node->expr2->type);
+			if(size > 8){
+				// 8byte以上
+				asmPrint("	mov r12, [rsp+%d]\n", size);
+				popVarFromStack(size, "r12");
+			} else {
+				// 8byte
+				popPrint("rax");
+			}
+		}
 		asmPrint("  #エピローグ\n");
+		asmPrint("	pop rdi\n"); // r12をスタックから削除する
 		asmPrint("  mov rsp, rbp\n");
 		asmPrint("	pop rbp\n");
 		asmPrint("  ret\n");
