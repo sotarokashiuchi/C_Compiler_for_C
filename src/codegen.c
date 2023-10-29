@@ -537,7 +537,7 @@ void gen(Node_t *node) {
 			}
 		}
 		asmPrint("  #エピローグ\n");
-		asmPrint("	pop rdi\n"); // r12をスタックから削除する
+		asmPrint("	pop r12\n"); // r12をスタックから削除する
 		asmPrint("  mov rsp, rbp\n");
 		asmPrint("	pop rbp\n");
 		asmPrint("  ret\n");
