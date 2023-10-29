@@ -36,6 +36,7 @@ StringVector_t *stringHead = NULL;
  * 						| string
  * typeSpec		= "int" | "char" | "void"
  * 						| ("struct"  | "union") (ident? "{" (typeSpec* declarator+) "}" | ident)
+ * typeName		= typeSpec* "*"* ("[" num "]")* 									# C99に準拠していない
  * expr       			= assign_expr
  * assign_expr 			= conditional_expr (("=" | "*=" | "/=" | "%=" | "+=" | "-=") assign_expr)?
  * conditional_expr = logicalOr_expr '("?" expr ":" conditional_expr)?'
@@ -861,6 +862,7 @@ Node_t* unary_expr(){
 			token = tok->next;
 			type = typeName();
 			if(type != NULL){
+				// typeNameで処理、それ以外はunary_expr()で処理
 				expect(TK_RESERVED, ")");
 				return new_node_num(sizeofType(type));
 			}
@@ -1098,15 +1100,10 @@ Types_t* typeSpec(NodeKind kind){
 
 Types_t* typeName(void){
 	Types_t *type;
+	type = typeSpec(-1);
 
-	// 基本型の読み込み
-	if(consume(TK_KEYWORD, "int")){
-		type = new_type(DT_INT, NULL);
-	} else if(consume(TK_KEYWORD, "char")){
-		type = new_type(DT_CHAR, NULL);
-	} else {
+	if(type==NULL){
 		return NULL;
-		todoError("まだ実装していない基本型です\n");
 	}
 
 	// アスタリスクをパース
