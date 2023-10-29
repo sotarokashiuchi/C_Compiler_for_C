@@ -222,21 +222,22 @@ Node_t *new_node(NodeKind kind, Node_t *expr1, Node_t *expr2, Node_t *expr3, Nod
 		case ND_ADDR:
 			node->type = new_type(DT_PTR, expr1->type);
 			break;
-		case ND_ASSIGN_EQ:
+		case ND_ASSIGN_EQ:								// =
 			// 左辺値の型を代入
 			node->type = expr1->type;
 			break;
-
+		case ND_EQUALTO:									// ==
+		case ND_NOT_EQUAL_TO:							// !=
+		case ND_LESS_THAN:								// <
+		case ND_LESS_THAN_OR_EQUALT_TO:		// <=
+		case ND_LOGICAL_AND:							// &&
+		case ND_LOGICAL_OR:								// ||
+			node->type = new_type(DT_INT, NULL);
+			break;
 	}
-
-
 	// ND_LVAR,        // ローカル変数
-	// ND_EQUALTO,     // ==
-	// ND_NOT_EQUAL_TO,// !=
-	// ND_GREATER_THAN,// >
-	// ND_LESS_THAN,   // <
-	// ND_GREATER_THAN_OR_EQUAL_TO,  // >=
-	// ND_LESS_THAN_OR_EQUALT_TO,    // <=
+	// ND_GVAR,        // グローバル変数
+	// ND_GVARDEFINE,  // グローバル変数定義
 	// ND_RETURN,      // return
 	// ND_IF,          // if
 	// ND_ELSE,        // else
@@ -246,6 +247,12 @@ Node_t *new_node(NodeKind kind, Node_t *expr1, Node_t *expr2, Node_t *expr3, Nod
 	// ND_FUNCCALL,    // funcCall
 	// ND_FUNCDEFINE,  // funcDefine
 	// ND_NUM, 				// 整数
+	// ND_STRING, 			// 文字列リテラル
+	// ND_SINGLESTMT,	// 文
+	// ND_DOUBLESTMT,	// 複文
+	// ND_DECLARATION, // 宣言
+	// ND_STRUCT_MEMBER,
+	// ND_STRUCT,
 	return node;
 }
 

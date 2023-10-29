@@ -23,9 +23,7 @@ typedef enum{
 	ND_GVARDEFINE,  // グローバル変数定義
 	ND_EQUALTO,     // ==
 	ND_NOT_EQUAL_TO,// !=
-	ND_GREATER_THAN,// >
 	ND_LESS_THAN,   // <
-	ND_GREATER_THAN_OR_EQUAL_TO,  // >=
 	ND_LESS_THAN_OR_EQUALT_TO,    // <=
 	ND_RETURN,      // return
 	ND_IF,          // if
