@@ -56,7 +56,16 @@ int main(int argc, char **argv){
 
 	/* トークナイズ */
 	token = tokenize();
+	Token_t *tok = token;
 	DEBUG_WRITE("\033[35mcompleted tokenize\033[39m\n\n");
+	for( ; tok->kind != TK_EOF; tok = tok->next){
+		if(tok->kind == TK_NUM){
+			fprintf(stderr, "%d ", tok->val);
+		} else {
+			fprintf(stderr, "%.*s ", tok->len, tok->str);
+		}
+	}
+	//exit(1);
 
 	/* パーサ */
 	program();

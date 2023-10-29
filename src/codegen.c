@@ -24,6 +24,7 @@ void codegenError(char *fmt, ...){
 }
 
 void asmTab(){
+	fflush(stdout);
 	for(int i=0; i<abs((alignmentCount-local_variable_stack)/8); i++){
 		//printf("\t");
 	}
