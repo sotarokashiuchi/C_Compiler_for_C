@@ -420,13 +420,9 @@ void gen(Node_t *node) {
 	}
 	case ND_BLOCK:
 	case ND_DOUBLESTMT:{
-		Vector_t *vector = node->vector;
-		for( ; ; ){
+		Vector_t *vector;
+		for(vector=node->vector ;vector ; vector=vector->next){
 			gen(vector->node);
-			if(vector->next == NULL){
-				break;
-			}
-			vector = vector->next;
 		}
 		return;
 	}

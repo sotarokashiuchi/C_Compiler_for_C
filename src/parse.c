@@ -527,8 +527,10 @@ Node_t* stmt(void){
 
 	if(consume(TK_RESERVED, "{")){
 		// "{" stmt* "}"
-		Vector_t *vector;
-		vector = new_vector(stmt(), NULL);
+		Vector_t *vector=NULL;
+		if(!peek(TK_RESERVED, "}")){
+			vector = new_vector(stmt(), NULL);
+		}
 		node = new_node(ND_BLOCK, NULL, NULL, NULL, NULL, NULL, vector);
 		while(!consume(TK_RESERVED, "}")){
 			vector = new_vector(stmt(), vector);
