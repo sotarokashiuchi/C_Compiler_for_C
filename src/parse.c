@@ -5,7 +5,7 @@
 #include <stdlib.h>
 /* グローバル変数 */
 // 文ごとの先頭ノードを格納
-Node_t *code[100];
+Node_t *code[CodeSize];
 // identifierのリストの先頭ポインタ
 Identifier_t *identHead = NULL;
 // identifierのoffset
@@ -357,6 +357,7 @@ void program(void){
 	Token_t *tok;
 	void* status;
 	while(!at_eof()){
+		assert(CodeSize > i && "codeの容量が足りません\n");
 		tok = token;
 
 		if(consume(TK_KEYWORD, "struct")){

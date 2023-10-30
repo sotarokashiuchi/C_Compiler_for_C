@@ -176,6 +176,7 @@ void gen_address(Node_t *node){
 	} else if(node->kind == ND_LVAR){
 		// ローカル変数
 		asmPrint("  mov rax, rbp\n");
+		assert(node->identifier->offset < local_variable_stack && "stack over float");
 		asmPrint("  sub rax, %d\n", node->identifier->offset);
 		pushPrint("rax");
 	} else if(node->kind == ND_GVAR){

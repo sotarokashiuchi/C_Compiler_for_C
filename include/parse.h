@@ -118,7 +118,7 @@ typedef struct Types_tag {
 
 /* グローバル変数 */
 /// @brief 関数のノードの配列
-extern Node_t *code[100];
+extern Node_t *code[CodeSize];
 /// @brief Lvar_t構造体のリストの先頭
 extern Identifier_t *identHead;
 /// @brief Lvar_t構造体のリストの先頭

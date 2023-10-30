@@ -3,9 +3,6 @@
 
 #include <string.h>
 
-// ソースコードの行数
-#define PROGRAM_LINE 128
-
 /// @brief トークンの種類
 typedef enum{
 	TK_RESERVED,		// 記号
@@ -33,7 +30,7 @@ extern Token_t *token;
 /// @brief 入力文字列
 extern char *user_input;
 // 文字列位置
-extern char charPoint [128];
+extern char charPoint [PROGRAM_LINE];
 
 
 /* プロトタイプ宣言 */

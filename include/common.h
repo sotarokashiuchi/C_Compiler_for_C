@@ -12,6 +12,12 @@
 // #define local_variable_stack (26*8)
 #define local_variable_stack (33808)
 
+// ソースコードの行数
+#define PROGRAM_LINE 2000
+
+//  codeのサイズ
+#define CodeSize 1000
+
 // デバッグモードの切り替えマクロ
 #define DEBUG_WRITE(...) debug_write("[%s:%s:%d]", __FILE__, __func__, __LINE__);debug_write(__VA_ARGS__)
 // #define DEBUG_WRITE(...) " "
