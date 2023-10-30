@@ -235,6 +235,10 @@ Node_t *new_node(NodeKind kind, Node_t *expr1, Node_t *expr2, Node_t *expr3, Nod
 		case ND_LOGICAL_OR:								// ||
 			node->type = new_type(DT_INT, NULL);
 			break;
+		case ND_STRING: 									// new_string_vector()で型情報等の継承を行っている
+		case ND_STRUCT:										// postfix_expr()で型情報等の継承を行っている
+		case ND_STRUCT_MEMBER:						// postfix_expr()で型情報等の継承を行っている
+			break;
 	}
 	// ND_LVAR,        // ローカル変数
 	// ND_GVAR,        // グローバル変数
@@ -248,12 +252,9 @@ Node_t *new_node(NodeKind kind, Node_t *expr1, Node_t *expr2, Node_t *expr3, Nod
 	// ND_FUNCCALL,    // funcCall
 	// ND_FUNCDEFINE,  // funcDefine
 	// ND_NUM, 				// 整数
-	// ND_STRING, 			// 文字列リテラル
 	// ND_SINGLESTMT,	// 文
 	// ND_DOUBLESTMT,	// 複文
 	// ND_DECLARATION, // 宣言
-	// ND_STRUCT_MEMBER,
-	// ND_STRUCT,
 	return node;
 }
 
@@ -291,6 +292,8 @@ Node_t* new_string_vector(Token_t *tok){
 	static int labelID;
 	DEBUG_WRITE("this is string, labelID %d\n", labelID);
 	Node_t *node = new_node(ND_STRING, NULL, NULL, NULL, NULL, NULL, NULL);
+	node->type = new_type(DT_ARRAY, new_type(DT_CHAR, NULL)); // string型はchar型の配列である
+	node->type->array_size = tok->len;
 	StringVector_t *stringVector = calloc(1, sizeof(StringVector_t));
 	stringVector->string = tok->str;
 	stringVector->len = tok->len;

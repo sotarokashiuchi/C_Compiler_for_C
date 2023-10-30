@@ -53,6 +53,7 @@ int main(int argc, char **argv){
 	identHead = &dummyIdentifier;
 	StringVector_t dummyStringVecotr = {NULL, 0, 0, NULL};
 	stringHead = &dummyStringVecotr;
+	DEBUG_WRITE("\033[35start program\033[39m\n\n");
 
 	/* トークナイズ */
 	token = tokenize();

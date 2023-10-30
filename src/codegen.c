@@ -158,6 +158,11 @@ void popVarFromStack(int size, char *dest){
 /// @brief 左辺値の評価(アドレス計算)
 /// @param node 評価対象のノード
 void gen_address(Node_t *node){
+	if(node->kind == ND_STRING){
+		asmPrint("	lea rax, [rip+ .LC%d]\n", node->string->labelID);
+		pushPrint("rax");
+		return;
+	}
 	if(node->kind == ND_STRUCT){
 		/* strcut のメモリ配置
 		 * struct A { int x; int y; int z;};
@@ -545,11 +550,6 @@ void gen(Node_t *node) {
 		char buf[8];
 		snprintf(buf, 8, "%d", node->val);
 		pushPrint(buf);
-		return;
-	}
-	case ND_STRING:{
-		asmPrint("	lea rax, [rip+ .LC%d]\n", node->string->labelID);
-		pushPrint("rax");
 		return;
 	}
 	case ND_STRUCT:
