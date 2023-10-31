@@ -352,7 +352,9 @@ void gen(Node_t *node) {
 
 		asmPrint("  #戻り値をスタックに積む\n");
 		// 戻り値のサイズが8byte以下なら、r12のアドレスに代入し直す
-		if(size<=8){
+		if(sizeofType(node->type)==0){
+			popPrint("rax");
+		} else if(size<=8){
 			asmPrint("	mov [r12], rax\n");
 		}
 		return;
