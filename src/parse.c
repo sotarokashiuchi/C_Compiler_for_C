@@ -619,8 +619,8 @@ Node_t* initializer(Node_t *node_declarator){
 			vector = new_vector(node, vector);
 		} while(consume(TK_RESERVED, ","));
 		expect(TK_RESERVED, "}");
-	} else if((tok = consume_string())) {
-		// stringのときのみ特殊に扱う。本来はassign_expr()のstringでパースすべきだが、assign_exprのstringは文字列リテラルの先頭アドレスを返し、配列の初期化のときは特殊であるため
+	} else if(node_declarator->expr1->type->dataType == DT_ARRAY && (tok = consume_string())) {
+		// 左辺がchar型の配列の時のみ、stringを特殊に扱う。本来はassign_expr()のstringでパースすべきだが、assign_exprのstringは文字列リテラルの先頭アドレスを返し、配列の初期化のときは特殊であるため
 		char c;
 		for(int index = 0, offset = 0; index <= tok->len; index++){
 			// 左辺
