@@ -489,7 +489,7 @@ Node_t* stmt(void){
 			expr1 = NULL;
 		}else{
 			// Aの読み込み
-			if(peek(TK_KEYWORD, "int") || peek(TK_KEYWORD, "char")|| peek(TK_KEYWORD, "void") ){
+			if(peek(TK_KEYWORD, "int") || peek(TK_KEYWORD, "char") || peek(TK_KEYWORD, "void") || peek(TK_KEYWORD, "struct")){
 				/* for (int i = 0; i < n; i++) { ... } を
 				 * {
 				 * 	int i = 0;
