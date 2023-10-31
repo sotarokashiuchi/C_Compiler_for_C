@@ -599,6 +599,7 @@ void gen(Node_t *node) {
 
 		// aの値を評価 // raxにaのアドレスが格納されている想定 // sizeを考慮していない
 		size = sizeofType(node->expr1->type);
+		asmPrint("  mov rax, [rsp]\n"); // スタックトップに存在するaのアドレスを取得
 		if(size == 1){
 			asmPrint("  movzx rax, BYTE PTR [rax]\n");
 		} else if (size == 4 || size == 8){
