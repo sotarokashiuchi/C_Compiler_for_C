@@ -265,7 +265,6 @@ void gen(Node_t *node) {
 		size = size<8 ? 8 : size;
 		asmPrint("	# ND_FUNCCALL\n");
 		asmPrint("	sub rsp, %d\n", size);
-		asmPrint("	mov r12, rsp\n");
 		alignmentCount -= size;
 
 		// 引数
@@ -343,6 +342,10 @@ void gen(Node_t *node) {
 					break;
 			}
 		}
+		// 戻り値用のアドレスを計算し設定
+		asmPrint("	mov r12, rsp\n");
+		asmPrint("	add r12, %d\n", offsetSize+(argumentIndex<=6 ? 0 : argumentIndex-6)+adjustAligment);
+		// 関数の呼び出し
 		asmPrint("  call %.*s\n", node->identifier->len, node->identifier->name);
 		stack_pop(offsetSize+(argumentIndex<=6 ? 0 : argumentIndex-6));
 
