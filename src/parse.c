@@ -16,7 +16,7 @@ StringVector_t *stringHead = NULL;
 
 /* 関数プロトタイプ宣言 */
 /* EBNF
- * program    = funcDefine* | declaration
+ * program    = funcDefine* | declaration | funcPrototype 				# C99に準拠していない
  * funcDefine = typeSpec* declarator ("(" declaration? | declaration ("," declaration)* ")") "{" stmt* "}"
  * stmt    		= expr? ";"
  * 						| "return" expr? ";"
@@ -28,7 +28,6 @@ StringVector_t *stringHead = NULL;
  * declaration= typeSpec declarator? ("=" initializer)? ";"? # よくわからん
  * declarator = "*"* (ident | declarator) ( 											# 変数定義
  * 																					"[" num "]" 					# 配列定義
- * 																				'| "(" paramTypeList ")" # プロトタイプ宣言
  * 																				| ("{" ident "}")*' 			# プロトタイプ宣言
  * 																				)*
  * initializer= assign_expr
@@ -67,6 +66,7 @@ StringVector_t *stringHead = NULL;
 
 void program(void);
 Node_t* funcDefine();
+Node_t* funcPrototype();
 Node_t* stmt(void);
 Node_t* declaration(NodeKind);
 Node_t* expr(void);
@@ -339,6 +339,9 @@ Identifier_t* new_identifier(NodeKind kind, Token_t *tok, Types_t *type){
 		case ND_FUNCDEFINE:
 			identifier->kind = IK_FUNC;
 			break;
+		case ND_FUNCDECLARATION:
+			identifier->kind = IK_FUNC;
+			break;
 		case ND_FUNCCALL:
 			// FuncCallの時に新しい識別子を作成するのは間違っているのではないか？
 			identifier->kind = IK_FUNC;
@@ -371,16 +374,41 @@ void program(void){
 		}
 		while(consume(TK_RESERVED, "*"));
 		consume_ident();
-		status = peek(TK_RESERVED, "(");
 
-		back_token(tok);
-		if(status){
-			code[i++] = funcDefine();
+		if(consume(TK_RESERVED, "(")){
+			consume(TK_RESERVED, ")");
+			if(consume(TK_RESERVED, ";")){
+				// プロトタイプ宣言
+				back_token(tok);
+				code[i++] = funcPrototype();
+			} else {
+				// 関数定義
+				back_token(tok);
+				code[i++] = funcDefine();
+			}
 		} else {
+			// グローバル変数定義
+			back_token(tok);
 			code[i++] = declaration(ND_GVARDEFINE);
 		}
 	}
 	code[i] = NULL;
+}
+
+Node_t* funcPrototype(){
+	Node_t *node;
+	Types_t *type;
+
+	type = typeSpec(-1);
+	Identifier_t *identifier = declarator(ND_FUNCDECLARATION, type);
+	node = new_node(ND_FUNCDEFINE, NULL, NULL, NULL, NULL, NULL, NULL);
+	node->type = type;
+	node->identifier = identifier;
+	node = new_node(ND_DECLARATION, NULL, NULL, NULL, NULL, NULL, NULL);
+	expect(TK_RESERVED, "(");
+	expect(TK_RESERVED, ")");
+	expect(TK_RESERVED, ";");
+	return node;
 }
 
 Node_t* funcDefine(){
@@ -395,7 +423,6 @@ Node_t* funcDefine(){
 	type = typeSpec(-1);
 	Identifier_t *identifier = declarator(ND_FUNCDEFINE, type);
 	node = new_node(ND_FUNCDEFINE, NULL, NULL, NULL, NULL, NULL, NULL);
-	// declaratorでアスタリスクをパースしているのでtypeだけでは不十分なのでは?
 	node->type = type;
 	node->identifier = identifier;
 
@@ -973,7 +1000,6 @@ Node_t* postfix_expr(void){
 			// 関数呼び出し
 			node->kind = ND_FUNCCALL;
 			node->vector = paramList();
-			// プロトタイプ宣言を利用し、戻り値の型を入れるべき(未実装)
 			expect(TK_RESERVED, ")");
 		} else {
 			return node;
@@ -999,6 +1025,7 @@ Node_t *primary_expr(void) {
 				node->kind = ND_GVAR;
 			} else if (identifier->kind == IK_FUNC){
 				// 同じファイルで宣言されている関数の場合
+				// && プロトタイプ宣言されている関数の場合
 				node->kind = ND_FUNCCALL;
 				node->identifier = identifier;
 			} else {

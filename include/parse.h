@@ -33,6 +33,7 @@ typedef enum{
 	ND_BLOCK,       // block
 	ND_FUNCCALL,    // funcCall
 	ND_FUNCDEFINE,  // funcDefine
+	ND_FUNCDECLARATION, // funcDeclaration
 	ND_ADDR,        // アドレス演算子
 	ND_DEREF,       // 関節演算子
 	ND_NUM, 				// 整数
