@@ -716,7 +716,9 @@ void gen(Node_t *node) {
 	popPrint("rax");  // 左辺
 
 	switch (node->kind) {
-	case ND_ADD:{
+	case ND_ADD:
+	case ND_SUB:{
+		// ポインタ演算
 		if(node->type->dataType == DT_PTR || node->type->dataType == DT_ARRAY){
 			if(node->expr1->type->dataType == DT_INT){
 				asmPrint("  imul rax, %d\n", sizeofType(node->type->inner));
@@ -724,11 +726,11 @@ void gen(Node_t *node) {
 				asmPrint("  imul rdi, %d\n", sizeofType(node->type->inner));
 			}
 		}
-		asmPrint("  add rax, rdi\n");
-		break;
-	}
-	case ND_SUB:{
-		asmPrint("  sub rax, rdi\n");
+		if(node->kind == ND_ADD){
+			asmPrint("  add rax, rdi\n");
+		} else {
+			asmPrint("  sub rax, rdi\n");
+		}
 		break;
 	}
 	case ND_MUL:{
