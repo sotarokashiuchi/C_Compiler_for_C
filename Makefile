@@ -1,5 +1,6 @@
 COPTION=--pedantic -std=c11 -g -I ./include -static
 INCLUDEOBJ=./include/common.h ./include/tokenize.h ./include/parse.h ./include/codegen.h
+CODE='int main(void){ int x; x=5; return x; }'
 
 9cc: main.o tokenize.o parse.o codegen.o
 	# gcc -std=c11 -g -static -o 9cc main.o tokenize.o parse.o codegen.o
@@ -22,6 +23,12 @@ test: test.c
 
 debug: 9cc test
 	DEBUG=1 ./test $(FN)
+
+2kmcc: 9cc test
+	DEBUG=1 ./test "2kmcc_1.c"
+	./tmp $(CODE) > tmp_2kmcc.s
+	cc tmp_2kmcc.s -o code_2kmcc
+	./code_2kmcc || echo $$?
 
 clean:
 	rm -f 9cc test *.o *~ tmp*

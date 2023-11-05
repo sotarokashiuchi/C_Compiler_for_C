@@ -6,7 +6,14 @@ make debug
 
 // 特定のテストケースを実行
 make debug "FN=<file name>"
+
+// 2kmccをコンパイルし、2kmccでデフォルトのプログラムをコンパイル、実行
+make 2kmcc
+
+// 2kmccをコンパイルし、2kmccに指定のプログラムコードをコンパイルしてもらい、実行
+make 2kmcc "CODE=<program code>"
 ```
+[sozysozbot/2kmcc](https://github.com/sozysozbot/2kmcc)とはセキュリティ・キャンプ講師のhsjoihsさんが作成したC言語で書かれた、自作Cコンパイラです。hsjoihsさんから許可をもらいテストケースとして使用させていただいています。ありがとうございます。そのため`./testcase/2kmcc_1.c`のライセンスは複製元である、[sozysozbot/2kmcc](https://github.com/sozysozbot/2kmcc)のリポジトリに従います。
 
 ### compilerbook:[低レイヤを知りたい人のためのCコンパイラ作成入門](https://www.sigbus.info/compilerbook)
 - [x] (2023/06/22)1：整数1個をコンパイルする言語の作成
