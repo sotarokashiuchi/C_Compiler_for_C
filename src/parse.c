@@ -149,8 +149,11 @@ int sizeofType(Types_t *type){
 			size = 1;
 			break;
 		case DT_ARRAY:
-			// if(type->inner)
-			size = type->array_size * sizeofType(type->inner);
+			if(type->array_size == 0){
+				size = 8; // 添字のない文字列リテラルの配列用
+			} else {
+				size = type->array_size * sizeofType(type->inner);
+			}
 			break;
 		case DT_PTR:
 			size = 8;
@@ -293,7 +296,7 @@ Node_t* new_string_vector(Token_t *tok){
 	DEBUG_WRITE("this is string, labelID %d\n", labelID);
 	Node_t *node = new_node(ND_STRING, NULL, NULL, NULL, NULL, NULL, NULL);
 	node->type = new_type(DT_ARRAY, new_type(DT_CHAR, NULL)); // string型はchar型の配列である
-	node->type->array_size = tok->len;
+	node->type->array_size = 0;  // sizeof("STRING") は未実装
 	StringVector_t *stringVector = calloc(1, sizeof(StringVector_t));
 	stringVector->string = tok->str;
 	stringVector->len = tok->len;

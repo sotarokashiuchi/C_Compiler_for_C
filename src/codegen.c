@@ -536,7 +536,7 @@ void gen(Node_t *node) {
 			gen(node->expr2);
 			size = sizeofType(node->expr2->type);
 			if(size > 8){
-				// 8byte以上
+				// 8byteより大きい
 				asmPrint("	mov r12, [rsp+%d]\n", size);
 				popVarFromStack(size, "r12");
 			} else {
