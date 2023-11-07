@@ -6,7 +6,7 @@ CODE='int main(void){ return "Hello"; }'
 CODE='int main(void){ return "Hello"; }'
 CODE='int foo(void){ return 5;} int main(void){return "Hello"; }'
 CODE='int foo(void){ return 5;} int main(void){return foo(); }'
-
+CODE='int main(void){ printf("\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n******************************** start program ********************************\nHello World.\nThank you for running my App.\nThis App is compiled by 2kmcc compiler made by Ms.hsjoihs.\n2kmcc App is compiled my creating compiler.\nYou can compile using 2kmcc compiled by my creating compiler and exexute,\nwhen you input `make 2kmcc \"CODE=\\\"<your program>\\\"\"`\n\n\n\n\n\nstatus code = "); return 5; }'
 9cc: main.o tokenize.o parse.o codegen.o
 	# gcc -std=c11 -g -static -o 9cc main.o tokenize.o parse.o codegen.o
 	gcc codegen.o main.o parse.o tokenize.o -o 9cc
