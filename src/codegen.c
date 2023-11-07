@@ -111,11 +111,21 @@ void pushVarToStack(int size, char *src){
 	int offset=0;
 	printf("# size = %d\n", size);
 
-	if(size == 1){
-		asmPrint("  movzx rdi, BYTE PTR [%s]\n", src);
-		pushPrint("rdi");
-	} else if(size == 4 || size == 8){
-		asmPrint("  mov %s, [%s]\n", getRegNameFromSize(size, "rdi"), src); // 32bitレジスタでも自動的に拡張
+	if(size <= 8){
+		switch (size) {
+		case 1:
+			asmPrint("  movzx rdi, BYTE PTR [%s]\n", src); // ゼロ拡張(char型用)
+			break;
+		case 4:
+			asmPrint("  mov %s, [%s]\n", getRegNameFromSize(size, "rdi"), src); // 符号拡張
+			asmPrint("	movsxd rdi, %s\n", getRegNameFromSize(size, "rdi"));
+			break;
+		case 8:
+			asmPrint("  mov %s, [%s]\n", getRegNameFromSize(size, "rdi"), src);
+			break;
+		default:
+			codegenError("アドレスから値を取り出せませんでした。");
+		}
 		pushPrint("rdi");
 	} else {
 		// 8byte以上の場合は8の倍数であるという仮定
@@ -603,10 +613,21 @@ void gen(Node_t *node) {
 		// aの値を評価 // raxにaのアドレスが格納されている想定 // sizeを考慮していない
 		size = sizeofType(node->expr1->type);
 		asmPrint("  mov rax, [rsp]\n"); // スタックトップに存在するaのアドレスを取得
-		if(size == 1){
-			asmPrint("  movzx rax, BYTE PTR [rax]\n");
-		} else if (size == 4 || size == 8){
-			asmPrint("  mov %s, [rax]\n", getRegNameFromSize(size, "rax")); // 32bitレジスタでも自動的に拡張が行われる
+		if(size <= 8){
+			switch (size) {
+				case 1:
+					asmPrint("  movzx rax, BYTE PTR [rax]\n"); // ゼロ拡張(char型用)
+					break;
+				case 4:
+					asmPrint("  mov %s, [rax]\n", getRegNameFromSize(size, "rax")); // 符号拡張
+					asmPrint("	movsxd rax, %s\n", getRegNameFromSize(size, "rax"));
+					break;
+				case 8:
+					asmPrint("  mov %s, [rax]\n", getRegNameFromSize(size, "rax"));
+					break;
+				default:
+					codegenError("アドレスから値を取り出せませんでした。");
+			}
 		}
 		pushPrint("rax");
 
