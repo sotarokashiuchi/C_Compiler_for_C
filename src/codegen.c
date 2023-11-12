@@ -117,8 +117,7 @@ void pushVarToStack(int size, char *src){
 			asmPrint("  movzx rdi, BYTE PTR [%s]\n", src); // ゼロ拡張(char型用)
 			break;
 		case 4:
-			asmPrint("  mov %s, [%s]\n", getRegNameFromSize(size, "rdi"), src); // 符号拡張
-			asmPrint("	movsxd rdi, %s\n", getRegNameFromSize(size, "rdi"));
+			asmPrint("	movsxd rdi, DWORD PTR [%s]\n", src); // 符号拡張
 			break;
 		case 8:
 			asmPrint("  mov %s, [%s]\n", getRegNameFromSize(size, "rdi"), src);
@@ -619,8 +618,7 @@ void gen(Node_t *node) {
 					asmPrint("  movzx rax, BYTE PTR [rax]\n"); // ゼロ拡張(char型用)
 					break;
 				case 4:
-					asmPrint("  mov %s, [rax]\n", getRegNameFromSize(size, "rax")); // 符号拡張
-					asmPrint("	movsxd rax, %s\n", getRegNameFromSize(size, "rax"));
+					asmPrint("	movsxd rax, DWORD PTR [rax]\n"); // 符号拡張
 					break;
 				case 8:
 					asmPrint("  mov %s, [rax]\n", getRegNameFromSize(size, "rax"));
