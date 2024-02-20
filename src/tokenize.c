@@ -130,6 +130,16 @@ Token_t* tokenize(void){
 			continue;
 		}
 
+		if(!strncmp(p, "switch", 6) && !is_alnum(p[6])){
+			cur = new_token(TK_KEYWORD, cur, &p, 6);
+			continue;
+		}
+
+		if(!strncmp(p, "case", 4) && !is_alnum(p[4])){
+			cur = new_token(TK_KEYWORD, cur, &p, 4);
+			continue;
+		}
+
 		if(!strncmp(p, "else", 4) && !is_alnum(p[4])){
 			cur = new_token(TK_KEYWORD, cur, &p, 4);
 			continue;
@@ -157,7 +167,7 @@ Token_t* tokenize(void){
 		}
 
 		// 1文字
-		if(*p == '+' || *p == '-' || *p == '*' || *p == '/' || *p == '(' || *p == ')' || *p == '<' || *p == '>' || *p == ';' || *p == '=' || *p == '{' || *p == '}' || *p == ',' || *p == '&' || *p == '[' || *p == ']' || *p == '%' || *p == '!' || *p == '.'){
+		if(*p == '+' || *p == '-' || *p == '*' || *p == '/' || *p == '(' || *p == ')' || *p == '<' || *p == '>' || *p == ';' || *p == '=' || *p == '{' || *p == '}' || *p == ',' || *p == '&' || *p == '[' || *p == ']' || *p == '%' || *p == '!' || *p == '.' || *p == ':'){
 			cur = new_token(TK_RESERVED, cur, &p, 1);
 			continue;
 		}
