@@ -28,6 +28,8 @@ typedef enum{
 	ND_RETURN,      // return
 	ND_IF,          // if
 	ND_ELSE,        // else
+	ND_SWITCH,			// switch
+	ND_CASE,				// case
 	ND_WHILE,       // while
 	ND_FOR,         // for
 	ND_BLOCK,       // block

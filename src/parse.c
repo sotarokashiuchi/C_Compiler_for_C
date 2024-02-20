@@ -20,7 +20,9 @@ StringVector_t *stringHead = NULL;
  * funcDefine = typeSpec* declarator ("(" declaration? | declaration ("," declaration)* ")") "{" stmt* "}"
  * stmt    		= expr? ";"
  * 						| "return" expr? ";"
+ * 						| "case" conditional_expr ":" stmt
  * 						| "if" "(" expr ")" stmt ("else" stmt)?
+ * 						| "switch" "(" expr ")" stmt
  * 						| "while" "(" expr ")" stmt
  * 						| "for" "(" (expr? ";" | declaration) expr? ";" expr? ")" stmt
  *  					| "{" stmt* "}"
@@ -498,6 +500,21 @@ Node_t* stmt(void){
 			node = new_node(ND_ELSE, node, stmt(), NULL, NULL, NULL, NULL);
 		}
 		return node;
+	}
+
+	if(consume(TK_KEYWORD, "switch")){
+		expect(TK_RESERVED, "(");
+		expr1 = expr();
+		expect(TK_RESERVED, ")");
+		expr2 = stmt();
+		return new_node(ND_SWITCH, expr1, expr2, NULL, NULL, NULL, NULL);
+	}
+
+	if(consume(TK_KEYWORD, "case")){
+		expr1 = conditional_expr();
+		expect(TK_RESERVED, ":");
+		expr2 = stmt();
+		return new_node(ND_SWITCH, expr1, expr2, NULL, NULL, NULL, NULL);
 	}
 
 	if(consume(TK_KEYWORD, "while")){
