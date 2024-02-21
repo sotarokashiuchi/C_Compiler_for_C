@@ -494,8 +494,17 @@ void gen(Node_t *node) {
 					asmPrint("  je .case_%03d_%03d\n", vector->node->label->label, vector->node->label->labelIndex);
 					pushPrint("rdi");
 				}
+				if(vector->next == NULL){
+					vector->next = new_vector(new_node(ND_DEFAULT, NULL, new_node(ND_SINGLESTMT, new_node_num(1), NULL, NULL, NULL, NULL, NULL), NULL, NULL, NULL, NULL), vector);
+					vector = vector->next;
+				}
+				if(vector->node->kind == ND_DEFAULT){
+					vector->node->label = new_label(lavelIndexLocal, i);
+					popPrint("rax");
+					asmPrint("  jmp .case_%03d_%03d\n", vector->node->label->label, vector->node->label->labelIndex);
+					break;
+				}
 			}
-			popPrint("rax");
 		}
 
 		// ToDo caseだけの場合
@@ -508,6 +517,7 @@ void gen(Node_t *node) {
 		gen(node->expr2);
 		return;
 	}
+	case ND_DEFAULT:
 	case ND_CASE:{
 		asmPrint(".case_%03d_%03d:\n", node->label->label, node->label->labelIndex);
 		gen(node->expr2);

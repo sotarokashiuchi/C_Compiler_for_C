@@ -171,4 +171,10 @@ int sizeofType(Types_t *type);
 
 Label_t* new_label(int labelVar, int labelIndexVar);
 
+Vector_t* new_vector(Node_t *node, Vector_t *current);
+
+Node_t *new_node(NodeKind kind, Node_t *expr1, Node_t *expr2, Node_t *expr3, Node_t *expr4, Node_t *expr5, Vector_t *vector);
+
+Node_t *new_node_num(int val);
+
 #endif

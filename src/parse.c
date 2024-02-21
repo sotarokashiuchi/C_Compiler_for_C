@@ -530,8 +530,8 @@ Node_t* stmt(void){
 
 	if(consume(TK_KEYWORD, "default")){
 		expect(TK_RESERVED, ":");
-		expr1 = stmt();
-		return new_node(ND_DEFAULT, expr1, NULL, NULL, NULL, NULL, NULL);
+		expr2 = stmt();
+		return new_node(ND_DEFAULT, NULL, expr2, NULL, NULL, NULL, NULL);
 	}
 
 	if(consume(TK_KEYWORD, "while")){
