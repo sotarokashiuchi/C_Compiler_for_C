@@ -86,6 +86,12 @@ typedef enum {
  * |------------------------|----------| 
  */
 
+/// @brief ラベルの型
+typedef struct Label_tag {
+	int label;
+	int labelIndex;
+} Label_t;
+
 /// @brief 識別子の型
 typedef struct Identifier_tag {
 	IdentifierKind kind;
@@ -128,6 +134,7 @@ struct Node_tag {
 	int val;			  // kindがND_NUMの場合のみ使う
 	Identifier_t *identifier;   // 識別子用
 	StringVector_t *string;
+	Label_t *label; // kindがND_CASEの場合のみ使う
 };
 
 typedef struct Types_tag {
@@ -160,5 +167,7 @@ Identifier_t* find_lvar(Token_t *tok);
 /// @param type 
 /// @return 
 int sizeofType(Types_t *type);
+
+Label_t* new_label(int labelVar, int labelIndexVar);
 
 #endif

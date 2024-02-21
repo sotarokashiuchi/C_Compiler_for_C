@@ -173,6 +173,16 @@ int sizeofType(Types_t *type){
 	return size;
 }
 
+/// @brief 新しいラベルを生成する
+/// @param labelVar ラベルに含める番号
+/// @param labelIndexVar ラベルの通し番号
+Label_t* new_label(int labelVar, int labelIndexVar){
+	Label_t *label = calloc(1, sizeof(Label_t));
+	label->labelIndex = labelIndexVar;
+	label->label = labelVar;
+	return label;
+}
+
 /// @brief ノードを生成する
 /// @param kind ノードの種類
 /// @param expr1 Node1
@@ -510,11 +520,12 @@ Node_t* stmt(void){
 		return new_node(ND_SWITCH, expr1, expr2, NULL, NULL, NULL, NULL);
 	}
 
+ // 						| "case" conditional_expr ":" stmt
 	if(consume(TK_KEYWORD, "case")){
 		expr1 = conditional_expr();
 		expect(TK_RESERVED, ":");
 		expr2 = stmt();
-		return new_node(ND_SWITCH, expr1, expr2, NULL, NULL, NULL, NULL);
+		return new_node(ND_CASE, expr1, expr2, NULL, NULL, NULL, NULL);
 	}
 
 	if(consume(TK_KEYWORD, "while")){

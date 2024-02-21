@@ -473,6 +473,50 @@ void gen(Node_t *node) {
 		asmPrint(".ifend_%03d:\n", lavelIndexLocal);
 		return;
 	}
+	case ND_SWITCH:{
+		Vector_t *vector;
+		int i=0;
+		asmPrint("  # switch(A)\n");
+		// 比較部分生成
+		// A
+		gen(node->expr1);
+
+		if(node->expr2->kind == ND_BLOCK){
+			for(vector=node->expr2->vector ;vector ; vector=vector->next, i++){
+				if(vector->node->kind == ND_CASE){
+					vector->node->label = new_label(lavelIndexLocal, i);
+					gen(vector->node->expr1);
+
+					// 比較処理
+					popPrint("rax");
+					popPrint("rdi");
+					asmPrint("  cmp rax, rdi\n");
+					//asmPrint("  sete al\n");
+					//asmPrint("  movzb rax, al\n");
+          //
+					//asmPrint("  cmp rax, 0\n");
+					asmPrint("  je .case_%03d_%03d\n", vector->node->label->label, vector->node->label->labelIndex);    // ifの条件式が偽の場合jmp
+					pushPrint("rdi");
+				}
+			}
+			popPrint("rax");
+		}
+
+		// ToDo caseだけの場合
+
+		// 処理部分生成 defaultがないものもdefaultを定義してあげ、成り立たなければdefaultに飛ぶようにする
+		if(node->expr2->kind != ND_BLOCK && node->expr2->kind != ND_CASE) {
+			// ND_BLOCK ND_CASEでなければstmtは実行されない
+			return;
+		}
+		gen(node->expr2);
+		return;
+	}
+	case ND_CASE:{
+		asmPrint(".case_%03d_%03d:\n", node->label->label, node->label->labelIndex);
+		gen(node->expr2);
+		return;
+	}
 	case ND_WHILE:{
 		asmPrint(".while_%03d:\n", lavelIndexLocal);
 		asmPrint("  # while(A) {B} :A\n");
