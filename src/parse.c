@@ -21,6 +21,7 @@ StringVector_t *stringHead = NULL;
  * stmt    		= expr? ";"
  * 						| "return" expr? ";"
  * 						| "case" conditional_expr ":" stmt
+ * 						| "default" : stmt
  * 						| "if" "(" expr ")" stmt ("else" stmt)?
  * 						| "switch" "(" expr ")" stmt
  * 						| "while" "(" expr ")" stmt
@@ -520,12 +521,17 @@ Node_t* stmt(void){
 		return new_node(ND_SWITCH, expr1, expr2, NULL, NULL, NULL, NULL);
 	}
 
- // 						| "case" conditional_expr ":" stmt
 	if(consume(TK_KEYWORD, "case")){
 		expr1 = conditional_expr();
 		expect(TK_RESERVED, ":");
 		expr2 = stmt();
 		return new_node(ND_CASE, expr1, expr2, NULL, NULL, NULL, NULL);
+	}
+
+	if(consume(TK_KEYWORD, "default")){
+		expect(TK_RESERVED, ":");
+		expr1 = stmt();
+		return new_node(ND_DEFAULT, expr1, NULL, NULL, NULL, NULL, NULL);
 	}
 
 	if(consume(TK_KEYWORD, "while")){

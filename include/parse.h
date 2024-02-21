@@ -30,6 +30,7 @@ typedef enum{
 	ND_ELSE,        // else
 	ND_SWITCH,			// switch
 	ND_CASE,				// case
+	ND_DEFAULT,     // default
 	ND_WHILE,       // while
 	ND_FOR,         // for
 	ND_BLOCK,       // block

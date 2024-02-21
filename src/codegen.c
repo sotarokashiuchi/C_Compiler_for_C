@@ -491,11 +491,7 @@ void gen(Node_t *node) {
 					popPrint("rax");
 					popPrint("rdi");
 					asmPrint("  cmp rax, rdi\n");
-					//asmPrint("  sete al\n");
-					//asmPrint("  movzb rax, al\n");
-          //
-					//asmPrint("  cmp rax, 0\n");
-					asmPrint("  je .case_%03d_%03d\n", vector->node->label->label, vector->node->label->labelIndex);    // ifの条件式が偽の場合jmp
+					asmPrint("  je .case_%03d_%03d\n", vector->node->label->label, vector->node->label->labelIndex);
 					pushPrint("rdi");
 				}
 			}

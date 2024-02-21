@@ -135,6 +135,11 @@ Token_t* tokenize(void){
 			continue;
 		}
 
+		if(!strncmp(p, "default", 7) && !is_alnum(p[7])){
+			cur = new_token(TK_KEYWORD, cur, &p, 7);
+			continue;
+		}
+
 		if(!strncmp(p, "case", 4) && !is_alnum(p[4])){
 			cur = new_token(TK_KEYWORD, cur, &p, 4);
 			continue;
